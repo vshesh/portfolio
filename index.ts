@@ -2,7 +2,6 @@ import { meiosisSetup } from 'meiosis-setup';
 import { MeiosisCell, MeiosisViewComponent } from 'meiosis-setup/types';
 import m from 'mithril';
 import {Scenario, Model, SPTInput} from './model'
-import { scan } from 'ramda';
 import * as Plot from '@observablehq/plot';
 import * as R from 'ramda';
 
@@ -142,14 +141,6 @@ const app: MeiosisViewComponent<State> = {
 };
 
 const cells = meiosisSetup<State>({ app });
-
-// document.getElementById('plot').append(cdfplot(sptq({
-//   alpha: 0.1,
-//   low: 1, 
-//   med: 5, 
-//   high: 10
-// })))
-
 
 m.mount(document.getElementById('app') as HTMLElement, {
   view: () => app.view(cells())
