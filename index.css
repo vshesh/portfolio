@@ -1,0 +1,32 @@
+.scenario {
+  max-width: 350px; 
+}
+.scenario .inputs {
+  display:flex; 
+  flex-direction: column;
+}
+
+.spt-input {
+  display: inline-block;
+  padding: 5px;
+}
+
+.spt-input h4 {
+  padding-bottom: 0.25em;
+  margin: 0;
+}
+
+.spt-input > .input-stack {
+  display: inline-flex; 
+  flex-direction: column;
+}
+
+.scenario .outputs .stats {
+  display: flex;
+}
+
+.scenario .outputs .stats * {
+  flex: 1; 
+  width: 100%; 
+
+}
