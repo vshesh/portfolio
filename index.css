@@ -1,3 +1,13 @@
+.scenarios {
+  display: flex;
+}
+
+.scenarios > .scenario {
+  flex: 1;
+  display: inline-flex;
+  flex-direction: column;
+}
+
 body {
   font-family: Avenir, sans-serif;
 }

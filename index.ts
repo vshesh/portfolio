@@ -139,6 +139,7 @@ const app: MeiosisViewComponent<State> = {
       m('h1', 'DA Product Value Scenarios'),
       m('div.scenarios',
         cell.state.scenarios.map(s => m(ScenarioView, {cell: cell, scenario: s}))),
+        m('div.scenario.new', '+ Add Scenario')
     )
 };
 
