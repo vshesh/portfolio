@@ -1,3 +1,22 @@
+body {
+  font-family: Avenir, sans-serif;
+}
+
+.scenario textarea {
+  width: 99%;
+  box-sizing: border-box;
+  height: 3em;
+  font-family: Iosevka, JuliaMono, monospace;
+  font-size: 0.75em;
+  border: 0.5px solid #eee;
+  padding: 5px;
+  box-shadow: rgb(238, 238, 238) 2px 2px 2px;
+  border-radius: 5px;
+}
+.scenario textarea:focus {
+  outline: none;
+}
+
 .scenario {
   max-width: 350px; 
 }
@@ -19,6 +38,12 @@
 .spt-input > .input-stack {
   display: inline-flex; 
   flex-direction: column;
+  max-width: 165px;
+}
+
+.input-stack input {
+  border: 1px solid #eee;
+  margin-top: -1px;
 }
 
 .scenario .outputs .stats {

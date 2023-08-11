@@ -5,6 +5,7 @@
   "devDependencies": {
     "@types/mithril": "^2.0.13",
     "bun-types": "latest",
+    "meiosis-tracer": "^6.0.1",
     "tsc": "^2.0.4",
     "typescript": "^5.1.6"
   },

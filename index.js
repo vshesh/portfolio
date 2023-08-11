@@ -2251,7 +2251,7 @@ var require_exprparser = __commonJS((exports, module) => {
       options = options !== undefined ? options : {};
       var peg$FAILED = {}, peg$startRuleIndices = { Model: 0 }, peg$startRuleIndex = 0, peg$consts = [
         function(h, t) {
-          return [h, ...t];
+          return [h, ...t.map((x) => x[1])];
         },
         "=",
         peg$literalExpectation("=", false),
@@ -2628,6 +2628,590 @@ var require_exprparser = __commonJS((exports, module) => {
       parse: peg$parse
     };
   }();
+});
+
+// node_modules/meiosis-tracer/dist/meiosis-tracer.js
+var require_meiosis_tracer = __commonJS((exports, module) => {
+  (function webpackUniversalModuleDefinition(root2, factory) {
+    if (typeof exports === "object" && typeof module === "object")
+      module.exports = factory();
+    else if (typeof define === "function" && define.amd)
+      define([], factory);
+    else if (typeof exports === "object")
+      exports["meiosisTracer"] = factory();
+    else
+      root2["meiosisTracer"] = factory();
+  })(exports, () => {
+    return (() => {
+      var __webpack_modules__ = {
+        "./src/constants.js": (__unused_webpack_module, __webpack_exports__2, __webpack_require__2) => {
+          /*!**************************!*\
+            !*** ./src/constants.js ***!
+            \**************************/
+          __webpack_require__2.r(__webpack_exports__2);
+          __webpack_require__2.d(__webpack_exports__2, {
+            autoId: () => autoId,
+            colsId: () => colsId,
+            hiddenStreamId: () => hiddenStreamId,
+            hideStreamId: () => hideStreamId,
+            hideTracerId: () => hideTracerId,
+            histId: () => histId,
+            modelId: () => modelId,
+            resetId: () => resetId,
+            rowsId: () => rowsId,
+            sendId: () => sendId,
+            settingsContainerId: () => settingsContainerId,
+            showStreamId: () => showStreamId,
+            showTracerId: () => showTracerId,
+            sliderId: () => sliderId,
+            sliderValueId: () => sliderValueId,
+            stepBackId: () => stepBackId,
+            stepForwardId: () => stepForwardId,
+            streamContainerId: () => streamContainerId,
+            streamId: () => streamId
+          });
+          var rowsId = "tracerRows";
+          var colsId = "tracerCols";
+          var streamContainerId = "tracerStreamContainer";
+          var settingsContainerId = "tracerSettingsContainer";
+          var hideTracerId = "tracerHide";
+          var showTracerId = "tracerShow";
+          var autoId = "traceAutoSend";
+          var streamId = function streamId(index2) {
+            return "tracerStreamBox_ " + index2;
+          };
+          var hiddenStreamId = function hiddenStreamId(index2) {
+            return "tracerStreamBoxHidden_" + index2;
+          };
+          var hideStreamId = function hideStreamId(index2) {
+            return "tracerStreamHide_" + index2;
+          };
+          var showStreamId = function showStreamId(index2) {
+            return "tracerStreamShow_" + index2;
+          };
+          var modelId = function modelId(index2) {
+            return "tracerModel_" + index2;
+          };
+          var sliderId = function sliderId(index2) {
+            return "tracerSlider_" + index2;
+          };
+          var stepBackId = function stepBackId(index2) {
+            return "tracerStepBack_" + index2;
+          };
+          var stepForwardId = function stepForwardId(index2) {
+            return "tracerStepForward_" + index2;
+          };
+          var sliderValueId = function sliderValueId(index2) {
+            return "tracerSliderValue_" + index2;
+          };
+          var sendId = function sendId(index2) {
+            return "tracerSend_" + index2;
+          };
+          var resetId = function resetId(index2) {
+            return "tracerReset_" + index2;
+          };
+          var histId = function histId(index2) {
+            return "tracerAccumulateHistory_" + index2;
+          };
+        },
+        "./src/meiosis-tracer.js": (__unused_webpack_module, __webpack_exports__2, __webpack_require__2) => {
+          /*!*******************************!*\
+            !*** ./src/meiosis-tracer.js ***!
+            \*******************************/
+          __webpack_require__2.r(__webpack_exports__2);
+          __webpack_require__2.d(__webpack_exports__2, {
+            meiosisTracer: () => meiosisTracer
+          });
+          var _trace__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__2("./src/trace.js");
+          /*! ./trace */
+          var _tracer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__2("./src/tracer.js");
+          /*! ./tracer */
+          var meiosisTracer = function meiosisTracer(params) {
+            if (params.streams != null) {
+              (0, _trace__WEBPACK_IMPORTED_MODULE_0__.trace)(params);
+            }
+            if (params.selector != null) {
+              return (0, _tracer__WEBPACK_IMPORTED_MODULE_1__.tracer)(params);
+            }
+          };
+        },
+        "./src/settingsView.js": (__unused_webpack_module, __webpack_exports__2, __webpack_require__2) => {
+          /*!*****************************!*\
+            !*** ./src/settingsView.js ***!
+            \*****************************/
+          __webpack_require__2.r(__webpack_exports__2);
+          __webpack_require__2.d(__webpack_exports__2, {
+            initializeResizeChangeDirection: () => initializeResizeChangeDirection,
+            settingsView: () => settingsView
+          });
+          var _constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__2("./src/constants.js");
+          /*! ./constants */
+          var settingsView = function settingsView(_ref) {
+            var { element, listeners, direction, rows, cols, autoSend } = _ref;
+            element.innerHTML = "\n    <div id='".concat(_constants__WEBPACK_IMPORTED_MODULE_0__.settingsContainerId, "'>\n      <label title='Align in a row'>\n        <input type='radio' name='direction' value='row'\n          ").concat(direction === "row" ? "checked" : "", " />\n        Row\n      </label>\n      <label title='Align in a column'>\n        <input type='radio' name='direction' value='column'\n          ").concat(direction === "column" ? "checked" : "", " />\n        Col\n      </label>\n      <label title='Toggle auto-send'>\n        <input id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.autoId, "' type='checkbox' ").concat(autoSend ? "checked" : "", " />\n        Auto\n      </label>\n      <input title='Number of rows' id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.rowsId, "' type='text' size='2'\n        value='").concat(rows, "'/>\n      <span> &times; </span>\n      <input title='Number of columns' id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.colsId, "' type='text' size='2'\n        value='").concat(cols, "'/>\n      <button id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.hideTracerId, "'>Hide</button>\n      <span>v6.0.0</span>\n    </div>\n    <button id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.showTracerId, "' style='display:none'>Show</button>\n  ");
+            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.hideTracerId).addEventListener("click", function(_evt) {
+              listeners.onHideTracer();
+            });
+            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.showTracerId).addEventListener("click", function(_evt) {
+              listeners.onShowTracer();
+            });
+            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.rowsId).addEventListener("input", function(evt) {
+              listeners.onRowsColsChange(parseInt(evt.target.value, 10), parseInt(document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.colsId).value, 10));
+            });
+            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.colsId).addEventListener("input", function(evt) {
+              listeners.onRowsColsChange(parseInt(document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.rowsId).value, 10), parseInt(evt.target.value, 10));
+            });
+            var radios = document.querySelectorAll("input[name=\'direction\']");
+            for (var i = 0, t = radios.length;i < t; i++) {
+              radios[i].addEventListener("change", function(evt) {
+                if (evt.target.checked) {
+                  listeners.onDirectionChange(evt.target.value);
+                }
+              });
+            }
+            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.autoId).addEventListener("change", function(evt) {
+              listeners.onAutoChange(evt.target.checked);
+            });
+          };
+          var initializeResizeChangeDirection = function initializeResizeChangeDirection(listeners, direction) {
+            var directionAccordingToWindowSize = function directionAccordingToWindowSize() {
+              var dir = window.innerWidth > window.innerHeight ? "row" : "column";
+              var radios = document.querySelectorAll("input[name=\'direction\']");
+              for (var i = 0, t = radios.length;i < t; i++) {
+                radios[i].checked = radios[i].value === dir;
+              }
+              listeners.onDirectionChange(dir);
+            };
+            if (direction === "auto") {
+              window.addEventListener("resize", directionAccordingToWindowSize);
+            }
+            if (direction === "row" || direction === "column") {
+              listeners.onDirectionChange(direction);
+            } else {
+              directionAccordingToWindowSize();
+            }
+          };
+        },
+        "./src/streamView.js": (__unused_webpack_module, __webpack_exports__2, __webpack_require__2) => {
+          /*!***************************!*\
+            !*** ./src/streamView.js ***!
+            \***************************/
+          __webpack_require__2.r(__webpack_exports__2);
+          __webpack_require__2.d(__webpack_exports__2, {
+            streamView: () => streamView
+          });
+          var _constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__2("./src/constants.js");
+          /*! ./constants */
+          var streamView = function streamView(_ref) {
+            var { element, index: index2, listeners, label: _ref$label } = _ref, label = _ref$label === undefined ? "" : _ref$label, rows = _ref.rows, cols = _ref.cols, _ref$hist = _ref.hist, hist = _ref$hist === undefined ? true : _ref$hist, _ref$hide = _ref.hide, hide = _ref$hide === undefined ? false : _ref$hide;
+            var streamBoxStyle = "padding:8px;border:1px solid gray";
+            element.innerHTML = "\n    <div id='".concat(_constants__WEBPACK_IMPORTED_MODULE_0__.streamId(index2), "' style='").concat(streamBoxStyle, "'>\n      <div>\n        <span>").concat(label, "</span>\n        <label title='Toggle accumulate history'>\n          <input id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.histId(index2), "' type='checkbox' ").concat(hist ? "checked" : "", " />\n          Hist\n        </label>\n        <button id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.hideStreamId(index2), "'>Hide</button>\n      </div>\n      <textarea id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.modelId(index2), "' rows='").concat(rows, "' cols='").concat(cols, "'>\n      </textarea>\n      <div>\n        <input id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.sliderId(index2), "' type='range' min='0' max='0' value='0'\n          style='width: 100%' />\n        <button id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.stepBackId(index2), "'>&lt</button>\n        <button id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.stepForwardId(index2), "'>&gt</button>\n        <span id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.sliderValueId(index2), "'>-1</span>\n        <button id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.sendId(index2), "'>Send</button>\n        <button id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.resetId(index2), "'>Reset</button>\n      </div>\n    </div>\n    <div id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.hiddenStreamId(index2), "' style='display:none'>\n      <span>").concat(label, " </span>\n      <button id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.showStreamId(index2), "'>Show</button>\n    </div>\n  ");
+            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.sliderId(index2)).addEventListener("input", function(evt) {
+              listeners.onSliderChange(parseInt(evt.target.value, 10));
+            });
+            var stepBack = document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.stepBackId(index2));
+            stepBack.addEventListener("click", function(_evt) {
+              listeners.onStepBack();
+            });
+            stepBack.disabled = true;
+            var stepForward = document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.stepForwardId(index2));
+            stepForward.addEventListener("click", function(_evt) {
+              listeners.onStepForward();
+            });
+            stepForward.disabled = true;
+            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.sendId(index2)).addEventListener("click", function(_evt) {
+              listeners.onSend(document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.modelId(index2)).value);
+            });
+            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.resetId(index2)).addEventListener("click", function(_evt) {
+              listeners.onReset();
+            });
+            var hideStream = function hideStream(index3) {
+              document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.streamId(index3)).style = "display:none";
+              document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.hiddenStreamId(index3)).style = streamBoxStyle;
+            };
+            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.hideStreamId(index2)).addEventListener("click", function(_evt) {
+              return hideStream(index2);
+            });
+            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.showStreamId(index2)).addEventListener("click", function(_evt) {
+              document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.hiddenStreamId(index2)).style = "display:none";
+              document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.streamId(index2)).style = streamBoxStyle;
+            });
+            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.histId(index2)).addEventListener("change", function(evt) {
+              listeners.onHistChange(index2, evt.target.checked);
+            });
+            if (hide) {
+              hideStream(index2);
+            }
+          };
+        },
+        "./src/trace.js": (__unused_webpack_module, __webpack_exports__2, __webpack_require__2) => {
+          /*!**********************!*\
+            !*** ./src/trace.js ***!
+            \**********************/
+          __webpack_require__2.r(__webpack_exports__2);
+          __webpack_require__2.d(__webpack_exports__2, {
+            trace: () => trace
+          });
+          var isMeiosisTracerOn = function isMeiosisTracerOn() {
+            return window && window["__MEIOSIS_TRACER_GLOBAL_HOOK__"];
+          };
+          var trace = function trace(_ref) {
+            var _ref$streams = _ref.streams, streams = _ref$streams === undefined ? [] : _ref$streams, _ref$stringify = _ref.stringify, stringify = _ref$stringify === undefined ? function(obj) {
+              return JSON.stringify(obj, null, 4);
+            } : _ref$stringify, _ref$parse = _ref.parse, parse4 = _ref$parse === undefined ? function(str) {
+              return JSON.parse(str);
+            } : _ref$parse, _ref$listen = _ref.listen, listen = _ref$listen === undefined ? function(stream3, fn) {
+              return stream3.map(fn);
+            } : _ref$listen, _ref$emit = _ref.emit, emit = _ref$emit === undefined ? function(stream3, value5) {
+              return stream3(value5);
+            } : _ref$emit, _ref$direction = _ref.direction, direction = _ref$direction === undefined ? "column" : _ref$direction, _ref$rows = _ref.rows, rows = _ref$rows === undefined ? 15 : _ref$rows, _ref$cols = _ref.cols, cols = _ref$cols === undefined ? 50 : _ref$cols, _ref$autoSend = _ref.autoSend, autoSend = _ref$autoSend === undefined ? true : _ref$autoSend;
+            if (!isMeiosisTracerOn()) {
+              return;
+            }
+            var bufferedStreamValues = [];
+            var devtoolInitialized = false;
+            var streamObjs = [];
+            for (var i = 0, t = streams.length;i < t; i++) {
+              var defaultLabel = "Stream " + i;
+              if (streams[i].stream) {
+                streams[i].label = streams[i].label || defaultLabel;
+                streamObjs.push(streams[i]);
+              } else {
+                streamObjs.push({
+                  stream: streams[i],
+                  label: defaultLabel
+                });
+              }
+            }
+            streamObjs.forEach(function(_ref2, index2) {
+              var stream3 = _ref2.stream;
+              listen(stream3, function(value5) {
+                var data2 = {
+                  type: "MEIOSIS_STREAM_VALUE",
+                  index: index2,
+                  value: stringify(value5)
+                };
+                if (devtoolInitialized) {
+                  window.postMessage(data2, "*");
+                } else {
+                  bufferedStreamValues.push(data2);
+                }
+              });
+            });
+            window.addEventListener("message", function(evt) {
+              if (evt.data.type === "MEIOSIS_TRACER_INIT") {
+                var streamOptions = [];
+                streamObjs.forEach(function(streamObj) {
+                  var streamOpt = {};
+                  Object.keys(streamObj).forEach(function(key) {
+                    if (key !== "stream") {
+                      streamOpt[key] = streamObj[key];
+                    }
+                  });
+                  streamOptions.push(streamOpt);
+                });
+                var params = {
+                  streamOptions,
+                  direction,
+                  rows,
+                  cols,
+                  autoSend
+                };
+                window.postMessage({
+                  type: "MEIOSIS_STREAM_OPTIONS",
+                  value: params
+                }, "*");
+                devtoolInitialized = true;
+                bufferedStreamValues.forEach(function(data2) {
+                  return window.postMessage(data2, "*");
+                });
+                bufferedStreamValues.length = 0;
+              } else if (evt.data.type === "MEIOSIS_TRIGGER_STREAM_VALUE") {
+                var _evt$data = evt.data, index2 = _evt$data.index, value5 = _evt$data.value;
+                emit(streamObjs[index2].stream, parse4(value5));
+              }
+            });
+            window.postMessage({
+              type: "MEIOSIS_PING"
+            }, "*");
+          };
+        },
+        "./src/tracer.js": (__unused_webpack_module, __webpack_exports__2, __webpack_require__2) => {
+          /*!***********************!*\
+            !*** ./src/tracer.js ***!
+            \***********************/
+          __webpack_require__2.r(__webpack_exports__2);
+          __webpack_require__2.d(__webpack_exports__2, {
+            tracer: () => tracer
+          });
+          var _streamView__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__2("./src/streamView.js");
+          /*! ./streamView */
+          var _updateView__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__2("./src/updateView.js");
+          /*! ./updateView */
+          var _settingsView__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__2("./src/settingsView.js");
+          /*! ./settingsView */
+          var _constants__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__2("./src/constants.js");
+          /*! ./constants */
+          window["__MEIOSIS_TRACER_GLOBAL_HOOK__"] = true;
+          var states2 = [];
+          var accumulateHistory = [];
+          var tracer = function tracer(_ref) {
+            var { selector: selector3, sendTracerInit, triggerStreamValue, theme: _ref$theme } = _ref, theme = _ref$theme === undefined ? "light" : _ref$theme;
+            var target = document.querySelector(selector3);
+            if (!target) {
+              return;
+            }
+            target.classList.add("theme-".concat(theme));
+            var containerStyle = null;
+            if (sendTracerInit == null) {
+              sendTracerInit = function sendTracerInit() {
+                window.postMessage({
+                  type: "MEIOSIS_TRACER_INIT"
+                }, "*");
+              };
+            }
+            if (triggerStreamValue == null) {
+              triggerStreamValue = function triggerStreamValue(index2, value5) {
+                window.postMessage({
+                  type: "MEIOSIS_TRIGGER_STREAM_VALUE",
+                  index: index2,
+                  value: value5
+                }, "*");
+              };
+            }
+            var receiveStreamOptions = function receiveStreamOptions(_ref2) {
+              var { streamOptions, direction, rows, cols, autoSend } = _ref2;
+              if (target.lastChild) {
+                return;
+              }
+              var settingsListeners = {
+                onHideTracer: function onHideTracer() {
+                  var container2 = document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_3__.streamContainerId);
+                  containerStyle = container2.style;
+                  container2.style = "display:none";
+                  document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_3__.settingsContainerId).style = "display:none";
+                  document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_3__.showTracerId).style = "";
+                },
+                onShowTracer: function onShowTracer() {
+                  document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_3__.streamContainerId).style = containerStyle;
+                  document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_3__.settingsContainerId).style = "";
+                  document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_3__.showTracerId).style = "display:none";
+                },
+                onRowsColsChange: function onRowsColsChange(rows2, cols2) {
+                  for (var i = 0;i < streamOptions.length; i++) {
+                    var textarea = document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_3__.modelId(i));
+                    textarea.rows = rows2;
+                    textarea.cols = cols2;
+                  }
+                },
+                onDirectionChange: function onDirectionChange(direction2) {
+                  document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_3__.streamContainerId).style = "display:flex;flex-direction:" + direction2;
+                },
+                onAutoChange: function onAutoChange(auto) {
+                  autoSend = auto;
+                }
+              };
+              var settings = document.createElement("div");
+              target.append(settings);
+              (0, _settingsView__WEBPACK_IMPORTED_MODULE_2__.settingsView)({
+                element: settings,
+                listeners: settingsListeners,
+                direction,
+                rows,
+                cols,
+                autoSend
+              });
+              var container = document.createElement("div");
+              container.id = _constants__WEBPACK_IMPORTED_MODULE_3__.streamContainerId;
+              container.style = "display:flex;flex-direction:column";
+              target.append(container);
+              var sendStreamValue = function sendStreamValue(index3, model) {
+                if (autoSend) {
+                  accumulateHistory[index3] = false;
+                  document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_3__.histId(index3)).checked = false;
+                  triggerStreamValue(index3, model);
+                }
+              };
+              var _loop = function _loop(index3) {
+                var _streamOptions$index = streamOptions[index3], label = _streamOptions$index.label, hist = _streamOptions$index.hist, hide = _streamOptions$index.hide;
+                states2.push({
+                  history: [],
+                  value: -1
+                });
+                accumulateHistory.push(hist === false ? false : true);
+                var listeners = {
+                  onSliderChange: function onSliderChange(value5) {
+                    var state = states2[index3];
+                    var model = state.history[value5];
+                    state.value = value5;
+                    (0, _updateView__WEBPACK_IMPORTED_MODULE_1__.updateView)({
+                      index: index3,
+                      model,
+                      value: value5
+                    });
+                    sendStreamValue(index3, model);
+                  },
+                  onStepBack: function onStepBack() {
+                    var state = states2[index3];
+                    state.value = state.value - 1;
+                    var model = state.history[state.value];
+                    (0, _updateView__WEBPACK_IMPORTED_MODULE_1__.updateView)({
+                      index: index3,
+                      model,
+                      value: state.value
+                    });
+                    sendStreamValue(index3, model);
+                  },
+                  onStepForward: function onStepForward() {
+                    var state = states2[index3];
+                    state.value = state.value + 1;
+                    var model = state.history[state.value];
+                    (0, _updateView__WEBPACK_IMPORTED_MODULE_1__.updateView)({
+                      index: index3,
+                      model,
+                      value: state.value
+                    });
+                    sendStreamValue(index3, model);
+                  },
+                  onSend: function onSend(value5) {
+                    triggerStreamValue(index3, value5);
+                  },
+                  onReset: function onReset() {
+                    var state = states2[index3];
+                    state.history.length = 0;
+                    state.value = -1;
+                    (0, _updateView__WEBPACK_IMPORTED_MODULE_1__.updateView)({
+                      index: index3,
+                      model: "",
+                      value: state.value,
+                      max: state.value
+                    });
+                  },
+                  onHistChange: function onHistChange(index4, hist2) {
+                    accumulateHistory[index4] = hist2;
+                  }
+                };
+                var element = document.createElement("div");
+                element.style = "flex-grow:1";
+                container.append(element);
+                (0, _streamView__WEBPACK_IMPORTED_MODULE_0__.streamView)({
+                  element,
+                  index: index3,
+                  listeners,
+                  label,
+                  rows,
+                  cols,
+                  hist,
+                  hide
+                });
+              };
+              for (var index2 = 0;index2 < streamOptions.length; index2++) {
+                _loop(index2);
+              }
+              (0, _settingsView__WEBPACK_IMPORTED_MODULE_2__.initializeResizeChangeDirection)(settingsListeners, direction);
+            };
+            var receiveStreamValue = function receiveStreamValue(index2, model) {
+              if (accumulateHistory[index2]) {
+                var state = states2[index2];
+                if (state.history.length > 0) {
+                  state.history.length = state.value + 1;
+                }
+                state.history.push(model);
+                state.value = state.history.length - 1;
+                (0, _updateView__WEBPACK_IMPORTED_MODULE_1__.updateView)({
+                  index: index2,
+                  model,
+                  value: state.value,
+                  max: state.history.length - 1
+                });
+              }
+            };
+            window.addEventListener("message", function(evt) {
+              if (evt.data.type === "MEIOSIS_STREAM_OPTIONS") {
+                receiveStreamOptions(evt.data.value);
+              } else if (evt.data.type === "MEIOSIS_STREAM_VALUE") {
+                receiveStreamValue(evt.data.index, evt.data.value);
+              }
+            });
+            sendTracerInit();
+            return {
+              receiveStreamOptions,
+              receiveStreamValue
+            };
+          };
+        },
+        "./src/updateView.js": (__unused_webpack_module, __webpack_exports__2, __webpack_require__2) => {
+          /*!***************************!*\
+            !*** ./src/updateView.js ***!
+            \***************************/
+          __webpack_require__2.r(__webpack_exports__2);
+          __webpack_require__2.d(__webpack_exports__2, {
+            updateView: () => updateView
+          });
+          var _constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__2("./src/constants.js");
+          /*! ./constants */
+          var updateView = function updateView(_ref) {
+            var { index: index2, model, value: value5, max: max3 } = _ref;
+            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.modelId(index2)).value = model;
+            if (max3 != null) {
+              document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.sliderId(index2)).max = max3;
+            }
+            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.sliderId(index2)).value = value5;
+            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.sliderValueId(index2)).innerHTML = value5;
+            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.stepBackId(index2)).disabled = value5 <= 0;
+            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.stepForwardId(index2)).disabled = value5 == document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.sliderId(index2)).max;
+          };
+        }
+      };
+      var __webpack_module_cache__ = {};
+      function __webpack_require__(moduleId) {
+        var cachedModule = __webpack_module_cache__[moduleId];
+        if (cachedModule !== undefined) {
+          return cachedModule.exports;
+        }
+        var module2 = __webpack_module_cache__[moduleId] = {
+          exports: {}
+        };
+        __webpack_modules__[moduleId](module2, module2.exports, __webpack_require__);
+        return module2.exports;
+      }
+      (() => {
+        __webpack_require__.d = (exports2, definition) => {
+          for (var key in definition) {
+            if (__webpack_require__.o(definition, key) && !__webpack_require__.o(exports2, key)) {
+              Object.defineProperty(exports2, key, { enumerable: true, get: definition[key] });
+            }
+          }
+        };
+      })();
+      (() => {
+        __webpack_require__.o = (obj, prop4) => Object.prototype.hasOwnProperty.call(obj, prop4);
+      })();
+      (() => {
+        __webpack_require__.r = (exports2) => {
+          if (typeof Symbol !== "undefined" && Symbol.toStringTag) {
+            Object.defineProperty(exports2, Symbol.toStringTag, { value: "Module" });
+          }
+          Object.defineProperty(exports2, "__esModule", { value: true });
+        };
+      })();
+      var __webpack_exports__ = {};
+      (() => {
+        /*!**********************!*\
+          !*** ./src/index.js ***!
+          \**********************/
+        __webpack_require__.r(__webpack_exports__);
+        __webpack_require__.d(__webpack_exports__, {
+          default: () => __WEBPACK_DEFAULT_EXPORT__
+        });
+        var _meiosis_tracer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/meiosis-tracer.js");
+        /*! ./meiosis-tracer */
+        const __WEBPACK_DEFAULT_EXPORT__ = _meiosis_tracer__WEBPACK_IMPORTED_MODULE_0__.meiosisTracer;
+      })();
+      __webpack_exports__ = __webpack_exports__["default"];
+      return __webpack_exports__;
+    })();
+  });
 });
 
 // index.ts
@@ -3443,6 +4027,141 @@ function _identity(x) {
 var identity = _curry1(_identity);
 var identity_default = identity;
 
+// node_modules/ramda/es/internal/_Set.js
+var hasOrAdd = function(item, shouldAdd, set) {
+  var type4 = typeof item;
+  var prevSize, newSize;
+  switch (type4) {
+    case "string":
+    case "number":
+      if (item === 0 && 1 / item === (-Infinity)) {
+        if (set._items["-0"]) {
+          return true;
+        } else {
+          if (shouldAdd) {
+            set._items["-0"] = true;
+          }
+          return false;
+        }
+      }
+      if (set._nativeSet !== null) {
+        if (shouldAdd) {
+          prevSize = set._nativeSet.size;
+          set._nativeSet.add(item);
+          newSize = set._nativeSet.size;
+          return newSize === prevSize;
+        } else {
+          return set._nativeSet.has(item);
+        }
+      } else {
+        if (!(type4 in set._items)) {
+          if (shouldAdd) {
+            set._items[type4] = {};
+            set._items[type4][item] = true;
+          }
+          return false;
+        } else if (item in set._items[type4]) {
+          return true;
+        } else {
+          if (shouldAdd) {
+            set._items[type4][item] = true;
+          }
+          return false;
+        }
+      }
+    case "boolean":
+      if (type4 in set._items) {
+        var bIdx = item ? 1 : 0;
+        if (set._items[type4][bIdx]) {
+          return true;
+        } else {
+          if (shouldAdd) {
+            set._items[type4][bIdx] = true;
+          }
+          return false;
+        }
+      } else {
+        if (shouldAdd) {
+          set._items[type4] = item ? [false, true] : [true, false];
+        }
+        return false;
+      }
+    case "function":
+      if (set._nativeSet !== null) {
+        if (shouldAdd) {
+          prevSize = set._nativeSet.size;
+          set._nativeSet.add(item);
+          newSize = set._nativeSet.size;
+          return newSize === prevSize;
+        } else {
+          return set._nativeSet.has(item);
+        }
+      } else {
+        if (!(type4 in set._items)) {
+          if (shouldAdd) {
+            set._items[type4] = [item];
+          }
+          return false;
+        }
+        if (!_includes(item, set._items[type4])) {
+          if (shouldAdd) {
+            set._items[type4].push(item);
+          }
+          return false;
+        }
+        return true;
+      }
+    case "undefined":
+      if (set._items[type4]) {
+        return true;
+      } else {
+        if (shouldAdd) {
+          set._items[type4] = true;
+        }
+        return false;
+      }
+    case "object":
+      if (item === null) {
+        if (!set._items["null"]) {
+          if (shouldAdd) {
+            set._items["null"] = true;
+          }
+          return false;
+        }
+        return true;
+      }
+    default:
+      type4 = Object.prototype.toString.call(item);
+      if (!(type4 in set._items)) {
+        if (shouldAdd) {
+          set._items[type4] = [item];
+        }
+        return false;
+      }
+      if (!_includes(item, set._items[type4])) {
+        if (shouldAdd) {
+          set._items[type4].push(item);
+        }
+        return false;
+      }
+      return true;
+  }
+};
+var _Set = function() {
+  function _Set2() {
+    this._nativeSet = typeof Set === "function" ? new Set : null;
+    this._items = {};
+  }
+  _Set2.prototype.add = function(item) {
+    return !hasOrAdd(item, true, this);
+  };
+  _Set2.prototype.has = function(item) {
+    return hasOrAdd(item, false, this);
+  };
+  return _Set2;
+}();
+var _Set_default = _Set;
+
 // node_modules/ramda/es/last.js
 var last = nth_default(-1);
 var last_default = last;
@@ -3505,6 +4224,48 @@ var fromPairs_default = fromPairs;
 // node_modules/ramda/es/includes.js
 var includes = _curry2(_includes);
 var includes_default = includes;
+// node_modules/ramda/es/internal/_xuniqBy.js
+var XUniqBy = function() {
+  function XUniqBy2(f, xf) {
+    this.xf = xf;
+    this.f = f;
+    this.set = new _Set_default;
+  }
+  XUniqBy2.prototype["@@transducer/init"] = _xfBase_default.init;
+  XUniqBy2.prototype["@@transducer/result"] = _xfBase_default.result;
+  XUniqBy2.prototype["@@transducer/step"] = function(result, input) {
+    return this.set.add(this.f(input)) ? this.xf["@@transducer/step"](result, input) : result;
+  };
+  return XUniqBy2;
+}();
+function _xuniqBy(f) {
+  return function(xf) {
+    return new XUniqBy(f, xf);
+  };
+}
+
+// node_modules/ramda/es/uniqBy.js
+var uniqBy = _curry2(_dispatchable([], _xuniqBy, function(fn, list) {
+  var set = new _Set_default;
+  var result = [];
+  var idx = 0;
+  var appliedItem, item;
+  while (idx < list.length) {
+    item = list[idx];
+    appliedItem = fn(item);
+    if (set.add(appliedItem)) {
+      result.push(item);
+    }
+    idx += 1;
+  }
+  return result;
+}));
+var uniqBy_default = uniqBy;
+
+// node_modules/ramda/es/uniq.js
+var uniq = uniqBy_default(identity_default);
+var uniq_default = uniq;
+
 // node_modules/ramda/es/intersperse.js
 var intersperse = _curry2(_checkForMethod("intersperse", function intersperse2(separator, list) {
   var out = [];
@@ -3674,7 +4435,8 @@ class Model {
   constructor(formula) {
     this.formulas = asStatement(exprparser.parse(formula, {}));
     this.derived_vars = this.formulas.map((x) => x[1]);
-    this.inputs = chain_default((f) => Array.from(extract(branch, (a) => isLeaf(a) && typeof a === "string" && !includes_default(a, this.derived_vars), f)), this.formulas);
+    console.log(this.derived_vars);
+    this.inputs = uniq_default(chain_default((f) => Array.from(extract(branch, (a) => isLeaf(a) && typeof a === "string" && !includes_default(a, this.derived_vars), f)), this.formulas));
   }
   compute(inputs) {
     let ii = Object.assign({}, inputs);
@@ -3695,7 +4457,11 @@ class Model {
     if (!/\w+/.test(formula[0])) {
       return intersperse_default(formula[0], children).join(" ");
     } else {
-      return `${formula[0]}(${intersperse_default(",", children)})`;
+      const term = `${formula[0]}(${intersperse_default(",", children)})`;
+      if (formula[0] === "+" || formula[0] === "-") {
+        return `(${term})`;
+      }
+      return term;
     }
   }
 }
@@ -3706,13 +4472,15 @@ class Scenario {
   samples;
   name;
   constructor(model, inputs = {}, name = "") {
-    this.model = model;
+    this.inputs = inputs;
     this.name = name;
+    this.model = model;
   }
   get model() {
     return this._model;
   }
   set model(m) {
+    console.log("setting model");
     this._model = m;
     this.inputs = Object.assign(fromPairs_default(this.model.inputs.map((i) => [i, { alpha: 0.1, low: 0, med: 5, high: 10, min: undefined, max: undefined }])), this.inputs);
     this.update_samples();
@@ -4077,13 +4845,13 @@ class InternSet extends Set {
 }
 
 // node_modules/d3-array/src/identity.js
-function identity2(x) {
+function identity3(x) {
   return x;
 }
 
 // node_modules/d3-array/src/group.js
 function rollup(values, reduce3, ...keys6) {
-  return nest(values, identity2, reduce3, keys6);
+  return nest(values, identity3, reduce3, keys6);
 }
 function rollups(values, reduce3, ...keys6) {
   return nest(values, Array.from, reduce3, keys6);
@@ -4110,7 +4878,7 @@ var nest = function(values, map5, reduce3, keys6) {
   }(values, 0);
 };
 function group(values, ...keys6) {
-  return nest(values, identity2, identity2, keys6);
+  return nest(values, identity3, identity3, keys6);
 }
 // node_modules/d3-array/src/permute.js
 function permute(source, keys6) {
@@ -6291,7 +7059,7 @@ function round_default(a, b) {
 }
 // node_modules/d3-interpolate/src/transform/decompose.js
 var degrees2 = 180 / Math.PI;
-var identity5 = {
+var identity6 = {
   translateX: 0,
   translateY: 0,
   rotate: 0,
@@ -6322,16 +7090,16 @@ function decompose_default(a, b, c, d, e3, f) {
 // node_modules/d3-interpolate/src/transform/parse.js
 function parseCss(value4) {
   const m = new (typeof DOMMatrix === "function" ? DOMMatrix : WebKitCSSMatrix)(value4 + "");
-  return m.isIdentity ? identity5 : decompose_default(m.a, m.b, m.c, m.d, m.e, m.f);
+  return m.isIdentity ? identity6 : decompose_default(m.a, m.b, m.c, m.d, m.e, m.f);
 }
 function parseSvg(value4) {
   if (value4 == null)
-    return identity5;
+    return identity6;
   if (!svgNode)
     svgNode = document.createElementNS("http://www.w3.org/2000/svg", "g");
   svgNode.setAttribute("transform", value4);
   if (!(value4 = svgNode.transform.baseVal.consolidate()))
-    return identity5;
+    return identity6;
   value4 = value4.matrix;
   return decompose_default(value4.a, value4.b, value4.c, value4.d, value4.e, value4.f);
 }
@@ -9748,7 +10516,7 @@ function number8(x) {
 }
 
 // node_modules/d3-scale/src/continuous.js
-function identity9(x) {
+function identity10(x) {
   return x;
 }
 var normalize = function(a, b) {
@@ -9793,10 +10561,10 @@ function copy(source, target) {
   return target.domain(source.domain()).range(source.range()).interpolate(source.interpolate()).clamp(source.clamp()).unknown(source.unknown());
 }
 function transformer2() {
-  var domain = unit, range4 = unit, interpolate3 = value_default, transform3, untransform, unknown, clamp = identity9, piecewise2, output, input;
+  var domain = unit, range4 = unit, interpolate3 = value_default, transform3, untransform, unknown, clamp = identity10, piecewise2, output, input;
   function rescale() {
     var n = Math.min(domain.length, range4.length);
-    if (clamp !== identity9)
+    if (clamp !== identity10)
       clamp = clamper(domain[0], domain[n - 1]);
     piecewise2 = n > 2 ? polymap : bimap;
     output = input = null;
@@ -9818,7 +10586,7 @@ function transformer2() {
     return range4 = Array.from(_), interpolate3 = round_default, rescale();
   };
   scale.clamp = function(_) {
-    return arguments.length ? (clamp = _ ? true : identity9, rescale()) : clamp !== identity9;
+    return arguments.length ? (clamp = _ ? true : identity10, rescale()) : clamp !== identity10;
   };
   scale.interpolate = function(_) {
     return arguments.length ? (interpolate3 = _, rescale()) : interpolate3;
@@ -9833,7 +10601,7 @@ function transformer2() {
 }
 var unit = [0, 1];
 function continuous() {
-  return transformer2()(identity9, identity9);
+  return transformer2()(identity10, identity10);
 }
 
 // node_modules/d3-scale/src/tickFormat.js
@@ -9923,7 +10691,7 @@ function linear2() {
 }
 
 // node_modules/d3-scale/src/identity.js
-function identity10(domain) {
+function identity11(domain) {
   var unknown;
   function scale(x) {
     return x == null || isNaN(x = +x) ? unknown : x;
@@ -9936,7 +10704,7 @@ function identity10(domain) {
     return arguments.length ? (unknown = _, scale) : unknown;
   };
   scale.copy = function() {
-    return identity10(domain).unknown(unknown);
+    return identity11(domain).unknown(unknown);
   };
   domain = arguments.length ? Array.from(domain, number8) : [0, 1];
   return linearish(scale);
@@ -10117,9 +10885,9 @@ var transformSquare = function(x) {
   return x < 0 ? -x * x : x * x;
 };
 function powish(transform3) {
-  var scale = transform3(identity9, identity9), exponent5 = 1;
+  var scale = transform3(identity10, identity10), exponent5 = 1;
   function rescale() {
-    return exponent5 === 1 ? transform3(identity9, identity9) : exponent5 === 0.5 ? transform3(transformSqrt, transformSquare) : transform3(transformPow(exponent5), transformPow(1 / exponent5));
+    return exponent5 === 1 ? transform3(identity10, identity10) : exponent5 === 0.5 ? transform3(transformSqrt, transformSquare) : transform3(transformPow(exponent5), transformPow(1 / exponent5));
   }
   scale.exponent = function(_) {
     return arguments.length ? (exponent5 = +_, rescale()) : exponent5;
@@ -11164,7 +11932,7 @@ function copy2(source, target) {
 
 // node_modules/d3-scale/src/diverging.js
 var transformer3 = function() {
-  var x05 = 0, x12 = 0.5, x2 = 1, s = 1, t03, t13, t22, k10, k21, interpolator = identity9, transform3, clamp = false, unknown;
+  var x05 = 0, x12 = 0.5, x2 = 1, s = 1, t03, t13, t22, k10, k21, interpolator = identity10, transform3, clamp = false, unknown;
   function scale(x) {
     return isNaN(x = +x) ? unknown : (x = 0.5 + ((x = +transform3(x)) - t13) * (s * x < s * t13 ? k10 : k21), interpolator(clamp ? Math.max(0, Math.min(1, x)) : x));
   }
@@ -11215,7 +11983,7 @@ function divergingPow() {
   return initInterpolator.apply(scale, arguments);
 }
 function diverging() {
-  var scale = linearish(transformer3()(identity9));
+  var scale = linearish(transformer3()(identity10));
   scale.copy = function() {
     return copy2(scale, diverging());
   };
@@ -12635,12 +13403,12 @@ Transform.prototype = {
     return "translate(" + this.x + "," + this.y + ") scale(" + this.k + ")";
   }
 };
-var identity11 = new Transform(1, 0, 0);
+var identity12 = new Transform(1, 0, 0);
 transform3.prototype = Transform.prototype;
 function transform3(node2) {
   while (!node2.__zoom)
     if (!(node2 = node2.parentNode))
-      return identity11;
+      return identity12;
   return node2.__zoom;
 }
 // node_modules/@observablehq/plot/src/defined.js
@@ -12914,7 +13682,7 @@ function isOptions(option) {
 function isDomainSort(sort5) {
   return isOptions(sort5) && sort5.value === undefined && sort5.channel === undefined;
 }
-function maybeZero(x2, x12, x22, x3 = identity12) {
+function maybeZero(x2, x12, x22, x3 = identity13) {
   if (x12 === undefined && x22 === undefined) {
     x12 = 0, x22 = x2 === undefined ? x3 : x2;
   } else if (x12 === undefined) {
@@ -13186,7 +13954,7 @@ var objectToString = Object.prototype.toString;
 var singleton = [null];
 var field = (name) => (d) => d[name];
 var indexOf = { transform: range4 };
-var identity12 = { transform: (d) => d };
+var identity13 = { transform: (d) => d };
 var one2 = () => 1;
 var yes = () => true;
 var string3 = (x2) => x2 == null ? x2 : `${x2}`;
@@ -13827,7 +14595,7 @@ function createProjection({
       warn(`Warning: the projection could not be fit to the specified domain; using the default scale.`);
     }
   }
-  transform5 ??= tx === 0 && ty === 0 ? identity13() : transform_default({
+  transform5 ??= tx === 0 && ty === 0 ? identity14() : transform_default({
     point(x2, y2) {
       this.stream.point(x2 + tx, y2 + ty);
     }
@@ -13857,7 +14625,7 @@ var namedProjection = function(projection3) {
     case "gnomonic":
       return scaleProjection(gnomonic_default, 3.4641, 3.4641);
     case "identity":
-      return { type: identity13 };
+      return { type: identity14 };
     case "reflect-y":
       return { type: reflectY };
     case "mercator":
@@ -13986,7 +14754,7 @@ function getGeometryChannels(channel) {
 var pi4 = Math.PI;
 var tau4 = 2 * pi4;
 var defaultAspectRatio = 0.618;
-var identity13 = constant8({ stream: (stream3) => stream3 });
+var identity14 = constant8({ stream: (stream3) => stream3 });
 var reflectY = constant8(transform_default({
   point(x2, y2) {
     this.stream.point(x2, -y2);
@@ -14341,7 +15109,7 @@ var isOrdered = function(domain, sign3) {
   return true;
 };
 function createScaleIdentity() {
-  return { type: "identity", scale: identity10() };
+  return { type: "identity", scale: identity11() };
 }
 function inferDomain(channels, f = finite) {
   return channels.length ? [
@@ -16246,12 +17014,12 @@ function maybeIntervalMidY(options17 = {}) {
 
 // node_modules/@observablehq/plot/src/marks/rule.js
 function ruleX(data2, options18) {
-  let { x: x2 = identity12, y: y2, y1: y12, y2: y22, ...rest } = maybeIntervalY(options18);
+  let { x: x2 = identity13, y: y2, y1: y12, y2: y22, ...rest } = maybeIntervalY(options18);
   [y12, y22] = maybeOptionalZero(y2, y12, y22);
   return new RuleX(data2, { ...rest, x: x2, y1: y12, y2: y22 });
 }
 function ruleY(data2, options18) {
-  let { y: y2 = identity12, x: x2, x1: x12, x2: x22, ...rest } = maybeIntervalX(options18);
+  let { y: y2 = identity13, x: x2, x1: x12, x2: x22, ...rest } = maybeIntervalX(options18);
   [x12, x22] = maybeOptionalZero(x2, x12, x22);
   return new RuleY(data2, { ...rest, y: y2, x1: x12, x2: x22 });
 }
@@ -16395,10 +17163,10 @@ function text3(data2, { x: x2, y: y2, ...options19 } = {}) {
     [x2, y2] = maybeTuple(x2, y2);
   return new Text(data2, { ...options19, x: x2, y: y2 });
 }
-function textX(data2, { x: x2 = identity12, ...options19 } = {}) {
+function textX(data2, { x: x2 = identity13, ...options19 } = {}) {
   return new Text(data2, maybeIntervalMidY({ ...options19, x: x2 }));
 }
-function textY(data2, { y: y2 = identity12, ...options19 } = {}) {
+function textY(data2, { y: y2 = identity13, ...options19 } = {}) {
   return new Text(data2, maybeIntervalMidX({ ...options19, y: y2 }));
 }
 function applyIndirectTextStyles(selection5, mark4, T) {
@@ -16594,7 +17362,7 @@ class Text extends Mark {
     const {
       x: x2,
       y: y2,
-      text: text4 = isIterable(data2) && isTextual(data2) ? identity12 : indexOf,
+      text: text4 = isIterable(data2) && isTextual(data2) ? identity13 : indexOf,
       frameAnchor,
       textAnchor = /right$/i.test(frameAnchor) ? "end" : /left$/i.test(frameAnchor) ? "start" : "middle",
       lineAnchor = /^top/i.test(frameAnchor) ? "top" : /^bottom/i.test(frameAnchor) ? "bottom" : "middle",
@@ -16759,11 +17527,11 @@ var maybeShape = function(shape) {
   throw new Error(`invalid shape: ${shape}`);
 };
 function vectorX(data2, options20 = {}) {
-  const { x: x2 = identity12, ...rest } = options20;
+  const { x: x2 = identity13, ...rest } = options20;
   return new Vector(data2, { ...rest, x: x2 });
 }
 function vectorY(data2, options20 = {}) {
-  const { y: y2 = identity12, ...rest } = options20;
+  const { y: y2 = identity13, ...rest } = options20;
   return new Vector(data2, { ...rest, y: y2 });
 }
 var defaults3 = {
@@ -17259,7 +18027,7 @@ var axisMark = function(mark6, k2, ariaLabel, data2, options23, initialize) {
       if (k2 === "y" || k2 === "x") {
         facets = [range4(data3)];
       } else {
-        channels[k2] = { scale: k2, value: identity12 };
+        channels[k2] = { scale: k2, value: identity13 };
       }
     }
     initialize?.call(this, scale, data3, ticks2, channels);
@@ -17639,7 +18407,7 @@ class Tip extends Mark {
     if (options28.tip)
       options28 = { ...options28, tip: false };
     if (options28.title === undefined && isIterable(data2) && isTextual(data2))
-      options28 = { ...options28, title: identity12 };
+      options28 = { ...options28, title: identity13 };
     const {
       x: x2,
       y: y2,
@@ -18420,7 +19188,7 @@ var curves = new Map([
 function binX(outputs = { y: "count" }, options31 = {}) {
   [outputs, options31] = mergeOptions(outputs, options31);
   const { x: x2, y: y2 } = options31;
-  return binn(maybeBinValue(x2, options31, identity12), null, null, y2, outputs, maybeInsetX(options31));
+  return binn(maybeBinValue(x2, options31, identity13), null, null, y2, outputs, maybeInsetX(options31));
 }
 var maybeDenseInterval = function(bin, k2, options31 = {}) {
   return options31?.interval == null ? options31 : bin({ [k2]: options31?.reduce === undefined ? reduceFirst : options31.reduce, filter: null }, options31);
@@ -18438,7 +19206,7 @@ var binn = function(bx, by, gx, gy, {
   bx = maybeBin(bx);
   by = maybeBin(by);
   outputs = maybeBinOutputs(outputs, inputs);
-  reduceData = maybeBinReduce(reduceData, identity12);
+  reduceData = maybeBinReduce(reduceData, identity13);
   sort5 = sort5 == null ? undefined : maybeBinOutput("sort", sort5, inputs);
   filter4 = filter4 == null ? undefined : maybeBinEvaluator("filter", filter4, inputs);
   if (gx != null && hasOutput(outputs, "x", "x1", "x2"))
@@ -18798,7 +19566,7 @@ var reduceY2 = {
 
 // node_modules/@observablehq/plot/src/transforms/identity.js
 function maybeIdentityX(options32 = {}) {
-  return hasX(options32) ? options32 : { ...options32, x: identity12 };
+  return hasX(options32) ? options32 : { ...options32, x: identity13 };
 }
 
 // node_modules/@observablehq/plot/src/transforms/stack.js
@@ -19059,7 +19827,7 @@ var lengthy = { length: true };
 // node_modules/@observablehq/plot/src/marks/bar.js
 function barX(data2, options35 = {}) {
   if (!hasXY(options35))
-    options35 = { ...options35, y: indexOf, x2: identity12 };
+    options35 = { ...options35, y: indexOf, x2: identity13 };
   return new BarX(data2, maybeStackX(maybeIntervalX(maybeIdentityX(options35))));
 }
 class AbstractBar extends Mark {
@@ -19141,7 +19909,7 @@ var sphereLine = function(projection6, X3, Y3) {
     return path3({ type: "MultiLineString", coordinates: lines });
   };
 };
-function lineY(data2, { x: x2 = indexOf, y: y2 = identity12, ...options36 } = {}) {
+function lineY(data2, { x: x2 = indexOf, y: y2 = identity13, ...options36 } = {}) {
   return new Line(data2, maybeDenseIntervalX({ ...options36, x: x2, y: y2 }));
 }
 var defaults7 = {
@@ -19181,6 +19949,7 @@ class Line extends Mark {
   }
 }
 // index.ts
+var import_meiosis_tracer = __toESM(require_meiosis_tracer(), 1);
 var cdfplot = function(f) {
   let data2 = range_default(1, 100).map((x2) => [f(x2 / 100), x2 / 100]);
   return plot({
@@ -19244,6 +20013,7 @@ var actions = {
       scenario.set(input, values2);
     },
     update_formula(cell, scenario, formula) {
+      console.log("action: update_formula");
       scenario.model = new Model(formula);
     },
     update_name(cell, scenario, name) {
@@ -19253,7 +20023,7 @@ var actions = {
 };
 var ScenarioView = {
   view: ({ attrs: { scenario, cell } }) => {
-    return import_mithril.default("div.scenario", import_mithril.default("div.inputs", import_mithril.default("p", "Name: ", import_mithril.default("input", { type: "field", oninput: (e3) => actions.scenario.update_name(cell, scenario, e3.innerText) }, scenario.name)), import_mithril.default("div.formula", import_mithril.default("p", "Formula:"), import_mithril.default("textarea", { onblur: (e3) => actions.scenario.update_formula(cell, scenario, e3.target.value) }, scenario.model.formulaString())), import_mithril.default("div.spts", scenario.model.inputs.map((x2) => import_mithril.default(SPTInputView, {
+    return import_mithril.default("div.scenario", import_mithril.default("div.inputs", import_mithril.default("p", "Name: ", import_mithril.default("input", { type: "field", oninput: (e3) => actions.scenario.update_name(cell, scenario, e3.target.value) }, scenario.name)), import_mithril.default("div.formula", import_mithril.default("p", "Formula:"), import_mithril.default("textarea", { onblur: (e3) => actions.scenario.update_formula(cell, scenario, e3.target.value) }, scenario.model.formulaString())), import_mithril.default("div.spts", scenario.model.inputs.map((x2) => import_mithril.default(SPTInputView, {
       name: x2,
       input: scenario.inputs[x2],
       update: (values2) => actions.scenario.update_inputs(cell, scenario, x2, values2)
@@ -19271,6 +20041,7 @@ var app = {
   view: (cell) => import_mithril.default("div.app", import_mithril.default("h1", "DA Product Value Scenarios"), import_mithril.default("div.scenarios", cell.state.scenarios.map((s2) => import_mithril.default(ScenarioView, { cell, scenario: s2 }))))
 };
 var cells = import_meiosis_setup.meiosisSetup({ app });
+import_meiosis_tracer.default({ selector: "#tracer", streams: [cells().states] });
 import_mithril.default.mount(document.getElementById("app"), {
   view: () => app.view(cells())
 });

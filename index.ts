@@ -4,6 +4,7 @@ import m from 'mithril';
 import {Scenario, Model, SPTInput} from './model'
 import * as Plot from '@observablehq/plot';
 import * as R from 'ramda';
+import meiosisTracer from 'meiosis-tracer';
 
 interface State {
   models: {[name:string]: Model},
@@ -16,6 +17,7 @@ const actions = {
       scenario.set(input, values)
     },
     update_formula(cell: MeiosisCell<State>, scenario: Scenario, formula: string) {
+      console.log('action: update_formula')
       scenario.model = new Model(formula);
     },
     update_name(cell: MeiosisCell<State>, scenario: Scenario, name: string ){
@@ -28,10 +30,10 @@ const ScenarioView = {
   view: ({attrs: {scenario, cell}}: {attrs: {scenario: Scenario, cell: MeiosisCell<State>}}) => {
     return m('div.scenario',
       m('div.inputs', 
-        m('p', "Name: ", m('input', {type: 'field', oninput: (e) => actions.scenario.update_name(cell, scenario, e.innerText)}, scenario.name)),
+        m('p', "Name: ", m('input', {type: 'field', oninput: (e) => actions.scenario.update_name(cell, scenario, e.target.value)}, scenario.name)),
         m('div.formula', 
           m('p', 'Formula:'),
-          m('textarea', {onblur: (e) => actions.scenario.update_formula(cell, scenario, e.target.value)}, scenario.model.formulaString())),
+          m('textarea', {onblur: (e) => actions.scenario.update_formula(cell, scenario, e.target.value) }, scenario.model.formulaString())),
           m('div.spts',
             scenario.model.inputs.map(
             x => m(SPTInputView, {
@@ -141,6 +143,8 @@ const app: MeiosisViewComponent<State> = {
 };
 
 const cells = meiosisSetup<State>({ app });
+
+meiosisTracer({selector: "#tracer", streams: [cells().states]})
 
 m.mount(document.getElementById('app') as HTMLElement, {
   view: () => app.view(cells())

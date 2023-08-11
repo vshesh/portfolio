@@ -143,7 +143,7 @@ module.exports = /*
 
         peg$consts = [
           function(h, t) {
-            return [h, ...t]
+            return [h, ...t.map(x => x[1])]
           },
           "=",
           peg$literalExpectation("=", false),

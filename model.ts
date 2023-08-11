@@ -77,6 +77,10 @@ export function compute(formula: ASTTree, inputs: {[s:string]: number}): number 
   return f(...branch(formula).map(x => compute(x, inputs)))
 }
 
+
+// --------------------------------------------------------------------------
+
+
 export class Model {
   formulas: ["=", string, ASTBranch][];
   derived_vars: string[]; 
@@ -84,12 +88,13 @@ export class Model {
 
   public constructor(formula: string) {
     this.formulas = asStatement(parse(formula, {}));
-    this.derived_vars = this.formulas.map(x => x[1]) as string[];
-    this.inputs = R.chain((f) => Array.from(extract(
+    this.derived_vars = this.formulas.map(x => x[1]);
+    console.log(this.derived_vars);
+    this.inputs = R.uniq(R.chain((f) => Array.from(extract(
       branch,
       (a) => isLeaf(a)  && typeof a === 'string' &&  !R.includes(a, this.derived_vars),
       f
-    )) as string[], this.formulas)
+    )) as string[], this.formulas))
   }
 
   compute(inputs: {[s:string]: number}): {[s:string]: number} {
@@ -111,25 +116,31 @@ export class Model {
     if (!(/\w+/.test(formula[0]))) {
       return R.intersperse(formula[0], children).join(" ")
     } else {
-      return `${formula[0]}(${R.intersperse(",", children)})`
+      const term = `${formula[0]}(${R.intersperse(",", children)})`
+      if (formula[0] === '+' || formula[0] === '-') {
+        return `(${term})`
+      }
+      return term;
     }
   }
 }
 
 export class Scenario {
   private _model!: Model; 
-  inputs!: {[_:string]: SPTInput}
+  inputs: {[_:string]: SPTInput}
   samples!: number[]
   name: string
 
   constructor(model: Model, inputs: {[_:string]: SPTInput} = {}, name: string = "") {
-    this.model = model;
+    this.inputs = inputs;
     this.name = name;
+    this.model = model;
   }
 
   public get model() { return this._model; }
   
   public set model(m: Model) {
+    console.log('setting model')
     this._model = m; 
     this.inputs = Object.assign(
       R.fromPairs(this.model.inputs.map(
