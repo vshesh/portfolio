@@ -3725,6 +3725,30 @@ function _map(fn, functor) {
   return result;
 }
 
+// node_modules/ramda/es/internal/_quote.js
+function _quote(s) {
+  var escaped = s.replace(/\\/g, "\\\\").replace(/[\b]/g, "\\b").replace(/\f/g, "\\f").replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\t/g, "\\t").replace(/\v/g, "\\v").replace(/\0/g, "\\0");
+  return '"' + escaped.replace(/"/g, '\\"') + '"';
+}
+
+// node_modules/ramda/es/internal/_toISOString.js
+var pad = function pad2(n) {
+  return (n < 10 ? "0" : "") + n;
+};
+var _toISOString = typeof Date.prototype.toISOString === "function" ? function _toISOString2(d) {
+  return d.toISOString();
+} : function _toISOString3(d) {
+  return d.getUTCFullYear() + "-" + pad(d.getUTCMonth() + 1) + "-" + pad(d.getUTCDate()) + "T" + pad(d.getUTCHours()) + ":" + pad(d.getUTCMinutes()) + ":" + pad(d.getUTCSeconds()) + "." + (d.getUTCMilliseconds() / 1000).toFixed(3).slice(2, 5) + "Z";
+};
+var _toISOString_default = _toISOString;
+
+// node_modules/ramda/es/internal/_complement.js
+function _complement(f) {
+  return function() {
+    return !f.apply(this, arguments);
+  };
+}
+
 // node_modules/ramda/es/internal/_arrayReduce.js
 function _arrayReduce(reducer, acc, list) {
   var index = 0;
@@ -3735,6 +3759,112 @@ function _arrayReduce(reducer, acc, list) {
   }
   return acc;
 }
+
+// node_modules/ramda/es/internal/_filter.js
+function _filter(fn, list) {
+  var idx = 0;
+  var len = list.length;
+  var result = [];
+  while (idx < len) {
+    if (fn(list[idx])) {
+      result[result.length] = list[idx];
+    }
+    idx += 1;
+  }
+  return result;
+}
+
+// node_modules/ramda/es/internal/_isObject.js
+function _isObject(x) {
+  return Object.prototype.toString.call(x) === "[object Object]";
+}
+
+// node_modules/ramda/es/internal/_xfilter.js
+var XFilter = function() {
+  function XFilter2(f, xf) {
+    this.xf = xf;
+    this.f = f;
+  }
+  XFilter2.prototype["@@transducer/init"] = _xfBase_default.init;
+  XFilter2.prototype["@@transducer/result"] = _xfBase_default.result;
+  XFilter2.prototype["@@transducer/step"] = function(result, input) {
+    return this.f(input) ? this.xf["@@transducer/step"](result, input) : result;
+  };
+  return XFilter2;
+}();
+function _xfilter(f) {
+  return function(xf) {
+    return new XFilter(f, xf);
+  };
+}
+
+// node_modules/ramda/es/filter.js
+var filter = _curry2(_dispatchable(["fantasy-land/filter", "filter"], _xfilter, function(pred, filterable) {
+  return _isObject(filterable) ? _arrayReduce(function(acc, key) {
+    if (pred(filterable[key])) {
+      acc[key] = filterable[key];
+    }
+    return acc;
+  }, {}, keys_default(filterable)) : _filter(pred, filterable);
+}));
+var filter_default = filter;
+
+// node_modules/ramda/es/reject.js
+var reject = _curry2(function reject2(pred, filterable) {
+  return filter_default(_complement(pred), filterable);
+});
+var reject_default = reject;
+
+// node_modules/ramda/es/internal/_toString.js
+function _toString(x, seen) {
+  var recur = function recur(y) {
+    var xs = seen.concat([x]);
+    return _includes(y, xs) ? "<Circular>" : _toString(y, xs);
+  };
+  var mapPairs = function(obj, keys7) {
+    return _map(function(k) {
+      return _quote(k) + ": " + recur(obj[k]);
+    }, keys7.slice().sort());
+  };
+  switch (Object.prototype.toString.call(x)) {
+    case "[object Arguments]":
+      return "(function() { return arguments; }(" + _map(recur, x).join(", ") + "))";
+    case "[object Array]":
+      return "[" + _map(recur, x).concat(mapPairs(x, reject_default(function(k) {
+        return /^\d+$/.test(k);
+      }, keys_default(x)))).join(", ") + "]";
+    case "[object Boolean]":
+      return typeof x === "object" ? "new Boolean(" + recur(x.valueOf()) + ")" : x.toString();
+    case "[object Date]":
+      return "new Date(" + (isNaN(x.valueOf()) ? recur(NaN) : _quote(_toISOString_default(x))) + ")";
+    case "[object Map]":
+      return "new Map(" + recur(Array.from(x)) + ")";
+    case "[object Null]":
+      return "null";
+    case "[object Number]":
+      return typeof x === "object" ? "new Number(" + recur(x.valueOf()) + ")" : 1 / x === (-Infinity) ? "-0" : x.toString(10);
+    case "[object Set]":
+      return "new Set(" + recur(Array.from(x).sort()) + ")";
+    case "[object String]":
+      return typeof x === "object" ? "new String(" + recur(x.valueOf()) + ")" : _quote(x);
+    case "[object Undefined]":
+      return "undefined";
+    default:
+      if (typeof x.toString === "function") {
+        var repr = x.toString();
+        if (repr !== "[object Object]") {
+          return repr;
+        }
+      }
+      return "{" + mapPairs(x, keys_default(x)).join(", ") + "}";
+  }
+}
+
+// node_modules/ramda/es/toString.js
+var toString2 = _curry1(function toString3(val) {
+  return _toString(val, []);
+});
+var toString_default = toString2;
 
 // node_modules/ramda/es/internal/_xmap.js
 var XMap = function() {
@@ -3924,6 +4054,12 @@ var reduce = _curry3(function(xf, acc, list) {
 });
 var reduce_default = reduce;
 
+// node_modules/ramda/es/internal/_isFunction.js
+function _isFunction(x) {
+  var type4 = Object.prototype.toString.call(x);
+  return type4 === "[object Function]" || type4 === "[object AsyncFunction]" || type4 === "[object GeneratorFunction]" || type4 === "[object AsyncGeneratorFunction]";
+}
+
 // node_modules/ramda/es/internal/_makeFlat.js
 function _makeFlat(recursive) {
   return function flatt(list) {
@@ -4027,6 +4163,29 @@ function _identity(x) {
 var identity = _curry1(_identity);
 var identity_default = identity;
 
+// node_modules/ramda/es/concat.js
+var concat = _curry2(function concat2(a, b) {
+  if (_isArray_default(a)) {
+    if (_isArray_default(b)) {
+      return a.concat(b);
+    }
+    throw new TypeError(toString_default(b) + " is not an array");
+  }
+  if (_isString(a)) {
+    if (_isString(b)) {
+      return a + b;
+    }
+    throw new TypeError(toString_default(b) + " is not a string");
+  }
+  if (a != null && _isFunction(a["fantasy-land/concat"])) {
+    return a["fantasy-land/concat"](b);
+  }
+  if (a != null && _isFunction(a.concat)) {
+    return a.concat(b);
+  }
+  throw new TypeError(toString_default(a) + ' does not have a method named "concat" or "fantasy-land/concat"');
+});
+var concat_default = concat;
 // node_modules/ramda/es/internal/_Set.js
 var hasOrAdd = function(item, shouldAdd, set) {
   var type4 = typeof item;
@@ -4850,18 +5009,18 @@ function identity3(x) {
 }
 
 // node_modules/d3-array/src/group.js
-function rollup(values, reduce3, ...keys6) {
-  return nest(values, identity3, reduce3, keys6);
+function rollup(values, reduce3, ...keys8) {
+  return nest(values, identity3, reduce3, keys8);
 }
-function rollups(values, reduce3, ...keys6) {
-  return nest(values, Array.from, reduce3, keys6);
+function rollups(values, reduce3, ...keys8) {
+  return nest(values, Array.from, reduce3, keys8);
 }
-var nest = function(values, map5, reduce3, keys6) {
+var nest = function(values, map5, reduce3, keys8) {
   return function regroup(values2, i) {
-    if (i >= keys6.length)
+    if (i >= keys8.length)
       return reduce3(values2);
     const groups = new InternMap;
-    const keyof2 = keys6[i++];
+    const keyof2 = keys8[i++];
     let index = -1;
     for (const value2 of values2) {
       const key = keyof2(value2, ++index, values2);
@@ -4877,12 +5036,12 @@ var nest = function(values, map5, reduce3, keys6) {
     return map5(groups);
   }(values, 0);
 };
-function group(values, ...keys6) {
-  return nest(values, identity3, identity3, keys6);
+function group(values, ...keys8) {
+  return nest(values, identity3, identity3, keys8);
 }
 // node_modules/d3-array/src/permute.js
-function permute(source, keys6) {
-  return Array.from(keys6, (key) => source[key]);
+function permute(source, keys8) {
+  return Array.from(keys8, (key) => source[key]);
 }
 
 // node_modules/d3-array/src/sort.js
@@ -5615,16 +5774,16 @@ var children = function() {
 };
 var childrenFilter = function(match) {
   return function() {
-    return filter.call(this.children, match);
+    return filter3.call(this.children, match);
   };
 };
-var filter = Array.prototype.filter;
+var filter3 = Array.prototype.filter;
 function selectChildren_default(match) {
   return this.selectAll(match == null ? children : childrenFilter(typeof match === "function" ? match : childMatcher(match)));
 }
 
 // node_modules/d3-selection/src/selection/filter.js
-function filter_default(match) {
+function filter_default2(match) {
   if (typeof match !== "function")
     match = matcher_default(match);
   for (var groups2 = this._groups, m = groups2.length, subgroups = new Array(m), j = 0;j < m; ++j) {
@@ -6281,7 +6440,7 @@ Selection.prototype = selection.prototype = {
   selectAll: selectAll_default,
   selectChild: selectChild_default,
   selectChildren: selectChildren_default,
-  filter: filter_default,
+  filter: filter_default2,
   data: data_default,
   enter: enter_default,
   exit: exit_default,
@@ -7739,7 +7898,7 @@ function easeVarying_default(value5) {
 }
 
 // node_modules/d3-transition/src/transition/filter.js
-function filter_default2(match) {
+function filter_default3(match) {
   if (typeof match !== "function")
     match = matcher_default(match);
   for (var groups2 = this._groups, m = groups2.length, subgroups = new Array(m), j = 0;j < m; ++j) {
@@ -7989,8 +8148,8 @@ function transition_default() {
 // node_modules/d3-transition/src/transition/end.js
 function end_default() {
   var on0, on1, that = this, id = that._id, size2 = that.size();
-  return new Promise(function(resolve, reject) {
-    var cancel = { value: reject }, end = { value: function() {
+  return new Promise(function(resolve, reject4) {
+    var cancel = { value: reject4 }, end = { value: function() {
       if (--size2 === 0)
         resolve();
     } };
@@ -8030,7 +8189,7 @@ Transition.prototype = transition2.prototype = {
   selectAll: selectAll_default2,
   selectChild: selection_prototype.selectChild,
   selectChildren: selection_prototype.selectChildren,
-  filter: filter_default2,
+  filter: filter_default3,
   merge: merge_default2,
   selection: selection_default2,
   transition: transition_default,
@@ -11321,7 +11480,7 @@ var utcDate = function(d) {
 var newDate = function(y, m, d) {
   return { y, m, d, H: 0, M: 0, S: 0, L: 0 };
 };
-var pad = function(value5, fill, width) {
+var pad3 = function(value5, fill, width) {
   var sign2 = value5 < 0 ? "-" : "", string3 = (sign2 ? -value5 : value5) + "", length2 = string3.length;
   return sign2 + (length2 < width ? new Array(width - length2 + 1).join(fill) + string3 : string3);
 };
@@ -11415,38 +11574,38 @@ var parseUnixTimestampSeconds = function(d, string3, i) {
   return n ? (d.s = +n[0], i + n[0].length) : -1;
 };
 var formatDayOfMonth = function(d, p) {
-  return pad(d.getDate(), p, 2);
+  return pad3(d.getDate(), p, 2);
 };
 var formatHour24 = function(d, p) {
-  return pad(d.getHours(), p, 2);
+  return pad3(d.getHours(), p, 2);
 };
 var formatHour12 = function(d, p) {
-  return pad(d.getHours() % 12 || 12, p, 2);
+  return pad3(d.getHours() % 12 || 12, p, 2);
 };
 var formatDayOfYear = function(d, p) {
-  return pad(1 + timeDay.count(timeYear(d), d), p, 3);
+  return pad3(1 + timeDay.count(timeYear(d), d), p, 3);
 };
 var formatMilliseconds = function(d, p) {
-  return pad(d.getMilliseconds(), p, 3);
+  return pad3(d.getMilliseconds(), p, 3);
 };
 var formatMicroseconds = function(d, p) {
   return formatMilliseconds(d, p) + "000";
 };
 var formatMonthNumber = function(d, p) {
-  return pad(d.getMonth() + 1, p, 2);
+  return pad3(d.getMonth() + 1, p, 2);
 };
 var formatMinutes = function(d, p) {
-  return pad(d.getMinutes(), p, 2);
+  return pad3(d.getMinutes(), p, 2);
 };
 var formatSeconds = function(d, p) {
-  return pad(d.getSeconds(), p, 2);
+  return pad3(d.getSeconds(), p, 2);
 };
 var formatWeekdayNumberMonday = function(d) {
   var day2 = d.getDay();
   return day2 === 0 ? 7 : day2;
 };
 var formatWeekNumberSunday = function(d, p) {
-  return pad(timeSunday.count(timeYear(d) - 1, d), p, 2);
+  return pad3(timeSunday.count(timeYear(d) - 1, d), p, 2);
 };
 var dISO = function(d) {
   var day2 = d.getDay();
@@ -11454,66 +11613,66 @@ var dISO = function(d) {
 };
 var formatWeekNumberISO = function(d, p) {
   d = dISO(d);
-  return pad(timeThursday.count(timeYear(d), d) + (timeYear(d).getDay() === 4), p, 2);
+  return pad3(timeThursday.count(timeYear(d), d) + (timeYear(d).getDay() === 4), p, 2);
 };
 var formatWeekdayNumberSunday = function(d) {
   return d.getDay();
 };
 var formatWeekNumberMonday = function(d, p) {
-  return pad(timeMonday.count(timeYear(d) - 1, d), p, 2);
+  return pad3(timeMonday.count(timeYear(d) - 1, d), p, 2);
 };
 var formatYear = function(d, p) {
-  return pad(d.getFullYear() % 100, p, 2);
+  return pad3(d.getFullYear() % 100, p, 2);
 };
 var formatYearISO = function(d, p) {
   d = dISO(d);
-  return pad(d.getFullYear() % 100, p, 2);
+  return pad3(d.getFullYear() % 100, p, 2);
 };
 var formatFullYear = function(d, p) {
-  return pad(d.getFullYear() % 1e4, p, 4);
+  return pad3(d.getFullYear() % 1e4, p, 4);
 };
 var formatFullYearISO = function(d, p) {
   var day2 = d.getDay();
   d = day2 >= 4 || day2 === 0 ? timeThursday(d) : timeThursday.ceil(d);
-  return pad(d.getFullYear() % 1e4, p, 4);
+  return pad3(d.getFullYear() % 1e4, p, 4);
 };
 var formatZone = function(d) {
   var z = d.getTimezoneOffset();
-  return (z > 0 ? "-" : (z *= -1, "+")) + pad(z / 60 | 0, "0", 2) + pad(z % 60, "0", 2);
+  return (z > 0 ? "-" : (z *= -1, "+")) + pad3(z / 60 | 0, "0", 2) + pad3(z % 60, "0", 2);
 };
 var formatUTCDayOfMonth = function(d, p) {
-  return pad(d.getUTCDate(), p, 2);
+  return pad3(d.getUTCDate(), p, 2);
 };
 var formatUTCHour24 = function(d, p) {
-  return pad(d.getUTCHours(), p, 2);
+  return pad3(d.getUTCHours(), p, 2);
 };
 var formatUTCHour12 = function(d, p) {
-  return pad(d.getUTCHours() % 12 || 12, p, 2);
+  return pad3(d.getUTCHours() % 12 || 12, p, 2);
 };
 var formatUTCDayOfYear = function(d, p) {
-  return pad(1 + utcDay.count(utcYear(d), d), p, 3);
+  return pad3(1 + utcDay.count(utcYear(d), d), p, 3);
 };
 var formatUTCMilliseconds = function(d, p) {
-  return pad(d.getUTCMilliseconds(), p, 3);
+  return pad3(d.getUTCMilliseconds(), p, 3);
 };
 var formatUTCMicroseconds = function(d, p) {
   return formatUTCMilliseconds(d, p) + "000";
 };
 var formatUTCMonthNumber = function(d, p) {
-  return pad(d.getUTCMonth() + 1, p, 2);
+  return pad3(d.getUTCMonth() + 1, p, 2);
 };
 var formatUTCMinutes = function(d, p) {
-  return pad(d.getUTCMinutes(), p, 2);
+  return pad3(d.getUTCMinutes(), p, 2);
 };
 var formatUTCSeconds = function(d, p) {
-  return pad(d.getUTCSeconds(), p, 2);
+  return pad3(d.getUTCSeconds(), p, 2);
 };
 var formatUTCWeekdayNumberMonday = function(d) {
   var dow = d.getUTCDay();
   return dow === 0 ? 7 : dow;
 };
 var formatUTCWeekNumberSunday = function(d, p) {
-  return pad(utcSunday.count(utcYear(d) - 1, d), p, 2);
+  return pad3(utcSunday.count(utcYear(d) - 1, d), p, 2);
 };
 var UTCdISO = function(d) {
   var day2 = d.getUTCDay();
@@ -11521,28 +11680,28 @@ var UTCdISO = function(d) {
 };
 var formatUTCWeekNumberISO = function(d, p) {
   d = UTCdISO(d);
-  return pad(utcThursday.count(utcYear(d), d) + (utcYear(d).getUTCDay() === 4), p, 2);
+  return pad3(utcThursday.count(utcYear(d), d) + (utcYear(d).getUTCDay() === 4), p, 2);
 };
 var formatUTCWeekdayNumberSunday = function(d) {
   return d.getUTCDay();
 };
 var formatUTCWeekNumberMonday = function(d, p) {
-  return pad(utcMonday.count(utcYear(d) - 1, d), p, 2);
+  return pad3(utcMonday.count(utcYear(d) - 1, d), p, 2);
 };
 var formatUTCYear = function(d, p) {
-  return pad(d.getUTCFullYear() % 100, p, 2);
+  return pad3(d.getUTCFullYear() % 100, p, 2);
 };
 var formatUTCYearISO = function(d, p) {
   d = UTCdISO(d);
-  return pad(d.getUTCFullYear() % 100, p, 2);
+  return pad3(d.getUTCFullYear() % 100, p, 2);
 };
 var formatUTCFullYear = function(d, p) {
-  return pad(d.getUTCFullYear() % 1e4, p, 4);
+  return pad3(d.getUTCFullYear() % 1e4, p, 4);
 };
 var formatUTCFullYearISO = function(d, p) {
   var day2 = d.getUTCDay();
   d = day2 >= 4 || day2 === 0 ? utcThursday(d) : utcThursday.ceil(d);
-  return pad(d.getUTCFullYear() % 1e4, p, 4);
+  return pad3(d.getUTCFullYear() % 1e4, p, 4);
 };
 var formatUTCZone = function() {
   return "+0000";
@@ -11669,18 +11828,18 @@ function formatLocale(locale3) {
   utcFormats.c = newFormat(locale_dateTime, utcFormats);
   function newFormat(specifier, formats2) {
     return function(date2) {
-      var string3 = [], i = -1, j = 0, n = specifier.length, c, pad2, format2;
+      var string3 = [], i = -1, j = 0, n = specifier.length, c, pad4, format2;
       if (!(date2 instanceof Date))
         date2 = new Date(+date2);
       while (++i < n) {
         if (specifier.charCodeAt(i) === 37) {
           string3.push(specifier.slice(j, i));
-          if ((pad2 = pads[c = specifier.charAt(++i)]) != null)
+          if ((pad4 = pads[c = specifier.charAt(++i)]) != null)
             c = specifier.charAt(++i);
           else
-            pad2 = c === "e" ? " " : "0";
+            pad4 = c === "e" ? " " : "0";
           if (format2 = formats2[c])
-            c = format2(date2, pad2);
+            c = format2(date2, pad4);
           string3.push(c);
           j = i + 1;
         }
@@ -13436,9 +13595,9 @@ function negative(x2) {
 
 // node_modules/isoformat/src/format.js
 var formatYear2 = function(year2) {
-  return year2 < 0 ? `-${pad2(-year2, 6)}` : year2 > 9999 ? `+${pad2(year2, 6)}` : pad2(year2, 4);
+  return year2 < 0 ? `-${pad4(-year2, 6)}` : year2 > 9999 ? `+${pad4(year2, 6)}` : pad4(year2, 4);
 };
-var pad2 = function(value5, width) {
+var pad4 = function(value5, width) {
   return `${value5}`.padStart(width, "0");
 };
 function format2(date3, fallback) {
@@ -13450,7 +13609,7 @@ function format2(date3, fallback) {
   const minutes = date3.getUTCMinutes();
   const seconds2 = date3.getUTCSeconds();
   const milliseconds2 = date3.getUTCMilliseconds();
-  return `${formatYear2(date3.getUTCFullYear(), 4)}-${pad2(date3.getUTCMonth() + 1, 2)}-${pad2(date3.getUTCDate(), 2)}${hours || minutes || seconds2 || milliseconds2 ? `T${pad2(hours, 2)}:${pad2(minutes, 2)}${seconds2 || milliseconds2 ? `:${pad2(seconds2, 2)}${milliseconds2 ? `.${pad2(milliseconds2, 3)}` : ``}` : ``}Z` : ``}`;
+  return `${formatYear2(date3.getUTCFullYear(), 4)}-${pad4(date3.getUTCMonth() + 1, 2)}-${pad4(date3.getUTCDate(), 2)}${hours || minutes || seconds2 || milliseconds2 ? `T${pad4(hours, 2)}:${pad4(minutes, 2)}${seconds2 || milliseconds2 ? `:${pad4(seconds2, 2)}${milliseconds2 ? `.${pad4(milliseconds2, 3)}` : ``}` : ``}Z` : ``}`;
 }
 // node_modules/isoformat/src/parse.js
 var re2 = /^(?:[-+]\d{2})?\d{4}(?:-\d{2}(?:-\d{2})?)?(?:T\d{2}:\d{2}(?::\d{2}(?:\.\d{3})?)?(?:Z|[-+]\d{2}:?\d{2})?)?$/;
@@ -14358,7 +14517,7 @@ var reduceDistinct = {
 var reduceSum = reduceAccessor(sum3);
 
 // node_modules/@observablehq/plot/src/channel.js
-function createChannel(data2, { scale, type: type5, value: value5, filter: filter4, hint }, name) {
+function createChannel(data2, { scale, type: type5, value: value5, filter: filter6, hint }, name) {
   if (hint === undefined && typeof value5?.transform === "function")
     hint = value5.hint;
   return inferChannelScale(name, {
@@ -14366,7 +14525,7 @@ function createChannel(data2, { scale, type: type5, value: value5, filter: filte
     type: type5,
     value: valueof(data2, value5),
     label: labelof(value5),
-    filter: filter4,
+    filter: filter6,
     hint
   });
 }
@@ -15822,10 +15981,10 @@ var typeProjection = { toString: () => "projection" };
 // node_modules/@observablehq/plot/src/memoize.js
 function memoize1(compute2) {
   let cacheValue, cacheKeys;
-  return (...keys6) => {
-    if (cacheKeys?.length !== keys6.length || cacheKeys.some((k2, i) => k2 !== keys6[i])) {
-      cacheKeys = keys6;
-      cacheValue = compute2(...keys6);
+  return (...keys8) => {
+    if (cacheKeys?.length !== keys8.length || cacheKeys.some((k2, i) => k2 !== keys8[i])) {
+      cacheKeys = keys8;
+      cacheValue = compute2(...keys8);
     }
     return cacheValue;
   };
@@ -16599,10 +16758,10 @@ class Mark {
   }
   filter(index2, channels, values2) {
     for (const name in channels) {
-      const { filter: filter4 = defined } = channels[name];
-      if (filter4 !== null) {
+      const { filter: filter6 = defined } = channels[name];
+      if (filter6 !== null) {
         const value5 = values2[name];
-        index2 = index2.filter((i) => filter4(value5[i]));
+        index2 = index2.filter((i) => filter6(value5[i]));
       }
     }
     return index2;
@@ -18844,12 +19003,12 @@ var inferChannelScales = function(channels) {
     inferChannelScale(name, channels[name]);
   }
 };
-var addScaleChannels = function(channelsByScale, stateByMark, options30, filter4 = yes) {
+var addScaleChannels = function(channelsByScale, stateByMark, options30, filter6 = yes) {
   for (const { channels } of stateByMark.values()) {
     for (const name in channels) {
       const channel4 = channels[name];
       const { scale } = channel4;
-      if (scale != null && filter4(scale)) {
+      if (scale != null && filter6(scale)) {
         if (scale === "projection") {
           if (!hasProjection(options30)) {
             const gx = options30.x?.domain === undefined;
@@ -19198,7 +19357,7 @@ function maybeDenseIntervalX(options31 = {}) {
 }
 var binn = function(bx, by, gx, gy, {
   data: reduceData = reduceIdentity,
-  filter: filter4 = reduceCount,
+  filter: filter6 = reduceCount,
   sort: sort5,
   reverse: reverse2,
   ...outputs
@@ -19208,7 +19367,7 @@ var binn = function(bx, by, gx, gy, {
   outputs = maybeBinOutputs(outputs, inputs);
   reduceData = maybeBinReduce(reduceData, identity13);
   sort5 = sort5 == null ? undefined : maybeBinOutput("sort", sort5, inputs);
-  filter4 = filter4 == null ? undefined : maybeBinEvaluator("filter", filter4, inputs);
+  filter6 = filter6 == null ? undefined : maybeBinEvaluator("filter", filter6, inputs);
   if (gx != null && hasOutput(outputs, "x", "x1", "x2"))
     gx = null;
   if (gy != null && hasOutput(outputs, "y", "y1", "y2"))
@@ -19266,20 +19425,20 @@ var binn = function(bx, by, gx, gy, {
         o.initialize(data2);
       if (sort5)
         sort5.initialize(data2);
-      if (filter4)
-        filter4.initialize(data2);
+      if (filter6)
+        filter6.initialize(data2);
       for (const facet3 of facets) {
         const groupFacet = [];
         for (const o of outputs)
           o.scope("facet", facet3);
         if (sort5)
           sort5.scope("facet", facet3);
-        if (filter4)
-          filter4.scope("facet", facet3);
+        if (filter6)
+          filter6.scope("facet", facet3);
         for (const [f, I] of maybeGroup(facet3, G)) {
           for (const [k3, g] of maybeGroup(I, K2)) {
             for (const [b, extent2] of bin(g)) {
-              if (filter4 && !filter4.reduce(b, extent2))
+              if (filter6 && !filter6.reduce(b, extent2))
                 continue;
               groupFacet.push(i++);
               groupData.push(reduceData.reduceIndex(b, data2, extent2));
@@ -20008,6 +20167,9 @@ var tornadoplot = function(data2) {
   });
 };
 var actions = {
+  add_scenario(cell) {
+    return cell.update({ scenarios: (s2) => concat_default(s2, [last_default(s2)]) });
+  },
   scenario: {
     update_inputs(cell, scenario, input, values2) {
       scenario.set(input, values2);
@@ -20038,7 +20200,7 @@ var app = {
     models: {},
     scenarios: [new Scenario(new Model("value = reach * (wtp * price - cost)"))]
   },
-  view: (cell) => import_mithril.default("div.app", import_mithril.default("h1", "DA Product Value Scenarios"), import_mithril.default("div.scenarios", cell.state.scenarios.map((s2) => import_mithril.default(ScenarioView, { cell, scenario: s2 }))))
+  view: (cell) => import_mithril.default("div.app", import_mithril.default("h1", "DA Product Value Scenarios"), import_mithril.default("div.scenarios", cell.state.scenarios.map((s2) => import_mithril.default(ScenarioView, { cell, scenario: s2 })), import_mithril.default("div.scenario.new", { onclick: (_) => actions.add_scenario(cell) }, import_mithril.default("span", "+ Add Scenario"))))
 };
 var cells = import_meiosis_setup.meiosisSetup({ app });
 import_meiosis_tracer.default({ selector: "#tracer", streams: [cells().states] });

@@ -1,0 +1,35 @@
+// Simple Arithmetics Grammar
+// ==========================
+//
+// Accepts expressions like "2 * (3 + 4)" and computes their value.
+
+Model = _n* h:Statement t:(_n* Statement)* _n* {
+  return [h, ...t.map(x => x[1])]
+}
+
+Statement = variable:Name _ "=" _ e:Expression {
+  return ["=", variable, e]
+}
+
+Expression
+  = head:Term _ op:("+" / "-") _ tail:Expression  {
+      return [op, head, tail];
+    } / Term
+
+Term
+  = head:Factor _ op:("*" / "/") _ tail:Term {
+      return [op, head, tail];
+    } / Factor
+    
+    
+Name = name:([a-zA-Z][A-Za-z0-9_]*) { return name[0] + name[1].join("")	; }
+
+Factor
+  = "(" _ expr:Expression _ ")" { return expr; } / n:Name "(" expr:Expression e:(_ "," _ Expression)* ")" {return [n, expr, ...e.map(x => x[3])]} / Integer / Name 
+
+Integer "number" = "-"?[0-9]+(.[0-9]+)? { return parseInt(text(), 10); }
+
+_n = [ \t\r]* "\n"
+
+_ "whitespace"
+  = [ \t\r]*

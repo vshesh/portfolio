@@ -12,6 +12,9 @@ interface State {
 }
 
 const actions = {
+  add_scenario(cell: MeiosisCell<State>) {
+    return cell.update({scenarios: (s: Scenario[]) => R.concat(s, [R.last(s)!])})
+  },
   scenario: {
     update_inputs(cell: MeiosisCell<State>, scenario: Scenario, input: string, values: SPTInput) {
       scenario.set(input, values)
@@ -138,8 +141,8 @@ const app: MeiosisViewComponent<State> = {
     m('div.app',
       m('h1', 'DA Product Value Scenarios'),
       m('div.scenarios',
-        cell.state.scenarios.map(s => m(ScenarioView, {cell: cell, scenario: s}))),
-        m('div.scenario.new', '+ Add Scenario')
+        cell.state.scenarios.map(s => m(ScenarioView, {cell: cell, scenario: s})),
+        m('div.scenario.new', {onclick: (_) => actions.add_scenario(cell)}, m('span', '+ Add Scenario')))
     )
 };
 
