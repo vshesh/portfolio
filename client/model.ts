@@ -87,7 +87,7 @@ export class Model {
   inputs:string[]; 
 
   public constructor(formula: string) {
-    this.formulas = asStatement(parse(formula, {}));
+    this.formulas = asStatement(parse(formula, {}) as ASTBranch[]);
     this.derived_vars = this.formulas.map(x => x[1]);
     console.log(this.derived_vars);
     this.inputs = R.uniq(R.chain((f) => Array.from(extract(
@@ -127,7 +127,6 @@ export class Model {
 
 
 
-
 export class Scenario {
   private _model!: Model; 
   inputs: {[_:string]: SPTInput}
@@ -137,10 +136,14 @@ export class Scenario {
   description: string = "";
   rationales: {[_:string]: {low: string, high: string}}
 
-  constructor(model: Model, inputs: {[_:string]: SPTInput} = {}, name: string = "") {
+  constructor(model: Model, inputs: {[_:string]: SPTInput} = {}, name: string = "", rationales = {}) {
+    // this is just to make the ts compiler happy
+    // the values are actually set when the model is set
     this.inputs = inputs;
+    this.rationales = rationales;
+
     this.name = name;
-    this.model = model;
+    this.model = model; // note calls set model below, ts doesn't check this control flow.
     this.id = name + (Math.random() + 1).toString(36).slice(-7)
   }
 
@@ -162,12 +165,15 @@ export class Scenario {
   }
 
   protected update_samples() {
-    this.samples = R.sortBy(R.identity, R.pluck(R.last(this.model.derived_vars)!, this.sample(10000)));
+    this.samples = R.pluck(R.last(this.model.derived_vars)!, this.sample(10000)).sort((a,b)=>a-b);
   }
 
-  set(name: string, value: SPTInput) {
+  set(name: string, value: SPTInput, rationale?: {low: string, high: string}) {
     this.inputs[name] = value;
     this.update_samples()
+    if(rationale) {
+      this.rationales[name] = rationale;
+    }
     console.log('new samples', R.mean(this.samples), R.median(this.samples), this.inputs, this.model)
   }
 

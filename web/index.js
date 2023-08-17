@@ -2155,7 +2155,7 @@ var require_mithril = __commonJS((exports, module) => {
   module.exports = m;
 });
 
-// exprparser.js
+// client/exprparser.js
 var require_exprparser = __commonJS((exports, module) => {
   module.exports = function() {
     function peg$subclass(child, parent) {
@@ -3088,595 +3088,11 @@ var require_exprparser = __commonJS((exports, module) => {
   }();
 });
 
-// node_modules/meiosis-tracer/dist/meiosis-tracer.js
-var require_meiosis_tracer = __commonJS((exports, module) => {
-  (function webpackUniversalModuleDefinition(root2, factory) {
-    if (typeof exports === "object" && typeof module === "object")
-      module.exports = factory();
-    else if (typeof define === "function" && define.amd)
-      define([], factory);
-    else if (typeof exports === "object")
-      exports["meiosisTracer"] = factory();
-    else
-      root2["meiosisTracer"] = factory();
-  })(exports, () => {
-    return (() => {
-      var __webpack_modules__ = {
-        "./src/constants.js": (__unused_webpack_module, __webpack_exports__2, __webpack_require__2) => {
-          /*!**************************!*\
-            !*** ./src/constants.js ***!
-            \**************************/
-          __webpack_require__2.r(__webpack_exports__2);
-          __webpack_require__2.d(__webpack_exports__2, {
-            autoId: () => autoId,
-            colsId: () => colsId,
-            hiddenStreamId: () => hiddenStreamId,
-            hideStreamId: () => hideStreamId,
-            hideTracerId: () => hideTracerId,
-            histId: () => histId,
-            modelId: () => modelId,
-            resetId: () => resetId,
-            rowsId: () => rowsId,
-            sendId: () => sendId,
-            settingsContainerId: () => settingsContainerId,
-            showStreamId: () => showStreamId,
-            showTracerId: () => showTracerId,
-            sliderId: () => sliderId,
-            sliderValueId: () => sliderValueId,
-            stepBackId: () => stepBackId,
-            stepForwardId: () => stepForwardId,
-            streamContainerId: () => streamContainerId,
-            streamId: () => streamId
-          });
-          var rowsId = "tracerRows";
-          var colsId = "tracerCols";
-          var streamContainerId = "tracerStreamContainer";
-          var settingsContainerId = "tracerSettingsContainer";
-          var hideTracerId = "tracerHide";
-          var showTracerId = "tracerShow";
-          var autoId = "traceAutoSend";
-          var streamId = function streamId(index2) {
-            return "tracerStreamBox_ " + index2;
-          };
-          var hiddenStreamId = function hiddenStreamId(index2) {
-            return "tracerStreamBoxHidden_" + index2;
-          };
-          var hideStreamId = function hideStreamId(index2) {
-            return "tracerStreamHide_" + index2;
-          };
-          var showStreamId = function showStreamId(index2) {
-            return "tracerStreamShow_" + index2;
-          };
-          var modelId = function modelId(index2) {
-            return "tracerModel_" + index2;
-          };
-          var sliderId = function sliderId(index2) {
-            return "tracerSlider_" + index2;
-          };
-          var stepBackId = function stepBackId(index2) {
-            return "tracerStepBack_" + index2;
-          };
-          var stepForwardId = function stepForwardId(index2) {
-            return "tracerStepForward_" + index2;
-          };
-          var sliderValueId = function sliderValueId(index2) {
-            return "tracerSliderValue_" + index2;
-          };
-          var sendId = function sendId(index2) {
-            return "tracerSend_" + index2;
-          };
-          var resetId = function resetId(index2) {
-            return "tracerReset_" + index2;
-          };
-          var histId = function histId(index2) {
-            return "tracerAccumulateHistory_" + index2;
-          };
-        },
-        "./src/meiosis-tracer.js": (__unused_webpack_module, __webpack_exports__2, __webpack_require__2) => {
-          /*!*******************************!*\
-            !*** ./src/meiosis-tracer.js ***!
-            \*******************************/
-          __webpack_require__2.r(__webpack_exports__2);
-          __webpack_require__2.d(__webpack_exports__2, {
-            meiosisTracer: () => meiosisTracer
-          });
-          var _trace__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__2("./src/trace.js");
-          /*! ./trace */
-          var _tracer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__2("./src/tracer.js");
-          /*! ./tracer */
-          var meiosisTracer = function meiosisTracer(params) {
-            if (params.streams != null) {
-              (0, _trace__WEBPACK_IMPORTED_MODULE_0__.trace)(params);
-            }
-            if (params.selector != null) {
-              return (0, _tracer__WEBPACK_IMPORTED_MODULE_1__.tracer)(params);
-            }
-          };
-        },
-        "./src/settingsView.js": (__unused_webpack_module, __webpack_exports__2, __webpack_require__2) => {
-          /*!*****************************!*\
-            !*** ./src/settingsView.js ***!
-            \*****************************/
-          __webpack_require__2.r(__webpack_exports__2);
-          __webpack_require__2.d(__webpack_exports__2, {
-            initializeResizeChangeDirection: () => initializeResizeChangeDirection,
-            settingsView: () => settingsView
-          });
-          var _constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__2("./src/constants.js");
-          /*! ./constants */
-          var settingsView = function settingsView(_ref) {
-            var { element, listeners, direction, rows, cols, autoSend } = _ref;
-            element.innerHTML = "\n    <div id='".concat(_constants__WEBPACK_IMPORTED_MODULE_0__.settingsContainerId, "'>\n      <label title='Align in a row'>\n        <input type='radio' name='direction' value='row'\n          ").concat(direction === "row" ? "checked" : "", " />\n        Row\n      </label>\n      <label title='Align in a column'>\n        <input type='radio' name='direction' value='column'\n          ").concat(direction === "column" ? "checked" : "", " />\n        Col\n      </label>\n      <label title='Toggle auto-send'>\n        <input id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.autoId, "' type='checkbox' ").concat(autoSend ? "checked" : "", " />\n        Auto\n      </label>\n      <input title='Number of rows' id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.rowsId, "' type='text' size='2'\n        value='").concat(rows, "'/>\n      <span> &times; </span>\n      <input title='Number of columns' id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.colsId, "' type='text' size='2'\n        value='").concat(cols, "'/>\n      <button id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.hideTracerId, "'>Hide</button>\n      <span>v6.0.0</span>\n    </div>\n    <button id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.showTracerId, "' style='display:none'>Show</button>\n  ");
-            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.hideTracerId).addEventListener("click", function(_evt) {
-              listeners.onHideTracer();
-            });
-            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.showTracerId).addEventListener("click", function(_evt) {
-              listeners.onShowTracer();
-            });
-            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.rowsId).addEventListener("input", function(evt) {
-              listeners.onRowsColsChange(parseInt(evt.target.value, 10), parseInt(document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.colsId).value, 10));
-            });
-            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.colsId).addEventListener("input", function(evt) {
-              listeners.onRowsColsChange(parseInt(document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.rowsId).value, 10), parseInt(evt.target.value, 10));
-            });
-            var radios = document.querySelectorAll("input[name=\'direction\']");
-            for (var i = 0, t = radios.length;i < t; i++) {
-              radios[i].addEventListener("change", function(evt) {
-                if (evt.target.checked) {
-                  listeners.onDirectionChange(evt.target.value);
-                }
-              });
-            }
-            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.autoId).addEventListener("change", function(evt) {
-              listeners.onAutoChange(evt.target.checked);
-            });
-          };
-          var initializeResizeChangeDirection = function initializeResizeChangeDirection(listeners, direction) {
-            var directionAccordingToWindowSize = function directionAccordingToWindowSize() {
-              var dir = window.innerWidth > window.innerHeight ? "row" : "column";
-              var radios = document.querySelectorAll("input[name=\'direction\']");
-              for (var i = 0, t = radios.length;i < t; i++) {
-                radios[i].checked = radios[i].value === dir;
-              }
-              listeners.onDirectionChange(dir);
-            };
-            if (direction === "auto") {
-              window.addEventListener("resize", directionAccordingToWindowSize);
-            }
-            if (direction === "row" || direction === "column") {
-              listeners.onDirectionChange(direction);
-            } else {
-              directionAccordingToWindowSize();
-            }
-          };
-        },
-        "./src/streamView.js": (__unused_webpack_module, __webpack_exports__2, __webpack_require__2) => {
-          /*!***************************!*\
-            !*** ./src/streamView.js ***!
-            \***************************/
-          __webpack_require__2.r(__webpack_exports__2);
-          __webpack_require__2.d(__webpack_exports__2, {
-            streamView: () => streamView
-          });
-          var _constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__2("./src/constants.js");
-          /*! ./constants */
-          var streamView = function streamView(_ref) {
-            var { element, index: index2, listeners, label: _ref$label } = _ref, label = _ref$label === undefined ? "" : _ref$label, rows = _ref.rows, cols = _ref.cols, _ref$hist = _ref.hist, hist = _ref$hist === undefined ? true : _ref$hist, _ref$hide = _ref.hide, hide = _ref$hide === undefined ? false : _ref$hide;
-            var streamBoxStyle = "padding:8px;border:1px solid gray";
-            element.innerHTML = "\n    <div id='".concat(_constants__WEBPACK_IMPORTED_MODULE_0__.streamId(index2), "' style='").concat(streamBoxStyle, "'>\n      <div>\n        <span>").concat(label, "</span>\n        <label title='Toggle accumulate history'>\n          <input id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.histId(index2), "' type='checkbox' ").concat(hist ? "checked" : "", " />\n          Hist\n        </label>\n        <button id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.hideStreamId(index2), "'>Hide</button>\n      </div>\n      <textarea id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.modelId(index2), "' rows='").concat(rows, "' cols='").concat(cols, "'>\n      </textarea>\n      <div>\n        <input id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.sliderId(index2), "' type='range' min='0' max='0' value='0'\n          style='width: 100%' />\n        <button id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.stepBackId(index2), "'>&lt</button>\n        <button id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.stepForwardId(index2), "'>&gt</button>\n        <span id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.sliderValueId(index2), "'>-1</span>\n        <button id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.sendId(index2), "'>Send</button>\n        <button id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.resetId(index2), "'>Reset</button>\n      </div>\n    </div>\n    <div id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.hiddenStreamId(index2), "' style='display:none'>\n      <span>").concat(label, " </span>\n      <button id='").concat(_constants__WEBPACK_IMPORTED_MODULE_0__.showStreamId(index2), "'>Show</button>\n    </div>\n  ");
-            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.sliderId(index2)).addEventListener("input", function(evt) {
-              listeners.onSliderChange(parseInt(evt.target.value, 10));
-            });
-            var stepBack = document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.stepBackId(index2));
-            stepBack.addEventListener("click", function(_evt) {
-              listeners.onStepBack();
-            });
-            stepBack.disabled = true;
-            var stepForward = document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.stepForwardId(index2));
-            stepForward.addEventListener("click", function(_evt) {
-              listeners.onStepForward();
-            });
-            stepForward.disabled = true;
-            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.sendId(index2)).addEventListener("click", function(_evt) {
-              listeners.onSend(document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.modelId(index2)).value);
-            });
-            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.resetId(index2)).addEventListener("click", function(_evt) {
-              listeners.onReset();
-            });
-            var hideStream = function hideStream(index3) {
-              document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.streamId(index3)).style = "display:none";
-              document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.hiddenStreamId(index3)).style = streamBoxStyle;
-            };
-            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.hideStreamId(index2)).addEventListener("click", function(_evt) {
-              return hideStream(index2);
-            });
-            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.showStreamId(index2)).addEventListener("click", function(_evt) {
-              document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.hiddenStreamId(index2)).style = "display:none";
-              document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.streamId(index2)).style = streamBoxStyle;
-            });
-            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.histId(index2)).addEventListener("change", function(evt) {
-              listeners.onHistChange(index2, evt.target.checked);
-            });
-            if (hide) {
-              hideStream(index2);
-            }
-          };
-        },
-        "./src/trace.js": (__unused_webpack_module, __webpack_exports__2, __webpack_require__2) => {
-          /*!**********************!*\
-            !*** ./src/trace.js ***!
-            \**********************/
-          __webpack_require__2.r(__webpack_exports__2);
-          __webpack_require__2.d(__webpack_exports__2, {
-            trace: () => trace
-          });
-          var isMeiosisTracerOn = function isMeiosisTracerOn() {
-            return window && window["__MEIOSIS_TRACER_GLOBAL_HOOK__"];
-          };
-          var trace = function trace(_ref) {
-            var _ref$streams = _ref.streams, streams = _ref$streams === undefined ? [] : _ref$streams, _ref$stringify = _ref.stringify, stringify = _ref$stringify === undefined ? function(obj) {
-              return JSON.stringify(obj, null, 4);
-            } : _ref$stringify, _ref$parse = _ref.parse, parse4 = _ref$parse === undefined ? function(str) {
-              return JSON.parse(str);
-            } : _ref$parse, _ref$listen = _ref.listen, listen = _ref$listen === undefined ? function(stream3, fn) {
-              return stream3.map(fn);
-            } : _ref$listen, _ref$emit = _ref.emit, emit = _ref$emit === undefined ? function(stream3, value5) {
-              return stream3(value5);
-            } : _ref$emit, _ref$direction = _ref.direction, direction = _ref$direction === undefined ? "column" : _ref$direction, _ref$rows = _ref.rows, rows = _ref$rows === undefined ? 15 : _ref$rows, _ref$cols = _ref.cols, cols = _ref$cols === undefined ? 50 : _ref$cols, _ref$autoSend = _ref.autoSend, autoSend = _ref$autoSend === undefined ? true : _ref$autoSend;
-            if (!isMeiosisTracerOn()) {
-              return;
-            }
-            var bufferedStreamValues = [];
-            var devtoolInitialized = false;
-            var streamObjs = [];
-            for (var i = 0, t = streams.length;i < t; i++) {
-              var defaultLabel = "Stream " + i;
-              if (streams[i].stream) {
-                streams[i].label = streams[i].label || defaultLabel;
-                streamObjs.push(streams[i]);
-              } else {
-                streamObjs.push({
-                  stream: streams[i],
-                  label: defaultLabel
-                });
-              }
-            }
-            streamObjs.forEach(function(_ref2, index2) {
-              var stream3 = _ref2.stream;
-              listen(stream3, function(value5) {
-                var data2 = {
-                  type: "MEIOSIS_STREAM_VALUE",
-                  index: index2,
-                  value: stringify(value5)
-                };
-                if (devtoolInitialized) {
-                  window.postMessage(data2, "*");
-                } else {
-                  bufferedStreamValues.push(data2);
-                }
-              });
-            });
-            window.addEventListener("message", function(evt) {
-              if (evt.data.type === "MEIOSIS_TRACER_INIT") {
-                var streamOptions = [];
-                streamObjs.forEach(function(streamObj) {
-                  var streamOpt = {};
-                  Object.keys(streamObj).forEach(function(key) {
-                    if (key !== "stream") {
-                      streamOpt[key] = streamObj[key];
-                    }
-                  });
-                  streamOptions.push(streamOpt);
-                });
-                var params = {
-                  streamOptions,
-                  direction,
-                  rows,
-                  cols,
-                  autoSend
-                };
-                window.postMessage({
-                  type: "MEIOSIS_STREAM_OPTIONS",
-                  value: params
-                }, "*");
-                devtoolInitialized = true;
-                bufferedStreamValues.forEach(function(data2) {
-                  return window.postMessage(data2, "*");
-                });
-                bufferedStreamValues.length = 0;
-              } else if (evt.data.type === "MEIOSIS_TRIGGER_STREAM_VALUE") {
-                var _evt$data = evt.data, index2 = _evt$data.index, value5 = _evt$data.value;
-                emit(streamObjs[index2].stream, parse4(value5));
-              }
-            });
-            window.postMessage({
-              type: "MEIOSIS_PING"
-            }, "*");
-          };
-        },
-        "./src/tracer.js": (__unused_webpack_module, __webpack_exports__2, __webpack_require__2) => {
-          /*!***********************!*\
-            !*** ./src/tracer.js ***!
-            \***********************/
-          __webpack_require__2.r(__webpack_exports__2);
-          __webpack_require__2.d(__webpack_exports__2, {
-            tracer: () => tracer
-          });
-          var _streamView__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__2("./src/streamView.js");
-          /*! ./streamView */
-          var _updateView__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__2("./src/updateView.js");
-          /*! ./updateView */
-          var _settingsView__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__2("./src/settingsView.js");
-          /*! ./settingsView */
-          var _constants__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__2("./src/constants.js");
-          /*! ./constants */
-          window["__MEIOSIS_TRACER_GLOBAL_HOOK__"] = true;
-          var states2 = [];
-          var accumulateHistory = [];
-          var tracer = function tracer(_ref) {
-            var { selector: selector3, sendTracerInit, triggerStreamValue, theme: _ref$theme } = _ref, theme = _ref$theme === undefined ? "light" : _ref$theme;
-            var target = document.querySelector(selector3);
-            if (!target) {
-              return;
-            }
-            target.classList.add("theme-".concat(theme));
-            var containerStyle = null;
-            if (sendTracerInit == null) {
-              sendTracerInit = function sendTracerInit() {
-                window.postMessage({
-                  type: "MEIOSIS_TRACER_INIT"
-                }, "*");
-              };
-            }
-            if (triggerStreamValue == null) {
-              triggerStreamValue = function triggerStreamValue(index2, value5) {
-                window.postMessage({
-                  type: "MEIOSIS_TRIGGER_STREAM_VALUE",
-                  index: index2,
-                  value: value5
-                }, "*");
-              };
-            }
-            var receiveStreamOptions = function receiveStreamOptions(_ref2) {
-              var { streamOptions, direction, rows, cols, autoSend } = _ref2;
-              if (target.lastChild) {
-                return;
-              }
-              var settingsListeners = {
-                onHideTracer: function onHideTracer() {
-                  var container2 = document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_3__.streamContainerId);
-                  containerStyle = container2.style;
-                  container2.style = "display:none";
-                  document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_3__.settingsContainerId).style = "display:none";
-                  document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_3__.showTracerId).style = "";
-                },
-                onShowTracer: function onShowTracer() {
-                  document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_3__.streamContainerId).style = containerStyle;
-                  document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_3__.settingsContainerId).style = "";
-                  document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_3__.showTracerId).style = "display:none";
-                },
-                onRowsColsChange: function onRowsColsChange(rows2, cols2) {
-                  for (var i = 0;i < streamOptions.length; i++) {
-                    var textarea = document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_3__.modelId(i));
-                    textarea.rows = rows2;
-                    textarea.cols = cols2;
-                  }
-                },
-                onDirectionChange: function onDirectionChange(direction2) {
-                  document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_3__.streamContainerId).style = "display:flex;flex-direction:" + direction2;
-                },
-                onAutoChange: function onAutoChange(auto) {
-                  autoSend = auto;
-                }
-              };
-              var settings = document.createElement("div");
-              target.append(settings);
-              (0, _settingsView__WEBPACK_IMPORTED_MODULE_2__.settingsView)({
-                element: settings,
-                listeners: settingsListeners,
-                direction,
-                rows,
-                cols,
-                autoSend
-              });
-              var container = document.createElement("div");
-              container.id = _constants__WEBPACK_IMPORTED_MODULE_3__.streamContainerId;
-              container.style = "display:flex;flex-direction:column";
-              target.append(container);
-              var sendStreamValue = function sendStreamValue(index3, model) {
-                if (autoSend) {
-                  accumulateHistory[index3] = false;
-                  document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_3__.histId(index3)).checked = false;
-                  triggerStreamValue(index3, model);
-                }
-              };
-              var _loop = function _loop(index3) {
-                var _streamOptions$index = streamOptions[index3], label = _streamOptions$index.label, hist = _streamOptions$index.hist, hide = _streamOptions$index.hide;
-                states2.push({
-                  history: [],
-                  value: -1
-                });
-                accumulateHistory.push(hist === false ? false : true);
-                var listeners = {
-                  onSliderChange: function onSliderChange(value5) {
-                    var state = states2[index3];
-                    var model = state.history[value5];
-                    state.value = value5;
-                    (0, _updateView__WEBPACK_IMPORTED_MODULE_1__.updateView)({
-                      index: index3,
-                      model,
-                      value: value5
-                    });
-                    sendStreamValue(index3, model);
-                  },
-                  onStepBack: function onStepBack() {
-                    var state = states2[index3];
-                    state.value = state.value - 1;
-                    var model = state.history[state.value];
-                    (0, _updateView__WEBPACK_IMPORTED_MODULE_1__.updateView)({
-                      index: index3,
-                      model,
-                      value: state.value
-                    });
-                    sendStreamValue(index3, model);
-                  },
-                  onStepForward: function onStepForward() {
-                    var state = states2[index3];
-                    state.value = state.value + 1;
-                    var model = state.history[state.value];
-                    (0, _updateView__WEBPACK_IMPORTED_MODULE_1__.updateView)({
-                      index: index3,
-                      model,
-                      value: state.value
-                    });
-                    sendStreamValue(index3, model);
-                  },
-                  onSend: function onSend(value5) {
-                    triggerStreamValue(index3, value5);
-                  },
-                  onReset: function onReset() {
-                    var state = states2[index3];
-                    state.history.length = 0;
-                    state.value = -1;
-                    (0, _updateView__WEBPACK_IMPORTED_MODULE_1__.updateView)({
-                      index: index3,
-                      model: "",
-                      value: state.value,
-                      max: state.value
-                    });
-                  },
-                  onHistChange: function onHistChange(index4, hist2) {
-                    accumulateHistory[index4] = hist2;
-                  }
-                };
-                var element = document.createElement("div");
-                element.style = "flex-grow:1";
-                container.append(element);
-                (0, _streamView__WEBPACK_IMPORTED_MODULE_0__.streamView)({
-                  element,
-                  index: index3,
-                  listeners,
-                  label,
-                  rows,
-                  cols,
-                  hist,
-                  hide
-                });
-              };
-              for (var index2 = 0;index2 < streamOptions.length; index2++) {
-                _loop(index2);
-              }
-              (0, _settingsView__WEBPACK_IMPORTED_MODULE_2__.initializeResizeChangeDirection)(settingsListeners, direction);
-            };
-            var receiveStreamValue = function receiveStreamValue(index2, model) {
-              if (accumulateHistory[index2]) {
-                var state = states2[index2];
-                if (state.history.length > 0) {
-                  state.history.length = state.value + 1;
-                }
-                state.history.push(model);
-                state.value = state.history.length - 1;
-                (0, _updateView__WEBPACK_IMPORTED_MODULE_1__.updateView)({
-                  index: index2,
-                  model,
-                  value: state.value,
-                  max: state.history.length - 1
-                });
-              }
-            };
-            window.addEventListener("message", function(evt) {
-              if (evt.data.type === "MEIOSIS_STREAM_OPTIONS") {
-                receiveStreamOptions(evt.data.value);
-              } else if (evt.data.type === "MEIOSIS_STREAM_VALUE") {
-                receiveStreamValue(evt.data.index, evt.data.value);
-              }
-            });
-            sendTracerInit();
-            return {
-              receiveStreamOptions,
-              receiveStreamValue
-            };
-          };
-        },
-        "./src/updateView.js": (__unused_webpack_module, __webpack_exports__2, __webpack_require__2) => {
-          /*!***************************!*\
-            !*** ./src/updateView.js ***!
-            \***************************/
-          __webpack_require__2.r(__webpack_exports__2);
-          __webpack_require__2.d(__webpack_exports__2, {
-            updateView: () => updateView
-          });
-          var _constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__2("./src/constants.js");
-          /*! ./constants */
-          var updateView = function updateView(_ref) {
-            var { index: index2, model, value: value5, max: max3 } = _ref;
-            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.modelId(index2)).value = model;
-            if (max3 != null) {
-              document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.sliderId(index2)).max = max3;
-            }
-            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.sliderId(index2)).value = value5;
-            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.sliderValueId(index2)).innerHTML = value5;
-            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.stepBackId(index2)).disabled = value5 <= 0;
-            document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.stepForwardId(index2)).disabled = value5 == document.getElementById(_constants__WEBPACK_IMPORTED_MODULE_0__.sliderId(index2)).max;
-          };
-        }
-      };
-      var __webpack_module_cache__ = {};
-      function __webpack_require__(moduleId) {
-        var cachedModule = __webpack_module_cache__[moduleId];
-        if (cachedModule !== undefined) {
-          return cachedModule.exports;
-        }
-        var module2 = __webpack_module_cache__[moduleId] = {
-          exports: {}
-        };
-        __webpack_modules__[moduleId](module2, module2.exports, __webpack_require__);
-        return module2.exports;
-      }
-      (() => {
-        __webpack_require__.d = (exports2, definition) => {
-          for (var key in definition) {
-            if (__webpack_require__.o(definition, key) && !__webpack_require__.o(exports2, key)) {
-              Object.defineProperty(exports2, key, { enumerable: true, get: definition[key] });
-            }
-          }
-        };
-      })();
-      (() => {
-        __webpack_require__.o = (obj, prop4) => Object.prototype.hasOwnProperty.call(obj, prop4);
-      })();
-      (() => {
-        __webpack_require__.r = (exports2) => {
-          if (typeof Symbol !== "undefined" && Symbol.toStringTag) {
-            Object.defineProperty(exports2, Symbol.toStringTag, { value: "Module" });
-          }
-          Object.defineProperty(exports2, "__esModule", { value: true });
-        };
-      })();
-      var __webpack_exports__ = {};
-      (() => {
-        /*!**********************!*\
-          !*** ./src/index.js ***!
-          \**********************/
-        __webpack_require__.r(__webpack_exports__);
-        __webpack_require__.d(__webpack_exports__, {
-          default: () => __WEBPACK_DEFAULT_EXPORT__
-        });
-        var _meiosis_tracer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/meiosis-tracer.js");
-        /*! ./meiosis-tracer */
-        const __WEBPACK_DEFAULT_EXPORT__ = _meiosis_tracer__WEBPACK_IMPORTED_MODULE_0__.meiosisTracer;
-      })();
-      __webpack_exports__ = __webpack_exports__["default"];
-      return __webpack_exports__;
-    })();
-  });
-});
-
-// index.ts
+// client/index.ts
 var import_meiosis_setup = __toESM(require_meiosis_setup(), 1);
 var import_mithril = __toESM(require_mithril(), 1);
 
-// model.ts
+// client/model.ts
 var exprparser = __toESM(require_exprparser(), 1);
 
 // node_modules/ramda/es/internal/_isPlaceholder.js
@@ -4989,7 +4405,7 @@ var sortBy = _curry2(function sortBy2(fn, list) {
   });
 });
 var sortBy_default = sortBy;
-// model.ts
+// client/model.ts
 function isLeaf(a) {
   return !(a instanceof Array);
 }
@@ -5132,8 +4548,9 @@ class Scenario {
   id;
   description = "";
   rationales;
-  constructor(model, inputs = {}, name = "") {
+  constructor(model, inputs = {}, name = "", rationales = {}) {
     this.inputs = inputs;
+    this.rationales = rationales;
     this.name = name;
     this.model = model;
     this.id = name + (Math.random() + 1).toString(36).slice(-7);
@@ -5149,11 +4566,14 @@ class Scenario {
     this.update_samples();
   }
   update_samples() {
-    this.samples = sortBy_default(identity_default, pluck_default(last_default(this.model.derived_vars), this.sample(1e4)));
+    this.samples = pluck_default(last_default(this.model.derived_vars), this.sample(1e4)).sort((a, b) => a - b);
   }
-  set(name, value2) {
+  set(name, value2, rationale) {
     this.inputs[name] = value2;
     this.update_samples();
+    if (rationale) {
+      this.rationales[name] = rationale;
+    }
     console.log("new samples", mean_default(this.samples), median_default(this.samples), this.inputs, this.model);
   }
   has_all_inputs() {
@@ -20611,8 +20031,7 @@ class Line extends Mark {
     return create2("svg:g", context14).call(applyIndirectStyles, this, dimensions2, context14).call(applyTransform, this, scales13).call((g) => g.selectAll().data(groupIndex(index2, [X3, Y3], this, channels)).enter().append("path").call(applyDirectStyles, this).call(applyGroupedChannelStyles, this, channels).call(applyGroupedMarkers, this, channels, context14).attr("d", curve2 === curveAuto && context14.projection ? sphereLine(context14.projection, X3, Y3) : line_default2().curve(curve2).defined((i) => i >= 0).x((i) => X3[i]).y((i) => Y3[i]))).node();
   }
 }
-// index.ts
-var import_meiosis_tracer = __toESM(require_meiosis_tracer(), 1);
+// client/index.ts
 var cdfplot = function(f) {
   let data2 = range_default(1, 100).map((x2) => [f(x2 / 100), x2 / 100]);
   return plot({
@@ -20654,6 +20073,7 @@ var TornadoPlot = function(data2) {
 };
 var tornadoplot = function(data2) {
   return plot({
+    marginLeft: 80,
     x: {
       label: "value"
     },
@@ -20697,40 +20117,44 @@ var ScenarioView = {
   }
 };
 var SPTInputView = {
-  view: ({ attrs: { name, input, update } }) => import_mithril.default("div.spt-input", import_mithril.default("h4", name), import_mithril.default("div.input-stack", ["min", "low", "med", "high", "max"].map((q) => import_mithril.default("input", { type: "number", value: input[q], oninput: (e3) => update(Object.assign(input, { [q]: +e3.target.value })) }))))
+  view: ({ attrs: { name, input, update } }) => import_mithril.default("div.spt-input", import_mithril.default("h4", name), import_mithril.default("div.input-stack", ["min", "low", "med", "high", "max"].map((q) => import_mithril.default("input", { type: "number", value: input[q], oninput: (e3) => update(Object.assign(input, { [q]: e3.target.value ? /-?\d+(.\d+)?([eE]\d+)?/.test(e3.target.value) ? +e3.target.value : input[q] : null })) }))))
 };
 var app = {
   initial: {
     models: map_default((x2) => new Model(x2), {
-      "Maker WTP Model": `
-      reach = endusers * (1-cann)
+      "maker-wtp-model": `
+      reach = endusers * (1 - cann)
       tlift = reach * (lift * wtp - cost)
-      devtime = 0.25 + log(endusers)/log(120) * ntools * tptool
-      makercost = devtime * devcost + devlic
-      makerval = ntools * tlift - makercost
-      value = nmakers * makerval
-      `,
-      "Basic WTP Model": "value = reach * (wtp * price - cost) - fixed_cost"
+      devtime = (0.25 + log(endusers) / log(120) * ntools * tptool)
+      value = nmakers * (ntools * tlift - (devtime * devcost + devlic))`,
+      "basic-wtp-model": "value = reach * (wtp * price - cost) - fixed_cost"
     }),
-    scenarios: [new Scenario(new Model("value = reach * (wtp * price - cost)"))]
+    scenarios: [new Scenario(new Model(`
+      reach = endusers * (1 - cann)
+      tlift = reach * (lift * wtp - cost)
+      devtime = (0.25 + log(endusers) / log(120) * ntools * tptool)
+      value = nmakers * (ntools * tlift - (devtime * devcost + devlic))`))]
   },
-  view: (cell) => import_mithril.default("div.app", import_mithril.default("h1", "DA Product Value Scenarios"), import_mithril.default("div.scenarios", cell.state.scenarios.map((s2) => import_mithril.default(ScenarioView, { cell, scenario: s2 })), import_mithril.default("div.scenario.new", { onclick: (_) => actions.add_scenario(cell) }, import_mithril.default("span", "+ Add Scenario"))))
+  view: (cell) => import_mithril.default("div.app", import_mithril.default("h1", "DA Product Value Scenarios"), import_mithril.default("div.scenarios", cell.state.scenarios.map((s2) => import_mithril.default(ScenarioView, { cell, scenario: s2 })), import_mithril.default("div.scenario.new", { onclick: () => actions.add_scenario(cell) }, import_mithril.default("span", "+ Add Scenario"))))
 };
 var ScenarioFocus = {
   view: ({ attrs: { cell, id: id2 } }) => {
     const scenario = find_default((x2) => x2.id === id2, cell.getState().scenarios);
-    return import_mithril.default("div.scenario-focus", import_mithril.default("h1.name[contenteditable=true]", import_mithril.default.trust(scenario.name)), import_mithril.default(FormulaInputView, { cell, scenario }));
+    return import_mithril.default("div.scenario-focus", import_mithril.default("h1.name[contenteditable=true]", import_mithril.default.trust(scenario.name)), import_mithril.default("textarea", scenario.description), import_mithril.default(FormulaInputView, { cell, scenario }));
   }
 };
 var FormulaInputView = {
   view({ attrs: { cell, scenario } }) {
-    return import_mithril.default("div.formula-input-view", import_mithril.default("h1.name", scenario.name), import_mithril.default("textarea", scenario.description), scenario.model.formulas.map((f) => import_mithril.default("div.formula-view", import_mithril.default("span.variable", f[1]), import_mithril.default("span.equals", `=`), this.construct(f[2], scenario, cell))));
+    return import_mithril.default("div.formula-input-view", scenario.model.formulas.map((f) => import_mithril.default("div.formula-view", import_mithril.default("span.variable", f[1]), import_mithril.default("span.equals", `=`), this.construct(f[2], scenario, cell))));
   },
   construct(formula, scenario, cell) {
     if (isLeaf(formula)) {
       if (typeof formula === "number") {
-        return import_mithril.default("span.term", `${formula}`);
+        return import_mithril.default("span.number", `${formula}`);
       } else {
+        if (includes_default(formula, scenario.model.derived_vars)) {
+          return import_mithril.default("span.variable", `${formula}`);
+        }
         return import_mithril.default(SPTInputView, {
           name: formula,
           input: scenario.inputs[formula],
@@ -20740,18 +20164,17 @@ var FormulaInputView = {
     }
     const children2 = formula.slice(1).map((x2) => this.construct(x2, scenario, cell));
     if (!/\w+/.test(formula[0])) {
-      const term = intersperse_default(import_mithril.default("span.operator", formula[0]), children2);
+      const term = intersperse_default(import_mithril.default("span.operator", { "+": "+", "-": "-", "*": "\xD7", "/": "\xF7" }[formula[0]]), children2);
       if (formula[0] === "+" || formula[0] === "-") {
         return import_mithril.default("span.factor", import_mithril.default("span.open-bracket", ``), ...term, import_mithril.default("span.closed-bracket", ``));
       }
       return import_mithril.default("span.factor", ...term);
     } else {
-      return import_mithril.default("span.function", `${formula[0]}`, import_mithril.default("span.open-paren", `(`), ...intersperse_default(",", children2), import_mithril.default("span.closed-paren", `)`));
+      return import_mithril.default("span.function", import_mithril.default("span.variable", `${formula[0]}`), import_mithril.default("span.open-bracket"), ...intersperse_default(",", children2), import_mithril.default("span.closed-bracket"));
     }
   }
 };
 var cells = import_meiosis_setup.meiosisSetup({ app });
-import_meiosis_tracer.default({ selector: "#tracer", streams: [cells().states] });
 import_mithril.default.route(document.getElementById("app"), "/", {
   "/": {
     view: () => app.view(cells())

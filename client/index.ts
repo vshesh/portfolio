@@ -34,11 +34,11 @@ const ScenarioView = {
     return m('div.scenario',
       m('div.inputs',
         m('p', "Name: ", 
-          m('input', { type: 'field', oninput: (e) => actions.scenario.update_name(cell, scenario, e.target.value) }, scenario.name),
+          m('input', { type: 'field', oninput: (e: {target:{value:string}}) => actions.scenario.update_name(cell, scenario, e.target.value) }, scenario.name),
           m('button', m('a', {href: `#!/scenario/${scenario.id}`}, 'Inspect'))),
         m('div.formula',
           m('p', 'Formula:'),
-          m('textarea', { onblur: (e) => actions.scenario.update_formula(cell, scenario, e.target.value) }, scenario.model.formulaString())),
+          m('textarea', { onblur: (e: {target:{value:string}}) => actions.scenario.update_formula(cell, scenario, e.target.value) }, scenario.model.formulaString())),
         m('div.spts',
           scenario.model.inputs.map(
             x => m(SPTInputView, {
@@ -63,7 +63,7 @@ const SPTInputView = {
       m('h4', name),
       m('div.input-stack',
         (['min', 'low', 'med', 'high', 'max'] as (keyof SPTInput)[]).map(q =>
-          m('input', { type: 'number', value: input[q], oninput: (e) => update(Object.assign(input, { [q]: +e.target.value })) })),
+          m('input', { type: 'number', value: input[q], oninput: (e: {target:{value:string}}) => update(Object.assign(input, { [q]: e.target.value ? /-?\d+(.\d+)?([eE]\d+)?/.test(e.target.value)  ? +e.target.value : input[q] : null })) })),
       )
     )
 }
@@ -116,6 +116,7 @@ function TornadoPlot(data: { variable: string, value: [number, number, number] }
 
 function tornadoplot(data: { variable: string, value: [number, number, number] }[]) {
   return Plot.plot({
+    marginLeft: 80,
     x: {
       label: 'value'
     },
@@ -137,24 +138,25 @@ function tornadoplot(data: { variable: string, value: [number, number, number] }
 const app: MeiosisViewComponent<State> = {
   initial: {
     models: R.map(x => new Model(x), {
-      'Maker WTP Model': `
-      reach = endusers * (1-cann)
+      'maker-wtp-model': `
+      reach = endusers * (1 - cann)
       tlift = reach * (lift * wtp - cost)
-      devtime = 0.25 + log(endusers)/log(120) * ntools * tptool
-      makercost = devtime * devcost + devlic
-      makerval = ntools * tlift - makercost
-      value = nmakers * makerval
-      `,
-      'Basic WTP Model': "value = reach * (wtp * price - cost) - fixed_cost"
+      devtime = (0.25 + log(endusers) / log(120) * ntools * tptool)
+      value = nmakers * (ntools * tlift - (devtime * devcost + devlic))`,
+      'basic-wtp-model': "value = reach * (wtp * price - cost) - fixed_cost"
     }),
-    scenarios: [new Scenario(new Model("value = reach * (wtp * price - cost)"))]
+    scenarios: [new Scenario(new Model(`
+      reach = endusers * (1 - cann)
+      tlift = reach * (lift * wtp - cost)
+      devtime = (0.25 + log(endusers) / log(120) * ntools * tptool)
+      value = nmakers * (ntools * tlift - (devtime * devcost + devlic))`))]
   },
   view: (cell) =>
     m('div.app',
       m('h1', 'DA Product Value Scenarios'),
       m('div.scenarios',
         cell.state.scenarios.map(s => m(ScenarioView, { cell: cell, scenario: s })),
-        m('div.scenario.new', { onclick: (_) => actions.add_scenario(cell) }, m('span', '+ Add Scenario')))
+        m('div.scenario.new', { onclick: () => actions.add_scenario(cell) }, m('span', '+ Add Scenario')))
     )
 };
 
@@ -163,6 +165,7 @@ const ScenarioFocus = {
     const scenario = R.find(x => x.id === id, cell.getState().scenarios)!
     return m("div.scenario-focus", 
       m('h1.name[contenteditable=true]', m.trust(scenario.name)),
+      m('textarea', scenario.description),
       m(FormulaInputView, {cell, scenario}))
   }
 }
@@ -170,19 +173,20 @@ const ScenarioFocus = {
 const FormulaInputView = {
   view({attrs: {cell, scenario}}: {attrs: {cell: MeiosisCell<State>, scenario: Scenario}}) {
     return m('div.formula-input-view', 
-      m('h1.name', scenario.name),
-      m('textarea', scenario.description),
       scenario.model.formulas.map(
         f => m('div.formula-view', m('span.variable', f[1]), m('span.equals', `=`), this.construct(f[2], scenario, cell))
       )
     )
   },
 
-  construct(formula:ASTTree, scenario: Scenario, cell: MeiosisCell<State>) {
+  construct(formula:ASTTree, scenario: Scenario, cell: MeiosisCell<State>): m.Vnode<any, any> {
     if (isLeaf(formula)) {
       if (typeof formula === 'number') {
-        return m('span.term', `${formula}`)
+        return m('span.number', `${formula}`)
       } else {
+        if (R.includes(formula, scenario.model.derived_vars)) {
+          return m('span.variable', `${formula}`);
+        }
         return m(SPTInputView, {
           name: formula, 
           // in this case formula is a variable
@@ -201,7 +205,7 @@ const FormulaInputView = {
       return m('span.factor', ...term);
     } else {
       // @ts-ignore (R.intersperse is typed wrong!)
-      return m('span.function', `${formula[0]}`, m('span.open-paren', `(`), ...R.intersperse(",", children) , m('span.closed-paren', `)`))
+      return m('span.function', m('span.variable', `${formula[0]}`), m('span.open-bracket'), ...R.intersperse(",", children) , m('span.closed-bracket'))
     }
   }
 }
@@ -209,8 +213,9 @@ const FormulaInputView = {
 
 const cells = meiosisSetup<State>({ app });
 
-meiosisTracer({ selector: "#tracer", streams: [cells().states] })
+// meiosisTracer({ selector: "#tracer", streams: [cells().states] })
 
+// @ts-ignore (TS can't find document and HTMLElement even though lib dom is included.)
 m.route(document.getElementById('app') as HTMLElement, '/', {
   '/': {
     view: () => app.view(cells())

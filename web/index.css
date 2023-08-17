@@ -30,9 +30,10 @@ body {
   textarea {
     width: 99%;
     box-sizing: border-box;
-    height: 3em;
+    height: 8em;
+    resize: none;
     font-family: Iosevka, JuliaMono, monospace;
-    font-size: 0.75em;
+    font-size: 63%;
     border: 0.5px solid #eee;
     padding: 5px;
     box-shadow: rgb(238, 238, 238) 2px 2px 2px;
@@ -52,20 +53,23 @@ body {
 .spt-input {
   display: inline-block;
   padding: 5px;
+  max-width: 75px;
 
   h4 {
     padding-bottom: 0.25em;
     margin: 0;
+    white-space: nowrap;
+    overflow-x: scroll;
   }
 
   > .input-stack {
     display: inline-flex;
     flex-direction: column;
-    max-width: 165px;
 
     input {
       border: 1px solid #eee;
       margin-top: -1px;
+      width: 100%;
     }
   }
 }
@@ -80,10 +84,12 @@ body {
 }
 
 .formula-view {
+
+  margin-bottom: 30px;
   display: flex;
   flex-direction: row;
 
-  .factor {
+  .factor, .function {
     display: flex;
     flex-direction: row;
   }
@@ -94,13 +100,16 @@ body {
 
   .spt-input {
     background-color: #eee;
+    
+    input {
+      width: 75px;
+    }
   }
 
   .operator,
   .equals {
     margin: 0 0.1em;
     font-size: 300%;
-    ,
     font-family: Iosevka, monospace;
     vertical-align: middle;
   }
@@ -128,8 +137,9 @@ body {
     border-radius: 0 3px 3px 0;
   }
 
-  .variable {
+  .variable, .number {
     font-size: 200%;
     vertical-align: middle;
+    transform: translateY(0.2em);
   }
 }
