@@ -4016,6 +4016,113 @@ var chain = _curry2(_dispatchable(["fantasy-land/chain", "chain"], _xchain, func
   return _makeFlat(false)(map_default(fn, monad));
 }));
 var chain_default = chain;
+// node_modules/ramda/es/internal/_cloneRegExp.js
+function _cloneRegExp(pattern) {
+  return new RegExp(pattern.source, pattern.flags ? pattern.flags : (pattern.global ? "g" : "") + (pattern.ignoreCase ? "i" : "") + (pattern.multiline ? "m" : "") + (pattern.sticky ? "y" : "") + (pattern.unicode ? "u" : "") + (pattern.dotAll ? "s" : ""));
+}
+
+// node_modules/ramda/es/internal/_clone.js
+var _isPrimitive = function(param) {
+  var type5 = typeof param;
+  return param == null || type5 != "object" && type5 != "function";
+};
+function _clone(value, deep, map5) {
+  map5 || (map5 = new _ObjectMap);
+  if (_isPrimitive(value)) {
+    return value;
+  }
+  var copy = function copy(copiedValue) {
+    var cachedCopy = map5.get(value);
+    if (cachedCopy) {
+      return cachedCopy;
+    }
+    map5.set(value, copiedValue);
+    for (var key in value) {
+      if (Object.prototype.hasOwnProperty.call(value, key)) {
+        copiedValue[key] = deep ? _clone(value[key], true, map5) : value[key];
+      }
+    }
+    return copiedValue;
+  };
+  switch (type_default(value)) {
+    case "Object":
+      return copy(Object.create(Object.getPrototypeOf(value)));
+    case "Array":
+      return copy([]);
+    case "Date":
+      return new Date(value.valueOf());
+    case "RegExp":
+      return _cloneRegExp(value);
+    case "Int8Array":
+    case "Uint8Array":
+    case "Uint8ClampedArray":
+    case "Int16Array":
+    case "Uint16Array":
+    case "Int32Array":
+    case "Uint32Array":
+    case "Float32Array":
+    case "Float64Array":
+    case "BigInt64Array":
+    case "BigUint64Array":
+      return value.slice();
+    default:
+      return value;
+  }
+}
+var _ObjectMap = function() {
+  function _ObjectMap2() {
+    this.map = {};
+    this.length = 0;
+  }
+  _ObjectMap2.prototype.set = function(key, value) {
+    const hashedKey = this.hash(key);
+    let bucket = this.map[hashedKey];
+    if (!bucket) {
+      this.map[hashedKey] = bucket = [];
+    }
+    bucket.push([key, value]);
+    this.length += 1;
+  };
+  _ObjectMap2.prototype.hash = function(key) {
+    let hashedKey = [];
+    for (var value in key) {
+      hashedKey.push(Object.prototype.toString.call(key[value]));
+    }
+    return hashedKey.join();
+  };
+  _ObjectMap2.prototype.get = function(key) {
+    if (this.length <= 180) {
+      for (const p in this.map) {
+        const bucket2 = this.map[p];
+        for (let i = 0;i < bucket2.length; i += 1) {
+          const element = bucket2[i];
+          if (element[0] === key) {
+            return element[1];
+          }
+        }
+      }
+      return;
+    }
+    const hashedKey = this.hash(key);
+    const bucket = this.map[hashedKey];
+    if (!bucket) {
+      return;
+    }
+    for (let i = 0;i < bucket.length; i += 1) {
+      const element = bucket[i];
+      if (element[0] === key) {
+        return element[1];
+      }
+    }
+  };
+  return _ObjectMap2;
+}();
+
+// node_modules/ramda/es/clone.js
+var clone = _curry1(function clone2(value) {
+  return value != null && typeof value.clone === "function" ? value.clone() : _clone(value, true);
+});
+var clone_default = clone;
 // node_modules/ramda/es/internal/_checkForMethod.js
 function _checkForMethod(methodname, fn) {
   return function() {
@@ -4062,9 +4169,9 @@ var concat = _curry2(function concat2(a, b) {
 var concat_default = concat;
 // node_modules/ramda/es/internal/_Set.js
 var hasOrAdd = function(item, shouldAdd, set) {
-  var type4 = typeof item;
+  var type5 = typeof item;
   var prevSize, newSize;
-  switch (type4) {
+  switch (type5) {
     case "string":
     case "number":
       if (item === 0 && 1 / item === (-Infinity)) {
@@ -4087,35 +4194,35 @@ var hasOrAdd = function(item, shouldAdd, set) {
           return set._nativeSet.has(item);
         }
       } else {
-        if (!(type4 in set._items)) {
+        if (!(type5 in set._items)) {
           if (shouldAdd) {
-            set._items[type4] = {};
-            set._items[type4][item] = true;
+            set._items[type5] = {};
+            set._items[type5][item] = true;
           }
           return false;
-        } else if (item in set._items[type4]) {
+        } else if (item in set._items[type5]) {
           return true;
         } else {
           if (shouldAdd) {
-            set._items[type4][item] = true;
+            set._items[type5][item] = true;
           }
           return false;
         }
       }
     case "boolean":
-      if (type4 in set._items) {
+      if (type5 in set._items) {
         var bIdx = item ? 1 : 0;
-        if (set._items[type4][bIdx]) {
+        if (set._items[type5][bIdx]) {
           return true;
         } else {
           if (shouldAdd) {
-            set._items[type4][bIdx] = true;
+            set._items[type5][bIdx] = true;
           }
           return false;
         }
       } else {
         if (shouldAdd) {
-          set._items[type4] = item ? [false, true] : [true, false];
+          set._items[type5] = item ? [false, true] : [true, false];
         }
         return false;
       }
@@ -4130,26 +4237,26 @@ var hasOrAdd = function(item, shouldAdd, set) {
           return set._nativeSet.has(item);
         }
       } else {
-        if (!(type4 in set._items)) {
+        if (!(type5 in set._items)) {
           if (shouldAdd) {
-            set._items[type4] = [item];
+            set._items[type5] = [item];
           }
           return false;
         }
-        if (!_includes(item, set._items[type4])) {
+        if (!_includes(item, set._items[type5])) {
           if (shouldAdd) {
-            set._items[type4].push(item);
+            set._items[type5].push(item);
           }
           return false;
         }
         return true;
       }
     case "undefined":
-      if (set._items[type4]) {
+      if (set._items[type5]) {
         return true;
       } else {
         if (shouldAdd) {
-          set._items[type4] = true;
+          set._items[type5] = true;
         }
         return false;
       }
@@ -4164,16 +4271,16 @@ var hasOrAdd = function(item, shouldAdd, set) {
         return true;
       }
     default:
-      type4 = Object.prototype.toString.call(item);
-      if (!(type4 in set._items)) {
+      type5 = Object.prototype.toString.call(item);
+      if (!(type5 in set._items)) {
         if (shouldAdd) {
-          set._items[type4] = [item];
+          set._items[type5] = [item];
         }
         return false;
       }
-      if (!_includes(item, set._items[type4])) {
+      if (!_includes(item, set._items[type5])) {
         if (shouldAdd) {
-          set._items[type4].push(item);
+          set._items[type5].push(item);
         }
         return false;
       }
@@ -5506,23 +5613,23 @@ var parseTypenames = function(typenames, types) {
     return { type: t, name };
   });
 };
-var get = function(type4, name) {
-  for (var i = 0, n = type4.length, c;i < n; ++i) {
-    if ((c = type4[i]).name === name) {
+var get = function(type5, name) {
+  for (var i = 0, n = type5.length, c;i < n; ++i) {
+    if ((c = type5[i]).name === name) {
       return c.value;
     }
   }
 };
-var set = function(type4, name, callback) {
-  for (var i = 0, n = type4.length;i < n; ++i) {
-    if (type4[i].name === name) {
-      type4[i] = noop, type4 = type4.slice(0, i).concat(type4.slice(i + 1));
+var set = function(type5, name, callback) {
+  for (var i = 0, n = type5.length;i < n; ++i) {
+    if (type5[i].name === name) {
+      type5[i] = noop, type5 = type5.slice(0, i).concat(type5.slice(i + 1));
       break;
     }
   }
   if (callback != null)
-    type4.push({ name, value: callback });
-  return type4;
+    type5.push({ name, value: callback });
+  return type5;
 };
 var noop = { value: () => {
 } };
@@ -5553,19 +5660,19 @@ Dispatch.prototype = dispatch.prototype = {
       copy[t] = _[t].slice();
     return new Dispatch(copy);
   },
-  call: function(type4, that) {
+  call: function(type5, that) {
     if ((n = arguments.length - 2) > 0)
       for (var args = new Array(n), i = 0, n, t;i < n; ++i)
         args[i] = arguments[i + 2];
-    if (!this._.hasOwnProperty(type4))
-      throw new Error("unknown type: " + type4);
-    for (t = this._[type4], i = 0, n = t.length;i < n; ++i)
+    if (!this._.hasOwnProperty(type5))
+      throw new Error("unknown type: " + type5);
+    for (t = this._[type5], i = 0, n = t.length;i < n; ++i)
       t[i].value.apply(that, args);
   },
-  apply: function(type4, that, args) {
-    if (!this._.hasOwnProperty(type4))
-      throw new Error("unknown type: " + type4);
-    for (var t = this._[type4], i = 0, n = t.length;i < n; ++i)
+  apply: function(type5, that, args) {
+    if (!this._.hasOwnProperty(type5))
+      throw new Error("unknown type: " + type5);
+    for (var t = this._[type5], i = 0, n = t.length;i < n; ++i)
       t[i].value.apply(that, args);
   }
 };
@@ -6221,14 +6328,14 @@ function remove_default() {
 
 // node_modules/d3-selection/src/selection/clone.js
 var selection_cloneShallow = function() {
-  var clone = this.cloneNode(false), parent = this.parentNode;
-  return parent ? parent.insertBefore(clone, this.nextSibling) : clone;
+  var clone3 = this.cloneNode(false), parent = this.parentNode;
+  return parent ? parent.insertBefore(clone3, this.nextSibling) : clone3;
 };
 var selection_cloneDeep = function() {
-  var clone = this.cloneNode(true), parent = this.parentNode;
-  return parent ? parent.insertBefore(clone, this.nextSibling) : clone;
+  var clone3 = this.cloneNode(true), parent = this.parentNode;
+  return parent ? parent.insertBefore(clone3, this.nextSibling) : clone3;
 };
-function clone_default(deep) {
+function clone_default2(deep) {
   return this.select(deep ? selection_cloneDeep : selection_cloneShallow);
 }
 
@@ -6310,31 +6417,31 @@ function on_default(typename, value2, options) {
 }
 
 // node_modules/d3-selection/src/selection/dispatch.js
-var dispatchEvent = function(node, type4, params) {
+var dispatchEvent = function(node, type5, params) {
   var window4 = window_default(node), event = window4.CustomEvent;
   if (typeof event === "function") {
-    event = new event(type4, params);
+    event = new event(type5, params);
   } else {
     event = window4.document.createEvent("Event");
     if (params)
-      event.initEvent(type4, params.bubbles, params.cancelable), event.detail = params.detail;
+      event.initEvent(type5, params.bubbles, params.cancelable), event.detail = params.detail;
     else
-      event.initEvent(type4, false, false);
+      event.initEvent(type5, false, false);
   }
   node.dispatchEvent(event);
 };
-var dispatchConstant = function(type4, params) {
+var dispatchConstant = function(type5, params) {
   return function() {
-    return dispatchEvent(this, type4, params);
+    return dispatchEvent(this, type5, params);
   };
 };
-var dispatchFunction = function(type4, params) {
+var dispatchFunction = function(type5, params) {
   return function() {
-    return dispatchEvent(this, type4, params.apply(this, arguments));
+    return dispatchEvent(this, type5, params.apply(this, arguments));
   };
 };
-function dispatch_default2(type4, params) {
-  return this.each((typeof params === "function" ? dispatchFunction : dispatchConstant)(type4, params));
+function dispatch_default2(type5, params) {
+  return this.each((typeof params === "function" ? dispatchFunction : dispatchConstant)(type5, params));
 }
 
 // node_modules/d3-selection/src/selection/iterator.js
@@ -6391,7 +6498,7 @@ Selection.prototype = selection.prototype = {
   append: append_default,
   insert: insert_default,
   remove: remove_default,
-  clone: clone_default,
+  clone: clone_default2,
   datum: datum_default,
   on: on_default,
   dispatch: dispatch_default2,
@@ -8189,12 +8296,12 @@ var number1 = function(e3) {
 var number22 = function(e3) {
   return [number1(e3[0]), number1(e3[1])];
 };
-var type4 = function(t) {
+var type5 = function(t) {
   return { type: t };
 };
 var X = {
   name: "x",
-  handles: ["w", "e"].map(type4),
+  handles: ["w", "e"].map(type5),
   input: function(x, e3) {
     return x == null ? null : [[+x[0], e3[0][1]], [+x[1], e3[1][1]]];
   },
@@ -8204,7 +8311,7 @@ var X = {
 };
 var Y = {
   name: "y",
-  handles: ["n", "s"].map(type4),
+  handles: ["n", "s"].map(type5),
   input: function(y, e3) {
     return y == null ? null : [[e3[0][0], +y[0]], [e3[1][0], +y[1]]];
   },
@@ -8214,7 +8321,7 @@ var Y = {
 };
 var XY = {
   name: "xy",
-  handles: ["n", "w", "e", "s", "nw", "ne", "sw", "se"].map(type4),
+  handles: ["n", "w", "e", "s", "nw", "ne", "sw", "se"].map(type5),
   input: function(xy) {
     return xy == null ? null : number22(xy);
   },
@@ -8477,19 +8584,19 @@ function locale_default(locale) {
   var group3 = locale.grouping === undefined || locale.thousands === undefined ? identity_default3 : formatGroup_default(map5.call(locale.grouping, Number), locale.thousands + ""), currencyPrefix = locale.currency === undefined ? "" : locale.currency[0] + "", currencySuffix = locale.currency === undefined ? "" : locale.currency[1] + "", decimal = locale.decimal === undefined ? "." : locale.decimal + "", numerals = locale.numerals === undefined ? identity_default3 : formatNumerals_default(map5.call(locale.numerals, String)), percent = locale.percent === undefined ? "%" : locale.percent + "", minus = locale.minus === undefined ? "\u2212" : locale.minus + "", nan = locale.nan === undefined ? "NaN" : locale.nan + "";
   function newFormat(specifier) {
     specifier = formatSpecifier(specifier);
-    var { fill, align, sign, symbol, zero: zero3, width, comma, precision, trim, type: type5 } = specifier;
-    if (type5 === "n")
-      comma = true, type5 = "g";
-    else if (!formatTypes_default[type5])
-      precision === undefined && (precision = 12), trim = true, type5 = "g";
+    var { fill, align, sign, symbol, zero: zero3, width, comma, precision, trim, type: type6 } = specifier;
+    if (type6 === "n")
+      comma = true, type6 = "g";
+    else if (!formatTypes_default[type6])
+      precision === undefined && (precision = 12), trim = true, type6 = "g";
     if (zero3 || fill === "0" && align === "=")
       zero3 = true, fill = "0", align = "=";
-    var prefix = symbol === "$" ? currencyPrefix : symbol === "#" && /[boxX]/.test(type5) ? "0" + type5.toLowerCase() : "", suffix = symbol === "$" ? currencySuffix : /[%p]/.test(type5) ? percent : "";
-    var formatType = formatTypes_default[type5], maybeSuffix = /[defgprs%]/.test(type5);
-    precision = precision === undefined ? 6 : /[gprs]/.test(type5) ? Math.max(1, Math.min(21, precision)) : Math.max(0, Math.min(20, precision));
+    var prefix = symbol === "$" ? currencyPrefix : symbol === "#" && /[boxX]/.test(type6) ? "0" + type6.toLowerCase() : "", suffix = symbol === "$" ? currencySuffix : /[%p]/.test(type6) ? percent : "";
+    var formatType = formatTypes_default[type6], maybeSuffix = /[defgprs%]/.test(type6);
+    precision = precision === undefined ? 6 : /[gprs]/.test(type6) ? Math.max(1, Math.min(21, precision)) : Math.max(0, Math.min(20, precision));
     function format(value5) {
       var valuePrefix = prefix, valueSuffix = suffix, i, n, c;
-      if (type5 === "c") {
+      if (type6 === "c") {
         valueSuffix = formatType(value5) + valueSuffix;
         value5 = "";
       } else {
@@ -8501,7 +8608,7 @@ function locale_default(locale) {
         if (valueNegative && +value5 === 0 && sign !== "+")
           valueNegative = false;
         valuePrefix = (valueNegative ? sign === "(" ? sign : minus : sign === "-" || sign === "(" ? "" : sign) + valuePrefix;
-        valueSuffix = (type5 === "s" ? prefixes[8 + prefixExponent / 3] : "") + valueSuffix + (valueNegative && sign === "(" ? ")" : "");
+        valueSuffix = (type6 === "s" ? prefixes[8 + prefixExponent / 3] : "") + valueSuffix + (valueNegative && sign === "(" ? ")" : "");
         if (maybeSuffix) {
           i = -1, n = value5.length;
           while (++i < n) {
@@ -13687,15 +13794,15 @@ var utcIntervals = new Map([
 ]);
 
 // node_modules/@observablehq/plot/src/options.js
-function valueof(data2, value5, type5) {
+function valueof(data2, value5, type6) {
   const valueType = typeof value5;
-  return valueType === "string" ? maybeTypedMap(data2, field(value5), type5) : valueType === "function" ? maybeTypedMap(data2, value5, type5) : valueType === "number" || value5 instanceof Date || valueType === "boolean" ? map6(data2, constant8(value5), type5) : typeof value5?.transform === "function" ? maybeTypedArrayify(value5.transform(data2), type5) : maybeTypedArrayify(value5, type5);
+  return valueType === "string" ? maybeTypedMap(data2, field(value5), type6) : valueType === "function" ? maybeTypedMap(data2, value5, type6) : valueType === "number" || value5 instanceof Date || valueType === "boolean" ? map6(data2, constant8(value5), type6) : typeof value5?.transform === "function" ? maybeTypedArrayify(value5.transform(data2), type6) : maybeTypedArrayify(value5, type6);
 }
-var maybeTypedMap = function(data2, f, type5) {
-  return map6(data2, type5?.prototype instanceof TypedArray ? floater(f) : f, type5);
+var maybeTypedMap = function(data2, f, type6) {
+  return map6(data2, type6?.prototype instanceof TypedArray ? floater(f) : f, type6);
 };
-var maybeTypedArrayify = function(data2, type5) {
-  return type5 === undefined ? arrayify2(data2) : data2 instanceof type5 ? data2 : type5.prototype instanceof TypedArray && !(data2 instanceof TypedArray) ? type5.from(data2, coerceNumber) : type5.from(data2);
+var maybeTypedArrayify = function(data2, type6) {
+  return type6 === undefined ? arrayify2(data2) : data2 instanceof type6 ? data2 : type6.prototype instanceof TypedArray && !(data2 instanceof TypedArray) ? type6.from(data2, coerceNumber) : type6.from(data2);
 };
 var floater = function(f) {
   return (d, i) => coerceNumber(f(d, i));
@@ -13739,11 +13846,11 @@ function keyword(input, name, allowed) {
 function arrayify2(data2) {
   return data2 == null || data2 instanceof Array || data2 instanceof TypedArray ? data2 : Array.from(data2);
 }
-function map6(values, f, type5 = Array) {
-  return values == null ? values : values instanceof type5 ? values.map(f) : type5.from(values, f);
+function map6(values, f, type6 = Array) {
+  return values == null ? values : values instanceof type6 ? values.map(f) : type6.from(values, f);
 }
-function slice2(values, type5 = Array) {
-  return values instanceof type5 ? values.slice() : type5.from(values);
+function slice2(values, type6 = Array) {
+  return values instanceof type6 ? values.slice() : type6.from(values);
 }
 function hasX({ x: x2, x1: x12, x2: x22 }) {
   return x2 !== undefined || x12 !== undefined || x22 !== undefined;
@@ -13847,11 +13954,11 @@ function maybeApplyInterval(V, scale) {
   const t = maybeIntervalTransform(scale?.interval, scale?.type);
   return t ? map6(V, t) : V;
 }
-function maybeIntervalTransform(interval10, type5) {
-  const i = maybeInterval(interval10, type5);
+function maybeIntervalTransform(interval10, type6) {
+  const i = maybeInterval(interval10, type6);
   return i && ((v) => defined(v) ? i.floor(v) : v);
 }
-function maybeInterval(interval10, type5) {
+function maybeInterval(interval10, type6) {
   if (interval10 == null)
     return;
   if (typeof interval10 === "number") {
@@ -13869,21 +13976,21 @@ function maybeInterval(interval10, type5) {
     };
   }
   if (typeof interval10 === "string")
-    return (type5 === "time" ? maybeTimeInterval : maybeUtcInterval)(interval10);
+    return (type6 === "time" ? maybeTimeInterval : maybeUtcInterval)(interval10);
   if (typeof interval10.floor !== "function")
     throw new Error("invalid interval; missing floor method");
   if (typeof interval10.offset !== "function")
     throw new Error("invalid interval; missing offset method");
   return interval10;
 }
-function maybeRangeInterval(interval10, type5) {
-  interval10 = maybeInterval(interval10, type5);
+function maybeRangeInterval(interval10, type6) {
+  interval10 = maybeInterval(interval10, type6);
   if (interval10 && typeof interval10.range !== "function")
     throw new Error("invalid interval: missing range method");
   return interval10;
 }
-function maybeNiceInterval(interval10, type5) {
-  interval10 = maybeRangeInterval(interval10, type5);
+function maybeNiceInterval(interval10, type6) {
+  interval10 = maybeRangeInterval(interval10, type6);
   if (interval10 && typeof interval10.ceil !== "function")
     throw new Error("invalid interval: missing ceil method");
   return interval10;
@@ -13911,8 +14018,8 @@ function isOrdinal(values) {
   for (const value5 of values) {
     if (value5 == null)
       continue;
-    const type5 = typeof value5;
-    return type5 === "string" || type5 === "boolean";
+    const type6 = typeof value5;
+    return type6 === "string" || type6 === "boolean";
   }
 }
 function isTemporal(values) {
@@ -14442,12 +14549,12 @@ var reduceDistinct = {
 var reduceSum = reduceAccessor(sum3);
 
 // node_modules/@observablehq/plot/src/channel.js
-function createChannel(data2, { scale, type: type5, value: value5, filter: filter6, hint }, name) {
+function createChannel(data2, { scale, type: type6, value: value5, filter: filter6, hint }, name) {
   if (hint === undefined && typeof value5?.transform === "function")
     hint = value5.hint;
   return inferChannelScale(name, {
     scale,
-    type: type5,
+    type: type6,
     value: valueof(data2, value5),
     label: labelof(value5),
     filter: filter6,
@@ -14754,11 +14861,11 @@ var scaleProjection = function(createProjection2, kx2, ky2) {
   };
 };
 var conicProjection2 = function(createProjection2, kx2, ky2) {
-  const { type: type5, aspectRatio } = scaleProjection(createProjection2, kx2, ky2);
+  const { type: type6, aspectRatio } = scaleProjection(createProjection2, kx2, ky2);
   return {
     type: (options6) => {
       const { parallels, domain, width, height } = options6;
-      const projection3 = type5(options6);
+      const projection3 = type6(options6);
       if (parallels != null) {
         projection3.parallels(parallels);
         if (domain === undefined) {
@@ -15035,7 +15142,7 @@ function maybeInterpolator(interpolate3) {
   return interpolators.get(i);
 }
 function createScaleQ(key, scale, channels, {
-  type: type5,
+  type: type6,
   nice: nice4,
   clamp,
   zero: zero3,
@@ -15045,12 +15152,12 @@ function createScaleQ(key, scale, channels, {
   scheme: scheme28,
   interval: interval10,
   range: range5 = registry.get(key) === radius ? inferRadialRange(channels, domain) : registry.get(key) === length2 ? inferLengthRange(channels, domain) : registry.get(key) === opacity ? unit2 : undefined,
-  interpolate: interpolate3 = registry.get(key) === color9 ? scheme28 == null && range5 !== undefined ? rgb_default : quantitativeScheme(scheme28 !== undefined ? scheme28 : type5 === "cyclical" ? "rainbow" : "turbo") : round ? round_default : number_default,
+  interpolate: interpolate3 = registry.get(key) === color9 ? scheme28 == null && range5 !== undefined ? rgb_default : quantitativeScheme(scheme28 !== undefined ? scheme28 : type6 === "cyclical" ? "rainbow" : "turbo") : round ? round_default : number_default,
   reverse: reverse2
 }) {
-  interval10 = maybeRangeInterval(interval10, type5);
-  if (type5 === "cyclical" || type5 === "sequential")
-    type5 = "linear";
+  interval10 = maybeRangeInterval(interval10, type6);
+  if (type6 === "cyclical" || type6 === "sequential")
+    type6 = "linear";
   if (typeof interpolate3 !== "function")
     interpolate3 = maybeInterpolator(interpolate3);
   reverse2 = !!reverse2;
@@ -15092,15 +15199,15 @@ function createScaleQ(key, scale, channels, {
     domain = reverse(domain);
   scale.domain(domain).unknown(unknown);
   if (nice4)
-    scale.nice(maybeNice(nice4, type5)), domain = scale.domain();
+    scale.nice(maybeNice(nice4, type6)), domain = scale.domain();
   if (range5 !== undefined)
     scale.range(range5);
   if (clamp)
     scale.clamp(clamp);
-  return { type: type5, domain, range: range5, scale, interpolate: interpolate3, interval: interval10 };
+  return { type: type6, domain, range: range5, scale, interpolate: interpolate3, interval: interval10 };
 }
-var maybeNice = function(nice4, type5) {
-  return nice4 === true ? undefined : typeof nice4 === "number" ? nice4 : maybeNiceInterval(nice4, type5);
+var maybeNice = function(nice4, type6) {
+  return nice4 === true ? undefined : typeof nice4 === "number" ? nice4 : maybeNiceInterval(nice4, type6);
 };
 function createScaleLinear(key, channels, options7) {
   return createScaleQ(key, linear2(), channels, options7);
@@ -15202,8 +15309,8 @@ function inferDomain(channels, f = finite) {
   ] : [0, 1];
 }
 var inferAutoDomain = function(key, channels) {
-  const type5 = registry.get(key);
-  return (type5 === radius || type5 === opacity || type5 === length2 ? inferZeroDomain : inferDomain)(channels);
+  const type6 = registry.get(key);
+  return (type6 === radius || type6 === opacity || type6 === length2 ? inferZeroDomain : inferDomain)(channels);
 };
 var inferZeroDomain = function(channels) {
   return [0, channels.length ? max(channels, ({ value: value5 }) => value5 === undefined ? value5 : max(value5, finite)) : 1];
@@ -15261,7 +15368,7 @@ var interpolators = new Map([
 
 // node_modules/@observablehq/plot/src/scales/diverging.js
 var createScaleD = function(key, scale, transform5, channels, {
-  type: type5,
+  type: type6,
   nice: nice4,
   clamp,
   domain = inferDomain(channels),
@@ -15304,7 +15411,7 @@ var createScaleD = function(key, scale, transform5, channels, {
     scale.clamp(clamp);
   if (nice4)
     scale.nice(nice4);
-  return { type: type5, domain: [min4, max3], pivot, interpolate: interpolate3, scale };
+  return { type: type6, domain: [min4, max3], pivot, interpolate: interpolate3, scale };
 };
 function createScaleDiverging(key, channels, options8) {
   return createScaleD(key, diverging(), transformIdentity, channels, options8);
@@ -15381,12 +15488,12 @@ function createScaleUtc(key, channels, options8) {
 }
 
 // node_modules/@observablehq/plot/src/scales/ordinal.js
-var createScaleO = function(key, scale, channels, { type: type5, interval: interval10, domain, range: range5, reverse: reverse2, hint }) {
-  interval10 = maybeRangeInterval(interval10, type5);
+var createScaleO = function(key, scale, channels, { type: type6, interval: interval10, domain, range: range5, reverse: reverse2, hint }) {
+  interval10 = maybeRangeInterval(interval10, type6);
   if (domain === undefined)
     domain = inferDomain2(channels, interval10, key);
-  if (type5 === "categorical" || type5 === ordinalImplicit)
-    type5 = "ordinal";
+  if (type6 === "categorical" || type6 === ordinalImplicit)
+    type6 = "ordinal";
   if (reverse2)
     domain = reverse(domain);
   scale.domain(domain);
@@ -15395,10 +15502,10 @@ var createScaleO = function(key, scale, channels, { type: type5, interval: inter
       range5 = range5(domain);
     scale.range(range5);
   }
-  return { type: type5, domain, range: range5, scale, hint, interval: interval10 };
+  return { type: type6, domain, range: range5, scale, hint, interval: interval10 };
 };
-function createScaleOrdinal(key, channels, { type: type5, interval: interval10, domain, range: range5, scheme: scheme28, unknown, ...options9 }) {
-  interval10 = maybeRangeInterval(interval10, type5);
+function createScaleOrdinal(key, channels, { type: type6, interval: interval10, domain, range: range5, scheme: scheme28, unknown, ...options9 }) {
+  interval10 = maybeRangeInterval(interval10, type6);
   if (domain === undefined)
     domain = inferDomain2(channels, interval10, key);
   let hint;
@@ -15406,13 +15513,13 @@ function createScaleOrdinal(key, channels, { type: type5, interval: interval10, 
     hint = inferSymbolHint(channels);
     range5 = range5 === undefined ? inferSymbolRange(hint) : map6(range5, maybeSymbol);
   } else if (registry.get(key) === color9) {
-    if (range5 === undefined && (type5 === "ordinal" || type5 === ordinalImplicit)) {
+    if (range5 === undefined && (type6 === "ordinal" || type6 === ordinalImplicit)) {
       range5 = maybeBooleanRange(domain, scheme28);
       if (range5 !== undefined)
         scheme28 = undefined;
     }
     if (scheme28 === undefined && range5 === undefined) {
-      scheme28 = type5 === "ordinal" ? "turbo" : "tableau10";
+      scheme28 = type6 === "ordinal" ? "turbo" : "tableau10";
     }
     if (scheme28 !== undefined) {
       if (range5 !== undefined) {
@@ -15427,7 +15534,7 @@ function createScaleOrdinal(key, channels, { type: type5, interval: interval10, 
   if (unknown === implicit) {
     throw new Error(`implicit unknown on ${key} scale is not supported`);
   }
-  return createScaleO(key, ordinal().unknown(unknown), channels, { ...options9, type: type5, domain, range: range5, hint });
+  return createScaleO(key, ordinal().unknown(unknown), channels, { ...options9, type: type6, domain, range: range5, hint });
 }
 function createScalePoint(key, channels, { align = 0.5, padding = 0.5, ...options9 }) {
   return maybeRound(point().align(align).padding(padding), channels, options9, key);
@@ -15554,8 +15661,8 @@ function createScales(channelsByScale, {
   return scales3;
 }
 function createScaleFunctions(scales3) {
-  return Object.fromEntries(Object.entries(scales3).filter(([, { scale }]) => scale).map(([name, { scale, type: type5, interval: interval10, label }]) => {
-    scale.type = type5;
+  return Object.fromEntries(Object.entries(scales3).filter(([, { scale }]) => scale).map(([name, { scale, type: type6, interval: interval10, label }]) => {
+    scale.type = type6;
     if (interval10 != null)
       scale.interval = interval10;
     if (label != null)
@@ -15678,18 +15785,18 @@ var piecewiseRange = function(scale) {
   return Array.from({ length: length3 }, (_, i) => start2 + i / (length3 - 1) * (end2 - start2));
 };
 var createScale = function(key, channels = [], options10 = {}) {
-  const type5 = inferScaleType(key, channels, options10);
-  if (options10.type === undefined && options10.domain === undefined && options10.range === undefined && options10.interval == null && key !== "fx" && key !== "fy" && isOrdinalScale({ type: type5 })) {
+  const type6 = inferScaleType(key, channels, options10);
+  if (options10.type === undefined && options10.domain === undefined && options10.range === undefined && options10.interval == null && key !== "fx" && key !== "fy" && isOrdinalScale({ type: type6 })) {
     const values2 = channels.map(({ value: value5 }) => value5).filter((value5) => value5 !== undefined);
     if (values2.some(isTemporal))
-      warn(`Warning: some data associated with the ${key} scale are dates. Dates are typically associated with a "utc" or "time" scale rather than a "${formatScaleType(type5)}" scale. If you are using a bar mark, you probably want a rect mark with the interval option instead; if you are using a group transform, you probably want a bin transform instead. If you want to treat this data as ordinal, you can specify the interval of the ${key} scale (e.g., d3.utcDay), or you can suppress this warning by setting the type of the ${key} scale to "${formatScaleType(type5)}".`);
+      warn(`Warning: some data associated with the ${key} scale are dates. Dates are typically associated with a "utc" or "time" scale rather than a "${formatScaleType(type6)}" scale. If you are using a bar mark, you probably want a rect mark with the interval option instead; if you are using a group transform, you probably want a bin transform instead. If you want to treat this data as ordinal, you can specify the interval of the ${key} scale (e.g., d3.utcDay), or you can suppress this warning by setting the type of the ${key} scale to "${formatScaleType(type6)}".`);
     else if (values2.some(isTemporalString))
-      warn(`Warning: some data associated with the ${key} scale are strings that appear to be dates (e.g., YYYY-MM-DD). If these strings represent dates, you should parse them to Date objects. Dates are typically associated with a "utc" or "time" scale rather than a "${formatScaleType(type5)}" scale. If you are using a bar mark, you probably want a rect mark with the interval option instead; if you are using a group transform, you probably want a bin transform instead. If you want to treat this data as ordinal, you can suppress this warning by setting the type of the ${key} scale to "${formatScaleType(type5)}".`);
+      warn(`Warning: some data associated with the ${key} scale are strings that appear to be dates (e.g., YYYY-MM-DD). If these strings represent dates, you should parse them to Date objects. Dates are typically associated with a "utc" or "time" scale rather than a "${formatScaleType(type6)}" scale. If you are using a bar mark, you probably want a rect mark with the interval option instead; if you are using a group transform, you probably want a bin transform instead. If you want to treat this data as ordinal, you can suppress this warning by setting the type of the ${key} scale to "${formatScaleType(type6)}".`);
     else if (values2.some(isNumericString))
-      warn(`Warning: some data associated with the ${key} scale are strings that appear to be numbers. If these strings represent numbers, you should parse or coerce them to numbers. Numbers are typically associated with a "linear" scale rather than a "${formatScaleType(type5)}" scale. If you want to treat this data as ordinal, you can specify the interval of the ${key} scale (e.g., 1 for integers), or you can suppress this warning by setting the type of the ${key} scale to "${formatScaleType(type5)}".`);
+      warn(`Warning: some data associated with the ${key} scale are strings that appear to be numbers. If these strings represent numbers, you should parse or coerce them to numbers. Numbers are typically associated with a "linear" scale rather than a "${formatScaleType(type6)}" scale. If you want to treat this data as ordinal, you can specify the interval of the ${key} scale (e.g., 1 for integers), or you can suppress this warning by setting the type of the ${key} scale to "${formatScaleType(type6)}".`);
   }
-  options10.type = type5;
-  switch (type5) {
+  options10.type = type6;
+  switch (type6) {
     case "diverging":
     case "diverging-sqrt":
     case "diverging-pow":
@@ -15721,7 +15828,7 @@ var createScale = function(key, channels = [], options10 = {}) {
       options10 = coerceType(channels, options10, coerceDates);
       break;
   }
-  switch (type5) {
+  switch (type6) {
     case "diverging":
       return createScaleDiverging(key, channels, options10);
     case "diverging-sqrt":
@@ -15767,29 +15874,29 @@ var createScale = function(key, channels = [], options10 = {}) {
     case undefined:
       return;
     default:
-      throw new Error(`unknown scale type: ${type5}`);
+      throw new Error(`unknown scale type: ${type6}`);
   }
 };
-var formatScaleType = function(type5) {
-  return typeof type5 === "symbol" ? type5.description : type5;
+var formatScaleType = function(type6) {
+  return typeof type6 === "symbol" ? type6.description : type6;
 };
-var inferScaleType = function(key, channels, { type: type5, domain, range: range5, scheme: scheme28, pivot, projection: projection3 }) {
+var inferScaleType = function(key, channels, { type: type6, domain, range: range5, scheme: scheme28, pivot, projection: projection3 }) {
   if (key === "fx" || key === "fy")
     return "band";
   if ((key === "x" || key === "y") && projection3 != null)
-    type5 = typeProjection;
+    type6 = typeProjection;
   for (const { type: t } of channels) {
     if (t === undefined)
       continue;
-    else if (type5 === undefined)
-      type5 = t;
-    else if (type5 !== t)
-      throw new Error(`scale incompatible with channel: ${type5} !== ${t}`);
+    else if (type6 === undefined)
+      type6 = t;
+    else if (type6 !== t)
+      throw new Error(`scale incompatible with channel: ${type6} !== ${t}`);
   }
-  if (type5 === typeProjection)
+  if (type6 === typeProjection)
     return;
-  if (type5 !== undefined)
-    return type5;
+  if (type6 !== undefined)
+    return type6;
   if (domain === undefined && !channels.some(({ value: value5 }) => value5 !== undefined))
     return;
   const kind = registry.get(key);
@@ -15831,17 +15938,17 @@ var asOrdinalType = function(kind) {
       return "ordinal";
   }
 };
-function isTemporalScale({ type: type5 }) {
-  return type5 === "time" || type5 === "utc";
+function isTemporalScale({ type: type6 }) {
+  return type6 === "time" || type6 === "utc";
 }
-function isOrdinalScale({ type: type5 }) {
-  return type5 === "ordinal" || type5 === "point" || type5 === "band" || type5 === ordinalImplicit;
+function isOrdinalScale({ type: type6 }) {
+  return type6 === "ordinal" || type6 === "point" || type6 === "band" || type6 === ordinalImplicit;
 }
-function isThresholdScale({ type: type5 }) {
-  return type5 === "threshold";
+function isThresholdScale({ type: type6 }) {
+  return type6 === "threshold";
 }
-var isBandScale = function({ type: type5 }) {
-  return type5 === "point" || type5 === "band";
+var isBandScale = function({ type: type6 }) {
+  return type6 === "point" || type6 === "band";
 };
 function isCollapsed(scale) {
   if (scale === undefined)
@@ -15876,12 +15983,12 @@ function exposeScales(scaleDescriptors) {
     return key in scaleDescriptors ? exposeScale(scaleDescriptors[key]) : undefined;
   };
 }
-var exposeScale = function({ scale, type: type5, domain, range: range5, interpolate: interpolate3, interval: interval10, transform: transform5, percent, pivot }) {
-  if (type5 === "identity")
+var exposeScale = function({ scale, type: type6, domain, range: range5, interpolate: interpolate3, interval: interval10, transform: transform5, percent, pivot }) {
+  if (type6 === "identity")
     return { type: "identity", apply: (d) => d, invert: (d) => d };
   const unknown = scale.unknown ? scale.unknown() : undefined;
   return {
-    type: type5,
+    type: type6,
     domain: slice2(domain),
     ...range5 !== undefined && { range: slice2(range5) },
     ...transform5 !== undefined && { transform: transform5 },
@@ -16393,9 +16500,9 @@ var autoHeight = function({ x: x2, y: y2, fy, fx }, { projection: projection4, a
 var aspectRatioLength = function(k2, scale) {
   if (!scale)
     throw new Error(`aspectRatio requires ${k2} scale`);
-  const { type: type5, domain } = scale;
+  const { type: type6, domain } = scale;
   let transform5;
-  switch (type5) {
+  switch (type6) {
     case "linear":
     case "utc":
     case "time":
@@ -16413,7 +16520,7 @@ var aspectRatioLength = function(k2, scale) {
     case "band":
       return domain.length;
     default:
-      throw new Error(`unsupported ${k2} scale for aspectRatio: ${type5}`);
+      throw new Error(`unsupported ${k2} scale for aspectRatio: ${type6}`);
   }
   const [min4, max3] = extent(domain);
   return Math.abs(transform5(max3) - transform5(min4));
@@ -16906,7 +17013,7 @@ function legendRamp(color10, options16) {
   let tickAdjust = (g) => g.selectAll(".tick line").attr("y1", marginTop + marginBottom - height);
   let x2;
   const applyRange = round ? (x3, range6) => x3.rangeRound(range6) : (x3, range6) => x3.range(range6);
-  const { type: type5, domain, range: range5, interpolate: interpolate3, scale, pivot } = color10;
+  const { type: type6, domain, range: range5, interpolate: interpolate3, scale, pivot } = color10;
   if (interpolate3) {
     const interpolator = range5 === undefined ? interpolate3 : piecewise(interpolate3.length === 1 ? interpolatePiecewise(interpolate3) : interpolate3, range5);
     x2 = applyRange(scale.copy(), quantize_default(number_default(marginLeft, width - marginRight), Math.min(domain.length + (pivot !== undefined), range5 === undefined ? Infinity : range5.length)));
@@ -16920,7 +17027,7 @@ function legendRamp(color10, options16) {
       context22.fillRect(i, 0, 1, 1);
     }
     svg.append("image").attr("opacity", opacity2).attr("x", marginLeft).attr("y", marginTop).attr("width", width - marginLeft - marginRight).attr("height", height - marginTop - marginBottom).attr("preserveAspectRatio", "none").attr("xlink:href", canvas.toDataURL());
-  } else if (type5 === "threshold") {
+  } else if (type6 === "threshold") {
     const thresholds = domain;
     const thresholdFormat = tickFormat3 === undefined ? (d) => d : typeof tickFormat3 === "string" ? format(tickFormat3) : tickFormat3;
     x2 = applyRange(linear2().domain([-1, range5.length - 1]), [marginLeft, width - marginRight]);
@@ -18328,14 +18435,14 @@ var legendColor = function(color10, { legend = true, ...options25 }) {
       throw new Error(`unknown legend type: ${legend}`);
   }
 };
-var legendOpacity = function({ type: type5, interpolate: interpolate3, ...scale }, { legend = true, color: color10 = rgb(0, 0, 0), ...options25 }) {
+var legendOpacity = function({ type: type6, interpolate: interpolate3, ...scale }, { legend = true, color: color10 = rgb(0, 0, 0), ...options25 }) {
   if (!interpolate3)
-    throw new Error(`${type5} opacity scales are not supported`);
+    throw new Error(`${type6} opacity scales are not supported`);
   if (legend === true)
     legend = "ramp";
   if (`${legend}`.toLowerCase() !== "ramp")
     throw new Error(`${legend} opacity legends are not supported`);
-  return legendColor({ type: type5, ...scale, interpolate: interpolateOpacity(color10) }, { legend, ...options25 });
+  return legendColor({ type: type6, ...scale, interpolate: interpolateOpacity(color10) }, { legend, ...options25 });
 };
 var interpolateOpacity = function(color10) {
   const { r, g, b } = rgb(color10) || rgb(0, 0, 0);
@@ -18913,10 +19020,10 @@ var applyScaleTransform = function(channel4, options30) {
   if (scale == null || !t)
     return;
   const {
-    type: type5,
+    type: type6,
     percent,
     interval: interval12,
-    transform: transform5 = percent ? (x2) => x2 * 100 : maybeIntervalTransform(interval12, type5)
+    transform: transform5 = percent ? (x2) => x2 * 100 : maybeIntervalTransform(interval12, type6)
   } = options30[scale] ?? {};
   if (transform5 == null)
     return;
@@ -20093,7 +20200,7 @@ var tornadoplot = function(data2) {
 };
 var actions = {
   add_scenario(cell) {
-    return cell.update({ scenarios: (s2) => concat_default(s2, [last_default(s2)]) });
+    return cell.update({ scenarios: (s2) => concat_default(s2, [clone_default(last_default(s2))]) });
   },
   scenario: {
     update_inputs(cell, scenario, input, values2) {
@@ -20123,7 +20230,13 @@ var ScenarioView = {
   }
 };
 var SPTInputView = {
-  view: ({ attrs: { name, input, update } }) => import_mithril.default("div.spt-input", import_mithril.default("h4", name), import_mithril.default("div.input-stack", ["min", "low", "med", "high", "max"].map((q) => import_mithril.default("input", { type: "number", value: input[q], oninput: (e3) => update(Object.assign(input, { [q]: e3.target.value ? /-?\d+(.\d+)?([eE]\d+)?/.test(e3.target.value) ? +e3.target.value : input[q] : null })) }))))
+  view: ({ attrs: { name, input, update } }) => import_mithril.default("div.spt-input", import_mithril.default("h4", name), import_mithril.default("div.input-stack", ["min", "low", "med", "high", "max"].map((q) => import_mithril.default("input", {
+    type: "number",
+    value: input[q],
+    oninput: (e3) => update(Object.assign(input, {
+      [q]: e3.target.value ? /-?\d+(\.\d*)?([eE]\d+)?/.test(e3.target.value) ? +e3.target.value : input[q] : null
+    }))
+  }))))
 };
 var app = {
   initial: {

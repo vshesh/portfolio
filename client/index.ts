@@ -14,7 +14,7 @@ interface State {
 
 const actions = {
   add_scenario(cell: MeiosisCell<State>) {
-    return cell.update({ scenarios: (s: Scenario[]) => R.concat(s, [R.last(s)!]) })
+    return cell.update({ scenarios: (s: Scenario[]) => R.concat(s, [R.clone(R.last(s)!)]) })
   },
   scenario: {
     update_inputs(cell: MeiosisCell<State>, scenario: Scenario, input: string, values: SPTInput) {
@@ -31,10 +31,10 @@ const actions = {
 };
 
 const FormulaText = {
-  view({attrs: {formula, update}}: {attrs: {formula: string, update: (s:string) => any}}) {
+  view({ attrs: { formula, update } }: { attrs: { formula: string, update: (s: string) => any } }) {
     return m('div.formula',
       m('p', 'Formula:'),
-      m('textarea', { onblur: (e: {target:{value:string}}) => update(e.target.value)}, formula))
+      m('textarea', { onblur: (e: { target: { value: string } }) => update(e.target.value) }, formula))
   }
 }
 
@@ -42,10 +42,10 @@ const ScenarioView = {
   view: ({ attrs: { scenario, cell } }: { attrs: { scenario: Scenario, cell: MeiosisCell<State> } }) => {
     return m('div.scenario',
       m('div.inputs',
-        m('p', "Name: ", 
-          m('input', { type: 'field', oninput: (e: {target:{value:string}}) => actions.scenario.update_name(cell, scenario, e.target.value) }, scenario.name),
-          m('button', m('a', {href: `#!/scenario/${scenario.id}`}, 'Inspect'))),
-        m(FormulaText, {formula: scenario.model.formulaString(), update: (s: string) => actions.scenario.update_formula(cell, scenario, s)}),
+        m('p', "Name: ",
+          m('input', { type: 'field', oninput: (e: { target: { value: string } }) => actions.scenario.update_name(cell, scenario, e.target.value) }, scenario.name),
+          m('button', m('a', { href: `#!/scenario/${scenario.id}` }, 'Inspect'))),
+        m(FormulaText, { formula: scenario.model.formulaString(), update: (s: string) => actions.scenario.update_formula(cell, scenario, s) }),
         m('div.spts',
           scenario.model.inputs.map(
             x => m(SPTInputView, {
@@ -70,7 +70,12 @@ const SPTInputView = {
       m('h4', name),
       m('div.input-stack',
         (['min', 'low', 'med', 'high', 'max'] as (keyof SPTInput)[]).map(q =>
-          m('input', { type: 'number', value: input[q], oninput: (e: {target:{value:string}}) => update(Object.assign(input, { [q]: e.target.value ? /-?\d+(.\d+)?([eE]\d+)?/.test(e.target.value)  ? +e.target.value : input[q] : null })) })),
+          m('input', {
+            type: 'number', value: input[q],
+            oninput: (e: { target: { value: string } }) => update(Object.assign(input, {
+              [q]: e.target.value ? /-?\d+(\.\d*)?([eE]\d+)?/.test(e.target.value) ? +e.target.value : input[q] : null
+            }))
+          })),
       )
     )
 }
@@ -168,25 +173,25 @@ const app: MeiosisViewComponent<State> = {
 };
 
 const ScenarioFocus = {
-  view: ({attrs: {cell, id}}: {attrs: {cell: MeiosisCell<State>, id: string}}) => {
+  view: ({ attrs: { cell, id } }: { attrs: { cell: MeiosisCell<State>, id: string } }) => {
     const scenario = R.find(x => x.id === id, cell.getState().scenarios)!
-    return m("div.scenario-focus", 
+    return m("div.scenario-focus",
       m('h1.name[contenteditable=true]', m.trust(scenario.name)),
-      m(FormulaText, {formula: scenario.model.formulaString(), update: (s: string) => actions.scenario.update_formula(cell, scenario, s)}),
-      m(FormulaInputView, {cell, scenario}))
+      m(FormulaText, { formula: scenario.model.formulaString(), update: (s: string) => actions.scenario.update_formula(cell, scenario, s) }),
+      m(FormulaInputView, { cell, scenario }))
   }
 }
 
 const FormulaInputView = {
-  view({attrs: {cell, scenario}}: {attrs: {cell: MeiosisCell<State>, scenario: Scenario}}) {
-    return m('div.formula-input-view', 
+  view({ attrs: { cell, scenario } }: { attrs: { cell: MeiosisCell<State>, scenario: Scenario } }) {
+    return m('div.formula-input-view',
       scenario.model.formulas.map(
         f => m('div.formula-view', m('span.variable', f[1]), m('span.equals', `=`), this.construct(f[2], scenario, cell))
       )
     )
   },
 
-  construct(formula:ASTTree, scenario: Scenario, cell: MeiosisCell<State>): m.Vnode<any, any> {
+  construct(formula: ASTTree, scenario: Scenario, cell: MeiosisCell<State>): m.Vnode<any, any> {
     if (isLeaf(formula)) {
       if (typeof formula === 'number') {
         return m('span.number', `${formula}`)
@@ -195,7 +200,7 @@ const FormulaInputView = {
           return m('span.variable', `${formula}`);
         }
         return m(SPTInputView, {
-          name: formula, 
+          name: formula,
           // in this case formula is a variable
           input: scenario.inputs[formula],
           update: (v) => actions.scenario.update_inputs(cell, scenario, formula, v)
@@ -205,14 +210,14 @@ const FormulaInputView = {
     const children = formula.slice(1).map(x => this.construct(x, scenario, cell))
     if (!(/\w+/.test(formula[0]))) {
       // @ts-ignore (R.intersperse is typed wrong!)
-      const term = R.intersperse(m('span.operator', {'+': '+','-': '-','*':'×','/':'÷'}[formula[0]]), children)
+      const term = R.intersperse(m('span.operator', { '+': '+', '-': '-', '*': '×', '/': '÷' }[formula[0]]), children)
       if (formula[0] === '+' || formula[0] === '-') {
         return m('span.factor', m('span.open-bracket', ``), ...term, m('span.closed-bracket', ``))
       }
       return m('span.factor', ...term);
     } else {
       // @ts-ignore (R.intersperse is typed wrong!)
-      return m('span.function', m('span.variable', `${formula[0]}`), m('span.open-bracket'), ...R.intersperse(",", children) , m('span.closed-bracket'))
+      return m('span.function', m('span.variable', `${formula[0]}`), m('span.open-bracket'), ...R.intersperse(",", children), m('span.closed-bracket'))
     }
   }
 }
@@ -228,7 +233,7 @@ m.route(document.getElementById('app') as HTMLElement, '/', {
     view: () => app.view(cells())
   },
   '/scenario/:id': {
-    view: (vnode) => m(ScenarioFocus, {cell: cells(), id: vnode.attrs.id})
+    view: (vnode) => m(ScenarioFocus, { cell: cells(), id: vnode.attrs.id })
   }
 });
 
