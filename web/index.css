@@ -27,6 +27,13 @@ body {
 .scenario {
   width: 350px;
 
+  .inputs {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.formula {
   textarea {
     width: 99%;
     box-sizing: border-box;
@@ -42,11 +49,6 @@ body {
     &:focus {
       outline: none;
     }
-  }
-
-  .inputs {
-    display: flex;
-    flex-direction: column;
   }
 }
 
@@ -109,7 +111,7 @@ body {
   .operator,
   .equals {
     margin: 0 0.1em;
-    font-size: 300%;
+    font-size: 200%;
     font-family: Iosevka, monospace;
     vertical-align: middle;
   }
@@ -129,6 +131,7 @@ body {
   .open-bracket,
   .open-paren {
     border-left: 2px solid black;
+    border-radius: 3px 0 0 3px;
   }
 
   .closed-bracket,
@@ -138,8 +141,7 @@ body {
   }
 
   .variable, .number {
-    font-size: 200%;
+    font-size: 150%;
     vertical-align: middle;
-    transform: translateY(0.2em);
   }
 }

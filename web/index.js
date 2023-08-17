@@ -4405,48 +4405,7 @@ var sortBy = _curry2(function sortBy2(fn, list) {
   });
 });
 var sortBy_default = sortBy;
-// client/model.ts
-function isLeaf(a) {
-  return !(a instanceof Array);
-}
-function branch(a) {
-  const [b, ...rest] = a;
-  return rest;
-}
-var value = function(a) {
-  return a[0];
-};
-function* extract(branch2, pred, a) {
-  if (isLeaf(a) && pred(a))
-    yield a;
-  if (!isLeaf(a)) {
-    for (const suba of branch2(a)) {
-      yield* extract(branch2, pred, suba);
-    }
-    if (pred(a))
-      yield value(a);
-  }
-}
-var asStatement = function(expr) {
-  return expr;
-};
-function compute(formula, inputs) {
-  if (isLeaf(formula)) {
-    if (typeof formula === "string") {
-      return inputs[formula] ?? (/[A-Z]+/.test(formula) ? Math[formula] : undefined);
-    }
-    return formula;
-  }
-  let f = {
-    "+": (x, y) => x + y,
-    "-": (x, y) => x - y,
-    "*": (x, y) => x * y,
-    "/": (x, y) => x / y
-  }[value(formula)] ?? Math[value(formula)];
-  if (type_default(f) === "Undefined")
-    throw Error(`did not recognize function ${f} in ${formula}`);
-  return f(...branch(formula).map((x) => compute(x, inputs)));
-}
+// client/metalog.ts
 function mq(a1, a2, a3 = 0, a4 = 0) {
   return (y) => a1 + a2 * log(y / (1 - y)) + a3 * (y - 0.5) * log(y / (1 - y)) + a4 * (y - 0.5);
 }
@@ -4501,6 +4460,52 @@ function sptq({
     throw Error("sptq: if you define max, need to also define min.");
   }
 }
+var log = Math.log;
+var exp = Math.exp;
+var e = (x) => x !== undefined && x != null;
+
+// client/model.ts
+function isLeaf(a) {
+  return !(a instanceof Array);
+}
+function branch(a) {
+  const [b, ...rest] = a;
+  return rest;
+}
+var value = function(a) {
+  return a[0];
+};
+function* extract(branch2, pred, a) {
+  if (isLeaf(a) && pred(a))
+    yield a;
+  if (!isLeaf(a)) {
+    for (const suba of branch2(a)) {
+      yield* extract(branch2, pred, suba);
+    }
+    if (pred(a))
+      yield value(a);
+  }
+}
+var asStatement = function(expr) {
+  return expr;
+};
+function compute(formula, inputs) {
+  if (isLeaf(formula)) {
+    if (typeof formula === "string") {
+      return inputs[formula] ?? (/[A-Z]+/.test(formula) ? Math[formula] : undefined);
+    }
+    return formula;
+  }
+  let f = {
+    "+": (x, y) => x + y,
+    "-": (x, y) => x - y,
+    "*": (x, y) => x * y,
+    "/": (x, y) => x / y
+  }[value(formula)] ?? Math[value(formula)];
+  if (type_default(f) === "Undefined")
+    throw Error(`did not recognize function ${f} in ${formula}`);
+  return f(...branch(formula).map((x) => compute(x, inputs)));
+}
 
 class Model {
   formulas;
@@ -4548,9 +4553,8 @@ class Scenario {
   id;
   description = "";
   rationales;
-  constructor(model, inputs = {}, name = "", rationales = {}) {
+  constructor(model, inputs = {}, name = "") {
     this.inputs = inputs;
-    this.rationales = rationales;
     this.name = name;
     this.model = model;
     this.id = name + (Math.random() + 1).toString(36).slice(-7);
@@ -4603,9 +4607,6 @@ class Scenario {
     return this.model.inputs.map((i) => ({ variable: i, value: [0.1, 0.5, 0.9].map((q) => this.model.compute(fromPairs_default(this.model.inputs.map((x) => [x, sptq(this.inputs[x])(x === i ? q : basepoint(this.inputs[x]))])))[last_default(this.model.derived_vars)]) }));
   }
 }
-var log = Math.log;
-var exp = Math.exp;
-var e = (x) => x !== undefined && x != null;
 
 // node_modules/d3-array/src/ascending.js
 function ascending(a, b) {
@@ -20107,9 +20108,14 @@ var actions = {
     }
   }
 };
+var FormulaText = {
+  view({ attrs: { formula, update } }) {
+    return import_mithril.default("div.formula", import_mithril.default("p", "Formula:"), import_mithril.default("textarea", { onblur: (e3) => update(e3.target.value) }, formula));
+  }
+};
 var ScenarioView = {
   view: ({ attrs: { scenario, cell } }) => {
-    return import_mithril.default("div.scenario", import_mithril.default("div.inputs", import_mithril.default("p", "Name: ", import_mithril.default("input", { type: "field", oninput: (e3) => actions.scenario.update_name(cell, scenario, e3.target.value) }, scenario.name), import_mithril.default("button", import_mithril.default("a", { href: `#!/scenario/${scenario.id}` }, "Inspect"))), import_mithril.default("div.formula", import_mithril.default("p", "Formula:"), import_mithril.default("textarea", { onblur: (e3) => actions.scenario.update_formula(cell, scenario, e3.target.value) }, scenario.model.formulaString())), import_mithril.default("div.spts", scenario.model.inputs.map((x2) => import_mithril.default(SPTInputView, {
+    return import_mithril.default("div.scenario", import_mithril.default("div.inputs", import_mithril.default("p", "Name: ", import_mithril.default("input", { type: "field", oninput: (e3) => actions.scenario.update_name(cell, scenario, e3.target.value) }, scenario.name), import_mithril.default("button", import_mithril.default("a", { href: `#!/scenario/${scenario.id}` }, "Inspect"))), import_mithril.default(FormulaText, { formula: scenario.model.formulaString(), update: (s2) => actions.scenario.update_formula(cell, scenario, s2) }), import_mithril.default("div.spts", scenario.model.inputs.map((x2) => import_mithril.default(SPTInputView, {
       name: x2,
       input: scenario.inputs[x2],
       update: (values2) => actions.scenario.update_inputs(cell, scenario, x2, values2)
@@ -20140,7 +20146,7 @@ var app = {
 var ScenarioFocus = {
   view: ({ attrs: { cell, id: id2 } }) => {
     const scenario = find_default((x2) => x2.id === id2, cell.getState().scenarios);
-    return import_mithril.default("div.scenario-focus", import_mithril.default("h1.name[contenteditable=true]", import_mithril.default.trust(scenario.name)), import_mithril.default("textarea", scenario.description), import_mithril.default(FormulaInputView, { cell, scenario }));
+    return import_mithril.default("div.scenario-focus", import_mithril.default("h1.name[contenteditable=true]", import_mithril.default.trust(scenario.name)), import_mithril.default(FormulaText, { formula: scenario.model.formulaString(), update: (s2) => actions.scenario.update_formula(cell, scenario, s2) }), import_mithril.default(FormulaInputView, { cell, scenario }));
   }
 };
 var FormulaInputView = {

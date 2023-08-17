@@ -1,7 +1,8 @@
 import { meiosisSetup } from 'meiosis-setup';
 import { MeiosisCell, MeiosisViewComponent } from 'meiosis-setup/types';
 import m from 'mithril';
-import { Scenario, Model, SPTInput, ASTTree, isLeaf, branch } from './model'
+import { SPTInput } from './metalog';
+import { Scenario, Model, ASTTree, isLeaf, branch } from './model'
 import * as Plot from '@observablehq/plot';
 import * as R from 'ramda';
 import meiosisTracer from 'meiosis-tracer';
@@ -29,6 +30,14 @@ const actions = {
   }
 };
 
+const FormulaText = {
+  view({attrs: {formula, update}}: {attrs: {formula: string, update: (s:string) => any}}) {
+    return m('div.formula',
+      m('p', 'Formula:'),
+      m('textarea', { onblur: (e: {target:{value:string}}) => update(e.target.value)}, formula))
+  }
+}
+
 const ScenarioView = {
   view: ({ attrs: { scenario, cell } }: { attrs: { scenario: Scenario, cell: MeiosisCell<State> } }) => {
     return m('div.scenario',
@@ -36,9 +45,7 @@ const ScenarioView = {
         m('p', "Name: ", 
           m('input', { type: 'field', oninput: (e: {target:{value:string}}) => actions.scenario.update_name(cell, scenario, e.target.value) }, scenario.name),
           m('button', m('a', {href: `#!/scenario/${scenario.id}`}, 'Inspect'))),
-        m('div.formula',
-          m('p', 'Formula:'),
-          m('textarea', { onblur: (e: {target:{value:string}}) => actions.scenario.update_formula(cell, scenario, e.target.value) }, scenario.model.formulaString())),
+        m(FormulaText, {formula: scenario.model.formulaString(), update: (s: string) => actions.scenario.update_formula(cell, scenario, s)}),
         m('div.spts',
           scenario.model.inputs.map(
             x => m(SPTInputView, {
@@ -165,7 +172,7 @@ const ScenarioFocus = {
     const scenario = R.find(x => x.id === id, cell.getState().scenarios)!
     return m("div.scenario-focus", 
       m('h1.name[contenteditable=true]', m.trust(scenario.name)),
-      m('textarea', scenario.description),
+      m(FormulaText, {formula: scenario.model.formulaString(), update: (s: string) => actions.scenario.update_formula(cell, scenario, s)}),
       m(FormulaInputView, {cell, scenario}))
   }
 }
