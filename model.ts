@@ -31,8 +31,8 @@ type ArrayTree<B, L> = L | ArrayBranch<B, L>
 export type ASTBranch = ArrayBranch<string, string | number>
 export type ASTTree = ArrayTree<string, string | number>
 
-function isLeaf<B,L>(a:ArrayTree<B, L>): a is L { return !(a instanceof Array) }
-function branch<B,L>(a:ArrayBranch<B, L>): ArrayTree<B, L>[] { 
+export function isLeaf<B,L>(a:ArrayTree<B, L>): a is L { return !(a instanceof Array) }
+export function branch<B,L>(a:ArrayBranch<B, L>): ArrayTree<B, L>[] { 
   const [b, ...rest] = a
   return rest;
 }
@@ -114,27 +114,34 @@ export class Model {
     if (isLeaf(formula)) {return `${formula}`};
     const children = formula.slice(1).map(Model.formulaToString)
     if (!(/\w+/.test(formula[0]))) {
-      return R.intersperse(formula[0], children).join(" ")
-    } else {
-      const term = `${formula[0]}(${R.intersperse(",", children)})`
+      const term = R.intersperse(formula[0], children).join(" ")
       if (formula[0] === '+' || formula[0] === '-') {
         return `(${term})`
       }
       return term;
+    } else {
+      return `${formula[0]}(${R.intersperse(",", children)})`
     }
   }
 }
+
+
+
 
 export class Scenario {
   private _model!: Model; 
   inputs: {[_:string]: SPTInput}
   samples!: number[]
   name: string
+  id: string
+  description: string = "";
+  rationales: {[_:string]: {low: string, high: string}}
 
   constructor(model: Model, inputs: {[_:string]: SPTInput} = {}, name: string = "") {
     this.inputs = inputs;
     this.name = name;
     this.model = model;
+    this.id = name + (Math.random() + 1).toString(36).slice(-7)
   }
 
   public get model() { return this._model; }
@@ -146,6 +153,11 @@ export class Scenario {
       R.fromPairs(this.model.inputs.map(
         (i) => [i, {alpha: 0.1, low: 0, med: 5, high: 10, min: undefined, max :undefined}])), 
       this.inputs);
+    this.rationales = Object.assign(
+      R.fromPairs(this.model.inputs.map(
+        (i) => [i, {low: "", high: ""}]
+      )),
+      this.rationales)
     this.update_samples();
   }
 

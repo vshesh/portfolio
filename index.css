@@ -58,7 +58,7 @@ body {
     margin: 0;
   }
 
-  >.input-stack {
+  > .input-stack {
     display: inline-flex;
     flex-direction: column;
     max-width: 165px;
@@ -76,5 +76,60 @@ body {
   * {
     flex: 1;
     width: 100%;
+  }
+}
+
+.formula-view {
+  display: flex;
+  flex-direction: row;
+
+  .factor {
+    display: flex;
+    flex-direction: row;
+  }
+
+  span {
+    display: block;
+  }
+
+  .spt-input {
+    background-color: #eee;
+  }
+
+  .operator,
+  .equals {
+    margin: 0 0.1em;
+    font-size: 300%;
+    ,
+    font-family: Iosevka, monospace;
+    vertical-align: middle;
+  }
+
+  .open-bracket,
+  .closed-bracket,
+  .open-paren,
+  .closed-paren {
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+    height: calc(100% + 20px);
+    width: 0.5em;
+    position: relative;
+    top: -10px;
+  }
+
+  .open-bracket,
+  .open-paren {
+    border-left: 2px solid black;
+  }
+
+  .closed-bracket,
+  .closed-paren {
+    border-right: 2px solid black;
+    border-radius: 0 3px 3px 0;
+  }
+
+  .variable {
+    font-size: 200%;
+    vertical-align: middle;
   }
 }

@@ -3,11 +3,11 @@
 //
 // Accepts expressions like "2 * (3 + 4)" and computes their value.
 
-Model = _n* h:Statement t:(_n* Statement)* _n* {
+Model = __ h:Statement t:(_n* Statement)* __ {
   return [h, ...t.map(x => x[1])]
 }
 
-Statement = variable:Name _ "=" _ e:Expression {
+Statement = _ variable:Name _ "=" _ e:Expression {
   return ["=", variable, e]
 }
 
@@ -25,9 +25,11 @@ Term
 Name = name:([a-zA-Z][A-Za-z0-9_]*) { return name[0] + name[1].join("")	; }
 
 Factor
-  = "(" _ expr:Expression _ ")" { return expr; } / n:Name "(" expr:Expression e:(_ "," _ Expression)* ")" {return [n, expr, ...e.map(x => x[3])]} / Integer / Name 
+  = "(" _ expr:Expression _ ")" { return expr; } / n:Name "(" expr:Expression e:(_ "," _ Expression)* ")" {return [n, expr, ...e.map(x => x[3])]} / Number / Name 
 
-Integer "number" = "-"?[0-9]+(.[0-9]+)? { return parseInt(text(), 10); }
+Number "number" = "-"?[0-9]+(.[0-9]+)? { return parseFloat(text(), 10); }
+
+__ = [ \t\r\n]*
 
 _n = [ \t\r]* "\n"
 
