@@ -1,11 +1,10 @@
 {
   "compilerOptions": {
-    "lib": ["dom"],
+    "lib": ["dom", "ES2016"],
     "module": "esnext",
     "target": "es6",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "moduleDetection": "force",
-    "allowImportingTsExtensions": true,
     "strict": true,
     "outDir": "dist",
     "downlevelIteration": true,

@@ -2,7 +2,7 @@ import { meiosisSetup } from 'meiosis-setup';
 import { MeiosisCell, MeiosisViewComponent } from 'meiosis-setup/types';
 import m from 'mithril';
 import { SPTInput } from './metalog';
-import { Scenario, Model, ASTTree, isLeaf, branch } from './model'
+import { Scenario, Model, ASTTree, isLeaf, Idea, Person,  branch } from './model'
 import * as Plot from '@observablehq/plot';
 import * as R from 'ramda';
 import meiosisTracer from 'meiosis-tracer';
@@ -10,6 +10,12 @@ import meiosisTracer from 'meiosis-tracer';
 interface State {
   models: { [name: string]: Model },
   scenarios: Scenario[]
+}
+
+const PersonBubble = {
+  view({attrs: {person}}: {attrs: {person: Person}}) {
+    return m('span', )
+  }
 }
 
 const actions = {
@@ -65,11 +71,11 @@ const ScenarioView = {
 }
 
 const SPTInputView = {
-  view: ({ attrs: { name, input, update } }: { attrs: { name: string, input: SPTInput, update: (v: SPTInput) => unknown } }) =>
+  view: ({ attrs: { name, input, update, simple } }: { attrs: { name: string, input: SPTInput, update: (v: SPTInput) => unknown , simple?: boolean} }) =>
     m('div.spt-input',
       m('h4', name),
       m('div.input-stack',
-        (['min', 'low', 'med', 'high', 'max'] as (keyof SPTInput)[]).map(q =>
+        ((simple ? ['low', 'med', 'high'] : ['min', 'low', 'med', 'high', 'max']) as (keyof SPTInput)[]).map(q =>
           m('input', {
             type: 'number', value: input[q],
             oninput: (e: { target: { value: string } }) => update(Object.assign(input, {
@@ -105,8 +111,7 @@ function cdfplot(f: (n: number) => number) {
 function CDFPlot(f: (n: number) => number) {
   return {
     oncreate: function (vnode: m.VnodeDOM) {
-      const chart = cdfplot(f);
-      vnode.dom.append(chart);
+      vnode.dom.append(cdfplot(f));
     },
 
     view: function (vnode: m.VnodeDOM) {
@@ -158,8 +163,7 @@ const app: MeiosisViewComponent<State> = {
       'basic-wtp-model': "value = reach * (wtp * price - cost) - fixed_cost"
     }),
     scenarios: [new Scenario(new Model(`
-      reach = endusers * (1 - cann)
-      tlift = reach * (lift * wtp - cost)
+      tlift = endusers * (1 - cann) * (lift * wtp - cost)
       devtime = (0.25 + log(endusers) / log(120) * ntools * tptool)
       value = nmakers * (ntools * tlift - (devtime * devcost + devlic))`))]
   },
@@ -171,6 +175,14 @@ const app: MeiosisViewComponent<State> = {
         m('div.scenario.new', { onclick: () => actions.add_scenario(cell) }, m('span', '+ Add Scenario')))
     )
 };
+
+const IdeaView = {
+  view({attrs: {cell, id}}: {attrs: {cell: MeiosisCell<State>, id: string}}) {
+    const idea = R.find(x => x.id === id, cell.getState().ideas);
+    
+  }
+}
+
 
 const ScenarioFocus = {
   view: ({ attrs: { cell, id } }: { attrs: { cell: MeiosisCell<State>, id: string } }) => {
