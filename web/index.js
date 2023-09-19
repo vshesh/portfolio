@@ -20178,8 +20178,8 @@ var CE = {
   }
 };
 var LabeledNumber = {
-  view: ({ attrs: { label, number: number13 } }) => {
-    return import_mithril3.default("span.labeled-number", import_mithril3.default("span.label", label), import_mithril3.default("span.number", number13.toLocaleString("en-US", { maximumFractionDigits: 0 })));
+  view: ({ attrs: { label, number: number13 = 0, precision = 0, postunit = "", preunit = "" } }) => {
+    return import_mithril3.default("span.labeled-number", import_mithril3.default("span.label", label), import_mithril3.default("span.number", preunit, number13.toLocaleString("en-US", { maximumFractionDigits: precision }), postunit));
   }
 };
 var ScenarioSummary = {
@@ -20187,7 +20187,7 @@ var ScenarioSummary = {
     return import_mithril3.default("div.scenario-summary", import_mithril3.default("div.top-bar", import_mithril3.default(CE, { selector: "span.name", onchange: (s2) => {
       scenario.name = s2;
       update(scenario);
-    }, value: scenario.name }), import_mithril3.default("button", import_mithril3.default("a", { href: `#!/scenario/${scenario.id}` }, ">"))), import_mithril3.default("div.outputs", import_mithril3.default("div.stats", import_mithril3.default(LabeledNumber, { number: mean_default(scenario.samples), label: "Mean" }), import_mithril3.default(LabeledNumber, { number: scenario.quantile(mean_default(scenario.samples)), label: "MeanQ" }), import_mithril3.default(LabeledNumber, { number: median_default(scenario.samples), label: "Median" }), import_mithril3.default(LabeledNumber, { number: 100 * filter_default((x2) => x2 < 0, scenario.samples).length / scenario.samples.length, label: "Loss Chance" })), import_mithril3.default(CDFPlot(scenario.quantileF())), import_mithril3.default(TornadoPlot(scenario.sensitivity()))), import_mithril3.default("div.inputs", import_mithril3.default(FormulaText, { formula: scenario.model.formulaString(), update: (s2) => {
+    }, value: scenario.name }), import_mithril3.default("button", import_mithril3.default("a", { href: `#!/scenario/${scenario.id}` }, ">"))), import_mithril3.default("div.outputs", import_mithril3.default("div.stats", import_mithril3.default(LabeledNumber, { number: mean_default(scenario.samples), label: "Mean" }), import_mithril3.default(LabeledNumber, { postunit: "%", number: 100 * scenario.quantile(mean_default(scenario.samples)), label: "MeanQ" }), import_mithril3.default(LabeledNumber, { number: median_default(scenario.samples), label: "Median" }), import_mithril3.default(LabeledNumber, { postunit: "%", number: 100 * filter_default((x2) => x2 < 0, scenario.samples).length / scenario.samples.length, label: "Loss Chance" })), import_mithril3.default(CDFPlot(scenario.quantileF())), import_mithril3.default(TornadoPlot(scenario.sensitivity()))), import_mithril3.default("div.inputs", import_mithril3.default(FormulaText, { formula: scenario.model.formulaString(), update: (s2) => {
       scenario.model = new Model(s2);
       update(scenario);
     } }), import_mithril3.default("div.spts", scenario.model.inputs.map((x2) => import_mithril3.default(SPTInputView, {

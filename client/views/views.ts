@@ -43,8 +43,8 @@ const CE = {
 }
 
 const LabeledNumber = {
-  view: ({attrs: {label, number}}) => {
-    return m('span.labeled-number', m('span.label', label), m('span.number', number.toLocaleString('en-US', {maximumFractionDigits: 0})))
+  view: ({attrs: {label, number = 0, precision = 0, postunit = '', preunit = ''}}) => {
+    return m('span.labeled-number', m('span.label', label), m('span.number', preunit, number.toLocaleString('en-US', {maximumFractionDigits: precision}), postunit))
   }
 }
 
@@ -57,9 +57,9 @@ const ScenarioSummary = {
       m('div.outputs',
         m('div.stats',
           m(LabeledNumber, {number: R.mean(scenario.samples), label: "Mean"}),
-          m(LabeledNumber, {number: scenario.quantile(R.mean(scenario.samples)), label: "MeanQ"}),
+          m(LabeledNumber, {postunit: '%', number: 100 * scenario.quantile(R.mean(scenario.samples)), label: "MeanQ"}),
           m(LabeledNumber, {number: R.median(scenario.samples), label: 'Median'}),
-          m(LabeledNumber, {number: 100* R.filter(x => x < 0, scenario.samples).length / scenario.samples.length, label: 'Loss Chance'})),
+          m(LabeledNumber, {postunit: '%', number: 100* R.filter(x => x < 0, scenario.samples).length / scenario.samples.length, label: 'Loss Chance'})),
         m(CDFPlot(scenario.quantileF())),
         m(TornadoPlot(scenario.sensitivity()))
       ),
