@@ -2,6 +2,9 @@ import { parse } from "./exprparser"
 import * as R from 'ramda'
 import { sptq, SPTInput } from './metalog'
 
+// Formula stuff 
+
+// this ArrayTree stuff should be its own file/library
 type ArrayBranch<B, L> = [B, ...(L | ArrayBranch<B, L>)[]]
 type ArrayTree<B, L> = L | ArrayBranch<B, L>
 export type ASTBranch = ArrayBranch<string, string | number>
@@ -61,8 +64,10 @@ export class Model {
   formulas: ["=", string, ASTBranch][];
   derived_vars: string[];
   inputs: string[];
+  name: string; // id 
 
-  public constructor(formula: string) {
+  public constructor(formula: string, name?: string) {
+    this.name = name ?? formula;
     this.formulas = asStatement(parse(formula, {}) as ASTBranch[]);
     this.derived_vars = this.formulas.map(x => x[1]);
     console.log(this.derived_vars);
@@ -101,15 +106,31 @@ export class Model {
   }
 }
 
-
+interface ScenarioData {
+    name: string;
+    id: string;
+    description: string;
+    idea: string | undefined;
+    assessor: string | undefined;
+    model: string;
+    inputs: {
+        [_: string]: SPTInput;
+    };
+    rationales: {
+        [_: string]: {
+            low: string;
+            high: string;
+        };
+    };
+}
 
 export class Scenario {
   id: string
   name: string
   description: string = "";
 
-  idea?: Idea // parent idea this scenario is estimating. 
-  assessor?: Person // person who did the estimates for this idea. 
+  idea?: Idea['id'] // parent idea this scenario is estimating. 
+  assessor?: Person['id'] // person who did the estimates for this idea. 
 
   private _model!: Model;
   inputs: { [_: string]: SPTInput }
@@ -119,14 +140,15 @@ export class Scenario {
   // technically should be private
   samples!: number[]
 
-  constructor(model: Model, inputs: { [_: string]: SPTInput } = {}, name: string = "") {
+  constructor(model: Model, name: string = "New Scenario", idea?: Idea['id'], inputs: { [_: string]: SPTInput } = {}, ) {
     // this is just to make the ts compiler happy
     // the values are actually set when the model is set
     this.inputs = inputs;
 
     this.name = name;
     this.model = model; // note calls set model below, ts doesn't check this control flow.
-    this.id = name + (Math.random() + 1).toString(36).slice(-7)
+    this.id = makeId(name);
+    this.idea = idea;
   }
 
   public get model() { return this._model; }
@@ -176,9 +198,6 @@ export class Scenario {
   }
 
   quantileF() {
-    // there will never be an input that is an empty string, just a hack 
-    // to deal with the typescript complier being not okay with undefined 
-    // as an index type.
     return (q: number) => q >= 0 && q <= 1 ? this.samples[Math.floor(q * this.samples.length)] : NaN
   }
 
@@ -189,36 +208,77 @@ export class Scenario {
   /** In reality sensitivity is a jacobian matrix (gradient of many variables), 
    * this is a crude approximation of sensitivity 
    * *around* the `med` point for each of the variables. 
+
+   * the concept falls apart for nonlinear relationships, especially
+   * when some variable 
    */
   sensitivity(around: 'med' | 'low' | 'high' = 'med'): { variable: string, value: [number, number, number] }[] {
     if (!this.has_all_inputs()) return [];
     const basepoint = (s: SPTInput) => ({ med: 0.5, low: s.alpha, high: 1 - s.alpha })[around]!
     return this.model.inputs.map(i => ({
-      variable: i, value: [0.1, 0.5, 0.9].map(q =>
-        this.model.compute(R.fromPairs(this.model.inputs.map(
+      variable: i, 
+      value: R.tap(x => console.log('value', i, x), [0.1, 0.5, 0.9].map(q => 
+        this.model.compute( R.fromPairs(this.model.inputs.map(
           x => [x, sptq(this.inputs[x]!)(x === i ? q : basepoint(this.inputs[x]))]
-        )))[R.last(this.model.derived_vars)!]
+        )))[R.last(this.model.derived_vars)!])
       ) as [number, number, number]
     }))
   }
-}
 
-export function* getScenariosForIdea(idea: Idea, scenarios: Iterable<Scenario>) {
-  for (let scenario of scenarios) {
-    if (scenario.idea && scenario.idea.name === idea.name && scenario.idea.proposer === idea.proposer) {
-      yield scenario
+  serialize(): ScenarioData {
+    return {
+      name: this.name, 
+      id: this.id, 
+      description: this.description,
+      idea: this.idea, 
+      assessor: this.assessor,
+      model: this.model.formulaString(),
+      inputs: this.inputs, 
+      rationales: this.rationales
     }
+  }
+
+  static deserialize(data: ScenarioData) {
+    let s = new Scenario(new Model(data.model), data.name, data.idea, data.inputs)
+    s.assessor = data.assessor
+    s.rationales = data.rationales
+    s.id = data.id
+    s.description = data.description
+    return s;
   }
 }
 
-export interface Idea {
+export class Idea {
   name: string;
   description: string;
-  proposer?: Person;
+  proposer?: Person['id'];
+  id: string;
+
+  public constructor(name: string, description?: string, proposer?: Person['id']) {
+    this.id = makeId(name)
+    this.name = name; 
+    this.description = description ?? ""; 
+    this.proposer = proposer; 
+  }
+
+  serialize() {
+    return R.map(R.identity, this)
+  }
+
+  static deserialize(i: Idea) {
+    let idea = new Idea(i.name, i.description, i.proposer)
+    idea.id = i.id;
+    return idea;
+  }
 }
 
 export interface Person {
+  id: string;
   name: string; 
   email: string; 
   color: string;
+}
+
+function makeId(name: string) {
+  return name.replace(/\s/, '-') + '--' + (Math.random() + 1).toString(36).slice(-7)
 }

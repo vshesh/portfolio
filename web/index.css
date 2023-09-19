@@ -1,17 +1,48 @@
+body {
+  background: #111;
+  color: white;
+}
+
+.idea-summary {
+  background-color: #222;
+  padding: 0.25em 0; 
+  margin-bottom: 0.5em;
+}
+
 .scenarios {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
 
-  >.scenario {
+  .scenario-summary {
     margin-right: 1em;
     display: inline-flex;
     flex-direction: column;
+    max-width: 350px;
+
+    .top-bar { 
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .inputs {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .outputs .stats {
+      display: flex;
+    
+      * {
+        flex: 1;
+        width: 100%;
+      }
+    }
 
     &.new {
       justify-content: center;
       align-items: center;
-      background-color: #eee;
+      background-color: #222;
 
       span {
         text-align: center;
@@ -24,16 +55,11 @@ body {
   font-family: Avenir, sans-serif;
 }
 
-.scenario {
-  width: 350px;
-
-  .inputs {
-    display: flex;
-    flex-direction: column;
-  }
-}
 
 .formula {
+  > p {
+    margin-bottom: 0.1em;
+  }
   textarea {
     width: 99%;
     box-sizing: border-box;
@@ -41,9 +67,11 @@ body {
     resize: none;
     font-family: Iosevka, JuliaMono, monospace;
     font-size: 63%;
-    border: 0.5px solid #eee;
+    border: 0.5px solid #444;
+    background-color: #181818;
+    color: white;
     padding: 5px;
-    box-shadow: rgb(238, 238, 238) 2px 2px 2px;
+    box-shadow: rgb(50, 50, 50) 2px 2px 2px;
     border-radius: 5px;
 
     &:focus {
@@ -69,25 +97,19 @@ body {
     flex-direction: column;
 
     input {
-      border: 1px solid #eee;
+      border: 1px solid #444;
+      background-color: #181818;
+      color: white;
+
       margin-top: -1px;
       width: 100%;
     }
   }
 }
 
-.scenario .outputs .stats {
-  display: flex;
-
-  * {
-    flex: 1;
-    width: 100%;
-  }
-}
-
 .formula-view {
 
-  margin-bottom: 30px;
+  margin: 2em 0;
   display: flex;
   flex-direction: row;
 
@@ -101,7 +123,8 @@ body {
   }
 
   .spt-input {
-    background-color: #eee;
+    background-color: #222;
+    border-radius: 10px 10px 0 0;
     
     input {
       width: 75px;
@@ -143,5 +166,46 @@ body {
   .variable, .number {
     font-size: 150%;
     vertical-align: middle;
+  }
+}
+
+.person-bubble {
+  border-radius: 50%;
+  font-family: monospace;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: inline-block;
+  position: relative;
+  
+  > span {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%)
+  }
+}
+
+.scenario {
+  max-width: 960px; 
+  margin: 0 auto; 
+
+  .rationales {
+    .input-rationale {
+      display: flex;
+      .formula {
+        flex: 1;
+      }
+    }
+  }
+}
+
+.labeled-number {
+  display: flex;
+  flex-direction: column;
+  .label {
+    font-size: 60%;
+  }
+  .number {
+    font-family: monospace;
   }
 }

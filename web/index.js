@@ -16,239 +16,6 @@ var __toESM = (mod, isNodeMode, target) => {
 };
 var __commonJS = (cb, mod) => () => (mod || cb((mod = { exports: {} }).exports, mod), mod.exports);
 
-// node_modules/meiosis-setup/simple-stream/index.js
-var require_simple_stream = __commonJS((exports) => {
-  Object.defineProperty(exports, "__esModule", { value: true });
-  exports.dropRepeats = exports.createDropRepeats = exports.simpleStream = exports.scan = exports.stream = undefined;
-  var stream = (initial) => {
-    const mapFunctions = [];
-    let latestValue = initial;
-    const createdStream = function(value) {
-      if (arguments.length > 0 && !createdStream.ended) {
-        latestValue = value;
-        for (const i in mapFunctions) {
-          mapFunctions[i](latestValue);
-        }
-      }
-      return latestValue;
-    };
-    createdStream.map = (mapFunction) => {
-      const newStream = (0, exports.stream)();
-      const mappedFunction = (value) => {
-        newStream(mapFunction(value));
-      };
-      mapFunctions.push(mappedFunction);
-      newStream.end = (_value) => {
-        const idx = mapFunctions.indexOf(mappedFunction);
-        newStream.ended = true;
-        mapFunctions.splice(idx, 1);
-      };
-      if (latestValue !== undefined) {
-        newStream(mapFunction(latestValue));
-      }
-      return newStream;
-    };
-    createdStream.end = (_value) => {
-      createdStream.ended = true;
-    };
-    return createdStream;
-  };
-  exports.stream = stream;
-  var scan = (accumulator, initial, sourceStream) => {
-    const newStream = (0, exports.stream)(initial);
-    let accumulated = initial;
-    sourceStream.map((value) => {
-      accumulated = accumulator(accumulated, value);
-      newStream(accumulated);
-    });
-    return newStream;
-  };
-  exports.scan = scan;
-  exports.simpleStream = {
-    stream: exports.stream,
-    scan: exports.scan
-  };
-  var createDropRepeats = (stream2 = exports.simpleStream) => (source, onchange = (state) => state) => {
-    const createStream = typeof stream2 === "function" ? stream2 : stream2.stream;
-    let prev = undefined;
-    const result = createStream();
-    source.map((state) => {
-      const next = onchange(state);
-      if (next !== prev) {
-        prev = next;
-        result(state);
-      }
-    });
-    return result;
-  };
-  exports.createDropRepeats = createDropRepeats;
-  exports.dropRepeats = (0, exports.createDropRepeats)();
-});
-
-// node_modules/meiosis-setup/util/index.js
-var require_util = __commonJS((exports) => {
-  Object.defineProperty(exports, "__esModule", { value: true });
-  exports.updateFormFloatValue = exports.updateFormIntValue = exports.updateFormValue = exports.get = undefined;
-  var get = (object, path) => path.reduce((obj, key) => obj == undefined ? undefined : obj[key], object);
-  exports.get = get;
-  var intoPath = (path, value) => ({
-    [path[0]]: path.length === 1 ? value : intoPath(path.slice(1), value)
-  });
-  var toPath = (pathOrProp) => Array.isArray(pathOrProp) ? pathOrProp : [pathOrProp];
-  var updateParseValue = (parseFn, cell, path) => (evt) => {
-    const value = parseFn(evt.currentTarget.value);
-    if (!isNaN(value)) {
-      cell.update(intoPath(toPath(path), value));
-    }
-  };
-  var updateFormValue = (cell, path, fn = (value) => value) => (evt) => cell.update(intoPath(toPath(path), fn(evt.currentTarget.value)));
-  exports.updateFormValue = updateFormValue;
-  var updateFormIntValue = (cell, path) => (evt) => updateParseValue(parseInt, cell, path)(evt);
-  exports.updateFormIntValue = updateFormIntValue;
-  var updateFormFloatValue = (cell, path) => (evt) => updateParseValue(parseFloat, cell, path)(evt);
-  exports.updateFormFloatValue = updateFormFloatValue;
-});
-
-// node_modules/mergerino/dist/mergerino.es5.min.js
-var require_mergerino_es5_min = __commonJS((exports, module) => {
-  (function(e, r) {
-    typeof define == "function" && define.amd ? define([], r) : typeof module == "object" && exports ? module.exports = r() : e.mergerino = r();
-  })(typeof self != "undefined" ? self : exports, function() {
-    var e = {}, r = Object.assign || function(e2, r2) {
-      return r2 && Object.keys(r2).forEach(function(t2) {
-        return e2[t2] = r2[t2];
-      }), e2;
-    }, t = function(e2, r2, o) {
-      var f = typeof o;
-      if (o && f === "object")
-        if (Array.isArray(o))
-          for (var i = 0, c = o;i < c.length; i += 1) {
-            var u = c[i];
-            r2 = t(e2, r2, u);
-          }
-        else
-          for (var s = 0, a = Object.keys(o);s < a.length; s += 1) {
-            var l = a[s], y = o[l];
-            typeof y == "function" ? r2[l] = y(r2[l], n) : y === undefined ? e2 && !isNaN(l) ? r2.splice(l, 1) : delete r2[l] : y === null || typeof y != "object" || Array.isArray(y) ? r2[l] = y : typeof r2[l] == "object" ? r2[l] = y === r2[l] ? y : n(r2[l], y) : r2[l] = t(false, {}, y);
-          }
-      else
-        f === "function" && (r2 = o(r2, n));
-      return r2;
-    }, n = function(e2) {
-      for (var n2 = [], o = arguments.length - 1;o-- > 0; )
-        n2[o] = arguments[o + 1];
-      var f = Array.isArray(e2);
-      return t(f, f ? e2.slice() : r({}, e2), n2);
-    };
-    return e = r(n, e);
-  });
-});
-
-// node_modules/meiosis-setup/setup.js
-var require_setup = __commonJS((exports) => {
-  var __importDefault = exports && exports.__importDefault || function(mod) {
-    return mod && mod.__esModule ? mod : { default: mod };
-  };
-  Object.defineProperty(exports, "__esModule", { value: true });
-  exports.meiosisSetup = undefined;
-  var simple_stream_1 = require_simple_stream();
-  var util_1 = require_util();
-  var mergerino_1 = __importDefault(require_mergerino_es5_min());
-  var assoc = (prop, value, target) => {
-    target[prop] = value;
-    return target;
-  };
-  var concatIfPresent = (target, source) => source ? target.concat(source) : target;
-  var assembleInitialState = (nestedComponents) => nestedComponents ? Object.keys(nestedComponents).reduce((result, key) => assoc(key, Object.assign({}, nestedComponents[key].initial, assembleInitialState(nestedComponents[key].nested)), result), {}) : {};
-  var getInitialState = (app) => Object.assign({}, app.initial, assembleInitialState(app.nested));
-  var assembleView = (nestedComponents) => nestedComponents ? Object.keys(nestedComponents).reduce((result, key) => {
-    const nestedApp = nestedComponents[key];
-    if (nestedApp.view !== undefined) {
-      const view = nestedApp.view;
-      return assoc(key, {
-        view: (cell, ...args) => view(cell.nest(key), ...args),
-        nested: assembleView(nestedApp.nested)
-      }, result);
-    }
-    return result;
-  }, {}) : {};
-  var getView = (app) => assembleView(app.nested);
-  var assembleServices = (nestedComponents, getCell = (cell) => cell, getState = (state) => state) => nestedComponents ? Object.keys(nestedComponents).reduce((result, key) => {
-    var _a;
-    const nextGetCell = (cell) => getCell(cell).nest(key);
-    const nextGetState = (state) => getState(state)[key];
-    const nestedApp = nestedComponents[key];
-    return concatIfPresent(result, (_a = nestedApp.services) === null || _a === undefined ? undefined : _a.map((service) => ({
-      onchange: (state) => service.onchange ? service.onchange(nextGetState(state)) : state,
-      run: (cell) => service.run(nextGetCell(cell))
-    }))).concat(assembleServices(nestedApp.nested, nextGetCell, nextGetState));
-  }, []) : [];
-  var getServices = (app) => concatIfPresent([], app.services).concat(assembleServices(app.nested));
-  var baseSetup = ({ stream, app }) => {
-    if (!stream) {
-      stream = simple_stream_1.simpleStream;
-    }
-    const safeApp = app || {};
-    const initial = getInitialState(safeApp);
-    const view = getView(safeApp);
-    const createStream = typeof stream === "function" ? stream : stream.stream;
-    const scan = stream.scan;
-    const update = createStream();
-    const states = scan((state, patch) => (0, mergerino_1.default)(state, patch), initial, update);
-    return {
-      states,
-      update,
-      view
-    };
-  };
-  var nestPatch = (patch, prop) => ({ [prop]: patch });
-  var nestUpdate = (parentUpdate, prop) => (patch) => parentUpdate(nestPatch(patch, prop));
-  var nestCell = (states, parentUpdate, components) => (prop) => {
-    const nestedStates = states.map((state) => state[prop]);
-    const getNestedState = () => states()[prop];
-    const nestedUpdate = nestUpdate(parentUpdate, prop);
-    const nestedComponents = (0, util_1.get)(components, [prop, "nested"]);
-    return {
-      states: nestedStates,
-      state: getNestedState(),
-      getState: getNestedState,
-      update: nestedUpdate,
-      nest: nestCell(nestedStates, nestedUpdate, nestedComponents),
-      nested: nestedComponents
-    };
-  };
-  var meiosisSetup = (config) => {
-    const stream = config === null || config === undefined ? undefined : config.stream;
-    const app = config === null || config === undefined ? undefined : config.app;
-    const { states, update, view } = baseSetup({
-      stream,
-      app
-    });
-    const nest = nestCell(states, update, view);
-    const getState = () => states();
-    const getCell = (state) => ({ states, state, getState, update, nest, nested: view });
-    const dropRepeats = (0, simple_stream_1.createDropRepeats)(stream);
-    if (app) {
-      getServices(app).forEach((service) => {
-        dropRepeats(states, service.onchange).map((state) => service.run(getCell(state)));
-      });
-    }
-    const cells = dropRepeats(states).map(getCell);
-    return cells;
-  };
-  exports.meiosisSetup = meiosisSetup;
-});
-
-// node_modules/meiosis-setup/index.js
-var require_meiosis_setup = __commonJS((exports) => {
-  Object.defineProperty(exports, "__esModule", { value: true });
-  exports.meiosisSetup = undefined;
-  var setup_1 = require_setup();
-  Object.defineProperty(exports, "meiosisSetup", { enumerable: true, get: function() {
-    return setup_1.meiosisSetup;
-  } });
-});
-
 // node_modules/mithril/render/vnode.js
 var require_vnode = __commonJS((exports, module) => {
   var Vnode = function(tag, key, attrs, children, text, dom) {
@@ -431,15 +198,15 @@ var require_polyfill = __commonJS((exports, module) => {
       throw new Error("Promise must be called with 'new'.");
     if (typeof executor !== "function")
       throw new TypeError("executor must be a function.");
-    var self2 = this, resolvers = [], rejectors = [], resolveCurrent = handler(resolvers, true), rejectCurrent = handler(rejectors, false);
-    var instance = self2._instance = { resolvers, rejectors };
+    var self = this, resolvers = [], rejectors = [], resolveCurrent = handler(resolvers, true), rejectCurrent = handler(rejectors, false);
+    var instance = self._instance = { resolvers, rejectors };
     var callAsync = typeof setImmediate === "function" ? setImmediate : setTimeout;
     function handler(list, shouldAbsorb) {
       return function execute(value) {
         var then;
         try {
           if (shouldAbsorb && value != null && (typeof value === "object" || typeof value === "function") && typeof (then = value.then) === "function") {
-            if (value === self2)
+            if (value === self)
               throw new TypeError("Promise can't be resolved with itself.");
             executeOnce(then.bind(value));
           } else {
@@ -479,7 +246,7 @@ var require_polyfill = __commonJS((exports, module) => {
     executeOnce(executor);
   };
   PromisePolyfill.prototype.then = function(onFulfilled, onRejection) {
-    var self2 = this, instance = self2._instance;
+    var self = this, instance = self._instance;
     function handle(callback, list, next, state) {
       list.push(function(value) {
         if (typeof callback !== "function")
@@ -3089,11 +2856,10 @@ var require_exprparser = __commonJS((exports, module) => {
 });
 
 // client/index.ts
-var import_meiosis_setup = __toESM(require_meiosis_setup(), 1);
-var import_mithril = __toESM(require_mithril(), 1);
+var import_mithril4 = __toESM(require_mithril(), 1);
 
-// client/model.ts
-var exprparser = __toESM(require_exprparser(), 1);
+// client/views/views.ts
+var import_mithril3 = __toESM(require_mithril(), 1);
 
 // node_modules/ramda/es/internal/_isPlaceholder.js
 function _isPlaceholder(a) {
@@ -3599,30 +3365,6 @@ function _map(fn, functor) {
   return result;
 }
 
-// node_modules/ramda/es/internal/_quote.js
-function _quote(s) {
-  var escaped = s.replace(/\\/g, "\\\\").replace(/[\b]/g, "\\b").replace(/\f/g, "\\f").replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\t/g, "\\t").replace(/\v/g, "\\v").replace(/\0/g, "\\0");
-  return '"' + escaped.replace(/"/g, '\\"') + '"';
-}
-
-// node_modules/ramda/es/internal/_toISOString.js
-var pad = function pad2(n) {
-  return (n < 10 ? "0" : "") + n;
-};
-var _toISOString = typeof Date.prototype.toISOString === "function" ? function _toISOString2(d) {
-  return d.toISOString();
-} : function _toISOString3(d) {
-  return d.getUTCFullYear() + "-" + pad(d.getUTCMonth() + 1) + "-" + pad(d.getUTCDate()) + "T" + pad(d.getUTCHours()) + ":" + pad(d.getUTCMinutes()) + ":" + pad(d.getUTCSeconds()) + "." + (d.getUTCMilliseconds() / 1000).toFixed(3).slice(2, 5) + "Z";
-};
-var _toISOString_default = _toISOString;
-
-// node_modules/ramda/es/internal/_complement.js
-function _complement(f) {
-  return function() {
-    return !f.apply(this, arguments);
-  };
-}
-
 // node_modules/ramda/es/internal/_arrayReduce.js
 function _arrayReduce(reducer, acc, list) {
   var index = 0;
@@ -3682,63 +3424,6 @@ var filter = _curry2(_dispatchable(["fantasy-land/filter", "filter"], _xfilter, 
   }, {}, keys_default(filterable)) : _filter(pred, filterable);
 }));
 var filter_default = filter;
-
-// node_modules/ramda/es/reject.js
-var reject = _curry2(function reject2(pred, filterable) {
-  return filter_default(_complement(pred), filterable);
-});
-var reject_default = reject;
-
-// node_modules/ramda/es/internal/_toString.js
-function _toString(x, seen) {
-  var recur = function recur(y) {
-    var xs = seen.concat([x]);
-    return _includes(y, xs) ? "<Circular>" : _toString(y, xs);
-  };
-  var mapPairs = function(obj, keys7) {
-    return _map(function(k) {
-      return _quote(k) + ": " + recur(obj[k]);
-    }, keys7.slice().sort());
-  };
-  switch (Object.prototype.toString.call(x)) {
-    case "[object Arguments]":
-      return "(function() { return arguments; }(" + _map(recur, x).join(", ") + "))";
-    case "[object Array]":
-      return "[" + _map(recur, x).concat(mapPairs(x, reject_default(function(k) {
-        return /^\d+$/.test(k);
-      }, keys_default(x)))).join(", ") + "]";
-    case "[object Boolean]":
-      return typeof x === "object" ? "new Boolean(" + recur(x.valueOf()) + ")" : x.toString();
-    case "[object Date]":
-      return "new Date(" + (isNaN(x.valueOf()) ? recur(NaN) : _quote(_toISOString_default(x))) + ")";
-    case "[object Map]":
-      return "new Map(" + recur(Array.from(x)) + ")";
-    case "[object Null]":
-      return "null";
-    case "[object Number]":
-      return typeof x === "object" ? "new Number(" + recur(x.valueOf()) + ")" : 1 / x === (-Infinity) ? "-0" : x.toString(10);
-    case "[object Set]":
-      return "new Set(" + recur(Array.from(x).sort()) + ")";
-    case "[object String]":
-      return typeof x === "object" ? "new String(" + recur(x.valueOf()) + ")" : _quote(x);
-    case "[object Undefined]":
-      return "undefined";
-    default:
-      if (typeof x.toString === "function") {
-        var repr = x.toString();
-        if (repr !== "[object Object]") {
-          return repr;
-        }
-      }
-      return "{" + mapPairs(x, keys_default(x)).join(", ") + "}";
-  }
-}
-
-// node_modules/ramda/es/toString.js
-var toString2 = _curry1(function toString3(val) {
-  return _toString(val, []);
-});
-var toString_default = toString2;
 
 // node_modules/ramda/es/internal/_xmap.js
 var XMap = function() {
@@ -3927,12 +3612,6 @@ var reduce = _curry3(function(xf, acc, list) {
   return _xReduce_default(typeof xf === "function" ? _xwrap(xf) : xf, acc, list);
 });
 var reduce_default = reduce;
-
-// node_modules/ramda/es/internal/_isFunction.js
-function _isFunction(x) {
-  var type4 = Object.prototype.toString.call(x);
-  return type4 === "[object Function]" || type4 === "[object AsyncFunction]" || type4 === "[object GeneratorFunction]" || type4 === "[object AsyncGeneratorFunction]";
-}
 
 // node_modules/ramda/es/internal/_makeFlat.js
 function _makeFlat(recursive) {
@@ -4144,29 +3823,6 @@ function _identity(x) {
 var identity = _curry1(_identity);
 var identity_default = identity;
 
-// node_modules/ramda/es/concat.js
-var concat = _curry2(function concat2(a, b) {
-  if (_isArray_default(a)) {
-    if (_isArray_default(b)) {
-      return a.concat(b);
-    }
-    throw new TypeError(toString_default(b) + " is not an array");
-  }
-  if (_isString(a)) {
-    if (_isString(b)) {
-      return a + b;
-    }
-    throw new TypeError(toString_default(b) + " is not a string");
-  }
-  if (a != null && _isFunction(a["fantasy-land/concat"])) {
-    return a["fantasy-land/concat"](b);
-  }
-  if (a != null && _isFunction(a.concat)) {
-    return a.concat(b);
-  }
-  throw new TypeError(toString_default(a) + ' does not have a method named "concat" or "fantasy-land/concat"');
-});
-var concat_default = concat;
 // node_modules/ramda/es/internal/_Set.js
 var hasOrAdd = function(item, shouldAdd, set) {
   var type5 = typeof item;
@@ -4305,48 +3961,6 @@ var _Set_default = _Set;
 // node_modules/ramda/es/last.js
 var last = nth_default(-1);
 var last_default = last;
-
-// node_modules/ramda/es/internal/_xfind.js
-var XFind = function() {
-  function XFind2(f, xf) {
-    this.xf = xf;
-    this.f = f;
-    this.found = false;
-  }
-  XFind2.prototype["@@transducer/init"] = _xfBase_default.init;
-  XFind2.prototype["@@transducer/result"] = function(result) {
-    if (!this.found) {
-      result = this.xf["@@transducer/step"](result, undefined);
-    }
-    return this.xf["@@transducer/result"](result);
-  };
-  XFind2.prototype["@@transducer/step"] = function(result, input) {
-    if (this.f(input)) {
-      this.found = true;
-      result = _reduced(this.xf["@@transducer/step"](result, input));
-    }
-    return result;
-  };
-  return XFind2;
-}();
-function _xfind(f) {
-  return function(xf) {
-    return new XFind(f, xf);
-  };
-}
-
-// node_modules/ramda/es/find.js
-var find = _curry2(_dispatchable(["find"], _xfind, function find2(fn, list) {
-  var idx = 0;
-  var len = list.length;
-  while (idx < len) {
-    if (fn(list[idx])) {
-      return list[idx];
-    }
-    idx += 1;
-  }
-}));
-var find_default = find;
 // node_modules/ramda/es/internal/_xfindIndex.js
 var XFindIndex = function() {
   function XFindIndex2(f, xf) {
@@ -4503,15 +4117,110 @@ var range = _curry2(function range2(from, to) {
   return result;
 });
 var range_default = range;
-// node_modules/ramda/es/sortBy.js
-var sortBy = _curry2(function sortBy2(fn, list) {
-  return Array.prototype.slice.call(list, 0).sort(function(a, b) {
-    var aa = fn(a);
-    var bb = fn(b);
-    return aa < bb ? -1 : aa > bb ? 1 : 0;
-  });
-});
-var sortBy_default = sortBy;
+// node_modules/ramda/es/internal/_xtap.js
+var XTap = function() {
+  function XTap2(f, xf) {
+    this.xf = xf;
+    this.f = f;
+  }
+  XTap2.prototype["@@transducer/init"] = _xfBase_default.init;
+  XTap2.prototype["@@transducer/result"] = _xfBase_default.result;
+  XTap2.prototype["@@transducer/step"] = function(result, input) {
+    this.f(input);
+    return this.xf["@@transducer/step"](result, input);
+  };
+  return XTap2;
+}();
+function _xtap(f) {
+  return function(xf) {
+    return new XTap(f, xf);
+  };
+}
+
+// node_modules/ramda/es/tap.js
+var tap = _curry2(_dispatchable([], _xtap, function tap2(fn, x) {
+  fn(x);
+  return x;
+}));
+var tap_default = tap;
+// client/db.ts
+function map5(iterable, f) {
+  const l = [];
+  for (const item of iterable) {
+    l.push(f(item));
+  }
+  return l;
+}
+class IndexedSet {
+  objects;
+  indexes;
+  constructor(iterable = []) {
+    this.objects = new Map;
+    this.indexes = {};
+    for (const item of iterable) {
+      this.add(item);
+    }
+  }
+  add(object) {
+    if (!!this.objects.get(this.id(object))) {
+      throw new Error(`While trying to add ${object}: Object with id ${this.id(object)} already exists in db: ${this.objects.get(this.id(object))}.`);
+    }
+    this.objects.set(this.id(object), object);
+    map_default((i) => i.index.get(i.id(object)) ? i.index.get(i.id(object))?.add(this.id(object)) : i.index.set(i.id(object), new Set([this.id(object)])), this.indexes);
+    return this;
+  }
+  upsert(object) {
+    if (!!this.objects.get(this.id(object))) {
+      this.remove(object);
+    }
+    return this.add(object);
+  }
+  remove(object) {
+    this.objects.delete(this.id(object));
+    map_default((i) => i.index.get(i.id(object))?.delete(this.id(object)), this.indexes);
+    return this;
+  }
+  get(arg) {
+    const test = (x) => typeof x !== "object";
+    if (!test(arg)) {
+      if (Object.keys(arg).length === 1) {
+        const name = Object.keys(arg)[0];
+        if (name.toLowerCase() === "id")
+          return this.get(arg[name]);
+        const id = this.indexes[name].index.get(arg[name]) ?? new Set;
+        return Array.from(id).map((x) => clone_default(this.objects.get(x)));
+      } else {
+        const { name, value } = arg;
+        const id = this.indexes[name].index.get(value) ?? new Set;
+        return Array.from(id).map((x) => clone_default(this.objects.get(x)));
+      }
+    } else {
+      return clone_default(this.objects.get(arg));
+    }
+  }
+  addIndex(id, name) {
+    if (!(name ?? id.name)) {
+      throw Error(`New index being added, but no valid name found. id function has name \`${id.name}\` and name is \`${name}\``);
+    }
+    if ((name ?? id.name).toLowerCase() === "id")
+      throw Error(`Either name \`${name}\` or id function name \`${name}\` is some variant of 'id'. Do not do this.`);
+    let m = new Map;
+    for (let [k, v] of this.objects.entries()) {
+      m.get(id(v)) ? m.get(id(v)).add(k) : m.set(id(v), new Set([k]));
+    }
+    this.indexes[name ?? id.name] = { id, index: m };
+  }
+  removeIndex(name) {
+    delete this.indexes[name];
+  }
+  [Symbol.iterator]() {
+    return this.objects.values();
+  }
+}
+
+// client/model.ts
+var exprparser = __toESM(require_exprparser(), 1);
+
 // client/metalog.ts
 function mq(a1, a2, a3 = 0, a4 = 0) {
   return (y) => a1 + a2 * log(y / (1 - y)) + a3 * (y - 0.5) * log(y / (1 - y)) + a4 * (y - 0.5);
@@ -4613,12 +4322,17 @@ function compute(formula, inputs) {
     throw Error(`did not recognize function ${f} in ${formula}`);
   return f(...branch(formula).map((x) => compute(x, inputs)));
 }
+var makeId = function(name) {
+  return name.replace(/\s/, "-") + "--" + (Math.random() + 1).toString(36).slice(-7);
+};
 
 class Model {
   formulas;
   derived_vars;
   inputs;
-  constructor(formula) {
+  name;
+  constructor(formula, name) {
+    this.name = name ?? formula;
     this.formulas = asStatement(exprparser.parse(formula, {}));
     this.derived_vars = this.formulas.map((x) => x[1]);
     console.log(this.derived_vars);
@@ -4653,18 +4367,21 @@ class Model {
 }
 
 class Scenario {
+  id;
+  name;
+  description = "";
+  idea;
+  assessor;
   _model;
   inputs;
-  samples;
-  name;
-  id;
-  description = "";
   rationales;
-  constructor(model, inputs = {}, name = "") {
+  samples;
+  constructor(model, name = "New Scenario", idea, inputs = {}) {
     this.inputs = inputs;
     this.name = name;
     this.model = model;
-    this.id = name + (Math.random() + 1).toString(36).slice(-7);
+    this.id = makeId(name);
+    this.idea = idea;
   }
   get model() {
     return this._model;
@@ -4711,7 +4428,104 @@ class Scenario {
     if (!this.has_all_inputs())
       return [];
     const basepoint = (s) => ({ med: 0.5, low: s.alpha, high: 1 - s.alpha })[around];
-    return this.model.inputs.map((i) => ({ variable: i, value: [0.1, 0.5, 0.9].map((q) => this.model.compute(fromPairs_default(this.model.inputs.map((x) => [x, sptq(this.inputs[x])(x === i ? q : basepoint(this.inputs[x]))])))[last_default(this.model.derived_vars)]) }));
+    return this.model.inputs.map((i) => ({
+      variable: i,
+      value: tap_default((x) => console.log("value", i, x), [0.1, 0.5, 0.9].map((q) => this.model.compute(fromPairs_default(this.model.inputs.map((x) => [x, sptq(this.inputs[x])(x === i ? q : basepoint(this.inputs[x]))])))[last_default(this.model.derived_vars)]))
+    }));
+  }
+  serialize() {
+    return {
+      name: this.name,
+      id: this.id,
+      description: this.description,
+      idea: this.idea,
+      assessor: this.assessor,
+      model: this.model.formulaString(),
+      inputs: this.inputs,
+      rationales: this.rationales
+    };
+  }
+  static deserialize(data) {
+    let s = new Scenario(new Model(data.model), data.name, data.idea, data.inputs);
+    s.assessor = data.assessor;
+    s.rationales = data.rationales;
+    s.id = data.id;
+    s.description = data.description;
+    return s;
+  }
+}
+
+class Idea {
+  name;
+  description;
+  proposer;
+  id;
+  constructor(name, description, proposer) {
+    this.id = makeId(name);
+    this.name = name;
+    this.description = description ?? "";
+    this.proposer = proposer;
+  }
+  serialize() {
+    return map_default(identity_default, this);
+  }
+  static deserialize(i) {
+    let idea = new Idea(i.name, i.description, i.proposer);
+    idea.id = i.id;
+    return idea;
+  }
+}
+
+// client/viewmodel.ts
+var import_mithril = __toESM(require_mithril(), 1);
+function serialize(db2) {
+  return {
+    ideas: map5(db2.ideas, (idea) => idea.serialize()),
+    scenarios: map5(db2.scenarios, (scenario) => scenario.serialize())
+  };
+}
+
+class IdeaT extends IndexedSet {
+  constructor() {
+    super(...arguments);
+  }
+  id(i) {
+    return i.id;
+  }
+}
+
+class ScenarioT extends IndexedSet {
+  id(s) {
+    return s.id;
+  }
+  constructor(iterable) {
+    super(iterable);
+    this.addIndex((s) => s.idea, "idea");
+  }
+}
+
+class Actions {
+  static save(DB) {
+    const data = serialize(DB);
+    console.log("[INFO] Actions.save", data);
+    import_mithril.default.request({
+      method: "PUT",
+      url: "/save",
+      body: data
+    }).then((data2) => {
+      return data2;
+    });
+  }
+  static load() {
+    return import_mithril.default.request({ method: "GET", url: "/load" }).then((data) => {
+      console.log("[INFO] Actions.load: Data received ", data);
+      const result = {
+        ideas: new IdeaT(data.ideas.map(Idea.deserialize)),
+        scenarios: new ScenarioT(data.scenarios.map(Scenario.deserialize))
+      };
+      console.log("[INFO] Actions.load: Parsed result", result);
+      return result;
+    });
   }
 }
 
@@ -5041,18 +4855,18 @@ function identity3(x) {
 }
 
 // node_modules/d3-array/src/group.js
-function rollup(values, reduce3, ...keys8) {
-  return nest(values, identity3, reduce3, keys8);
+function rollup(values, reduce3, ...keys7) {
+  return nest(values, identity3, reduce3, keys7);
 }
-function rollups(values, reduce3, ...keys8) {
-  return nest(values, Array.from, reduce3, keys8);
+function rollups(values, reduce3, ...keys7) {
+  return nest(values, Array.from, reduce3, keys7);
 }
-var nest = function(values, map5, reduce3, keys8) {
+var nest = function(values, map6, reduce3, keys7) {
   return function regroup(values2, i) {
-    if (i >= keys8.length)
+    if (i >= keys7.length)
       return reduce3(values2);
     const groups = new InternMap;
-    const keyof2 = keys8[i++];
+    const keyof2 = keys7[i++];
     let index = -1;
     for (const value2 of values2) {
       const key = keyof2(value2, ++index, values2);
@@ -5065,15 +4879,15 @@ var nest = function(values, map5, reduce3, keys8) {
     for (const [key, values3] of groups) {
       groups.set(key, regroup(values3, i));
     }
-    return map5(groups);
+    return map6(groups);
   }(values, 0);
 };
-function group(values, ...keys8) {
-  return nest(values, identity3, identity3, keys8);
+function group(values, ...keys7) {
+  return nest(values, identity3, identity3, keys7);
 }
 // node_modules/d3-array/src/permute.js
-function permute(source, keys8) {
-  return Array.from(keys8, (key) => source[key]);
+function permute(source, keys7) {
+  return Array.from(keys7, (key) => source[key]);
 }
 
 // node_modules/d3-array/src/sort.js
@@ -5292,12 +5106,12 @@ function quickselect(array, k, left = 0, right = Infinity, compare) {
   while (right > left) {
     if (right - left > 600) {
       const n = right - left + 1;
-      const m = k - left + 1;
+      const m2 = k - left + 1;
       const z = Math.log(n);
       const s = 0.5 * Math.exp(2 * z / 3);
-      const sd = 0.5 * Math.sqrt(z * s * (n - s) / n) * (m - n / 2 < 0 ? -1 : 1);
-      const newLeft = Math.max(left, Math.floor(k - m * s / n + sd));
-      const newRight = Math.min(right, Math.floor(k + (n - m) * s / n + sd));
+      const sd = 0.5 * Math.sqrt(z * s * (n - s) / n) * (m2 - n / 2 < 0 ? -1 : 1);
+      const newLeft = Math.max(left, Math.floor(k - m2 * s / n + sd));
+      const newRight = Math.min(right, Math.floor(k + (n - m2) * s / n + sd));
       quickselect(array, k, newLeft, newRight, compare);
     }
     const t = array[k];
@@ -5725,7 +5539,7 @@ function selector_default(selector) {
 function select_default(select) {
   if (typeof select !== "function")
     select = selector_default(select);
-  for (var groups2 = this._groups, m = groups2.length, subgroups = new Array(m), j = 0;j < m; ++j) {
+  for (var groups2 = this._groups, m2 = groups2.length, subgroups = new Array(m2), j = 0;j < m2; ++j) {
     for (var group3 = groups2[j], n = group3.length, subgroup = subgroups[j] = new Array(n), node, subnode, i = 0;i < n; ++i) {
       if ((node = group3[i]) && (subnode = select.call(node, node.__data__, i, group3))) {
         if ("__data__" in node)
@@ -5763,7 +5577,7 @@ function selectAll_default(select) {
     select = arrayAll(select);
   else
     select = selectorAll_default(select);
-  for (var groups2 = this._groups, m = groups2.length, subgroups = [], parents = [], j = 0;j < m; ++j) {
+  for (var groups2 = this._groups, m2 = groups2.length, subgroups = [], parents = [], j = 0;j < m2; ++j) {
     for (var group3 = groups2[j], n = group3.length, node, i = 0;i < n; ++i) {
       if (node = group3[i]) {
         subgroups.push(select.call(node, node.__data__, i, group3));
@@ -5789,13 +5603,13 @@ function matcher_default(selector2) {
 // node_modules/d3-selection/src/selection/selectChild.js
 var childFind = function(match) {
   return function() {
-    return find3.call(this.children, match);
+    return find.call(this.children, match);
   };
 };
 var childFirst = function() {
   return this.firstElementChild;
 };
-var find3 = Array.prototype.find;
+var find = Array.prototype.find;
 function selectChild_default(match) {
   return this.select(match == null ? childFirst : childFind(typeof match === "function" ? match : childMatcher(match)));
 }
@@ -5806,10 +5620,10 @@ var children = function() {
 };
 var childrenFilter = function(match) {
   return function() {
-    return filter3.call(this.children, match);
+    return filter2.call(this.children, match);
   };
 };
-var filter3 = Array.prototype.filter;
+var filter2 = Array.prototype.filter;
 function selectChildren_default(match) {
   return this.selectAll(match == null ? children : childrenFilter(typeof match === "function" ? match : childMatcher(match)));
 }
@@ -5818,7 +5632,7 @@ function selectChildren_default(match) {
 function filter_default2(match) {
   if (typeof match !== "function")
     match = matcher_default(match);
-  for (var groups2 = this._groups, m = groups2.length, subgroups = new Array(m), j = 0;j < m; ++j) {
+  for (var groups2 = this._groups, m2 = groups2.length, subgroups = new Array(m2), j = 0;j < m2; ++j) {
     for (var group3 = groups2[j], n = group3.length, subgroup = subgroups[j] = [], node, i = 0;i < n; ++i) {
       if ((node = group3[i]) && match.call(node, node.__data__, i, group3)) {
         subgroup.push(node);
@@ -5924,7 +5738,7 @@ function data_default(value2, key) {
   var bind4 = key ? bindKey : bindIndex, parents = this._parents, groups2 = this._groups;
   if (typeof value2 !== "function")
     value2 = constant_default(value2);
-  for (var m = groups2.length, update = new Array(m), enter2 = new Array(m), exit = new Array(m), j = 0;j < m; ++j) {
+  for (var m2 = groups2.length, update = new Array(m2), enter2 = new Array(m2), exit = new Array(m2), j = 0;j < m2; ++j) {
     var parent = parents[j], group3 = groups2[j], groupLength = group3.length, data = arraylike(value2.call(parent, parent && parent.__data__, j, parents)), dataLength = data.length, enterGroup = enter2[j] = new Array(dataLength), updateGroup = update[j] = new Array(dataLength), exitGroup = exit[j] = new Array(groupLength);
     bind4(parent, group3, enterGroup, updateGroup, exitGroup, data, key);
     for (var i0 = 0, i1 = 0, previous, next;i0 < dataLength; ++i0) {
@@ -5973,7 +5787,7 @@ function join_default(onenter, onupdate, onexit) {
 // node_modules/d3-selection/src/selection/merge.js
 function merge_default(context) {
   var selection = context.selection ? context.selection() : context;
-  for (var groups0 = this._groups, groups1 = selection._groups, m0 = groups0.length, m1 = groups1.length, m = Math.min(m0, m1), merges = new Array(m0), j = 0;j < m; ++j) {
+  for (var groups0 = this._groups, groups1 = selection._groups, m0 = groups0.length, m1 = groups1.length, m2 = Math.min(m0, m1), merges = new Array(m0), j = 0;j < m2; ++j) {
     for (var group0 = groups0[j], group1 = groups1[j], n = group0.length, merge2 = merges[j] = new Array(n), node, i = 0;i < n; ++i) {
       if (node = group0[i] || group1[i]) {
         merge2[i] = node;
@@ -5988,7 +5802,7 @@ function merge_default(context) {
 
 // node_modules/d3-selection/src/selection/order.js
 function order_default() {
-  for (var groups2 = this._groups, j = -1, m = groups2.length;++j < m; ) {
+  for (var groups2 = this._groups, j = -1, m2 = groups2.length;++j < m2; ) {
     for (var group3 = groups2[j], i = group3.length - 1, next = group3[i], node;--i >= 0; ) {
       if (node = group3[i]) {
         if (next && node.compareDocumentPosition(next) ^ 4)
@@ -6010,7 +5824,7 @@ function sort_default(compare) {
   function compareNode(a, b) {
     return a && b ? compare(a.__data__, b.__data__) : !a - !b;
   }
-  for (var groups2 = this._groups, m = groups2.length, sortgroups = new Array(m), j = 0;j < m; ++j) {
+  for (var groups2 = this._groups, m2 = groups2.length, sortgroups = new Array(m2), j = 0;j < m2; ++j) {
     for (var group3 = groups2[j], n = group3.length, sortgroup = sortgroups[j] = new Array(n), node, i = 0;i < n; ++i) {
       if (node = group3[i]) {
         sortgroup[i] = node;
@@ -6036,7 +5850,7 @@ function nodes_default() {
 
 // node_modules/d3-selection/src/selection/node.js
 function node_default() {
-  for (var groups2 = this._groups, j = 0, m = groups2.length;j < m; ++j) {
+  for (var groups2 = this._groups, j = 0, m2 = groups2.length;j < m2; ++j) {
     for (var group3 = groups2[j], i = 0, n = group3.length;i < n; ++i) {
       var node = group3[i];
       if (node)
@@ -6061,7 +5875,7 @@ function empty_default() {
 
 // node_modules/d3-selection/src/selection/each.js
 function each_default(callback) {
-  for (var groups2 = this._groups, j = 0, m = groups2.length;j < m; ++j) {
+  for (var groups2 = this._groups, j = 0, m2 = groups2.length;j < m2; ++j) {
     for (var group3 = groups2[j], i = 0, n = group3.length, node;i < n; ++i) {
       if (node = group3[i])
         callback.call(node, node.__data__, i, group3);
@@ -6363,7 +6177,7 @@ var onRemove = function(typename) {
     var on = this.__on;
     if (!on)
       return;
-    for (var j = 0, i = -1, m = on.length, o;j < m; ++j) {
+    for (var j = 0, i = -1, m2 = on.length, o;j < m2; ++j) {
       if (o = on[j], (!typename.type || o.type === typename.type) && o.name === typename.name) {
         this.removeEventListener(o.type, o.listener, o.options);
       } else {
@@ -6380,7 +6194,7 @@ var onAdd = function(typename, value2, options) {
   return function() {
     var on = this.__on, o, listener = contextListener(value2);
     if (on)
-      for (var j = 0, m = on.length;j < m; ++j) {
+      for (var j = 0, m2 = on.length;j < m2; ++j) {
         if ((o = on[j]).type === typename.type && o.name === typename.name) {
           this.removeEventListener(o.type, o.listener, o.options);
           this.addEventListener(o.type, o.listener = listener, o.options = options);
@@ -6401,7 +6215,7 @@ function on_default(typename, value2, options) {
   if (arguments.length < 2) {
     var on = this.node().__on;
     if (on)
-      for (var j = 0, m = on.length, o;j < m; ++j) {
+      for (var j = 0, m2 = on.length, o;j < m2; ++j) {
         for (i = 0, o = on[j];i < n; ++i) {
           if ((t = typenames[i]).type === o.type && t.name === o.name) {
             return o.value;
@@ -6446,7 +6260,7 @@ function dispatch_default2(type5, params) {
 
 // node_modules/d3-selection/src/selection/iterator.js
 function* iterator_default() {
-  for (var groups2 = this._groups, j = 0, m = groups2.length;j < m; ++j) {
+  for (var groups2 = this._groups, j = 0, m2 = groups2.length;j < m2; ++j) {
     for (var group3 = groups2[j], i = 0, n = group3.length, node;i < n; ++i) {
       if (node = group3[i])
         yield node;
@@ -6840,9 +6654,9 @@ define_default(Color, color, {
   toString: color_formatRgb
 });
 function color(format) {
-  var m, l;
+  var m2, l;
   format = (format + "").trim().toLowerCase();
-  return (m = reHex.exec(format)) ? (l = m[1].length, m = parseInt(m[1], 16), l === 6 ? rgbn(m) : l === 3 ? new Rgb(m >> 8 & 15 | m >> 4 & 240, m >> 4 & 15 | m & 240, (m & 15) << 4 | m & 15, 1) : l === 8 ? rgba(m >> 24 & 255, m >> 16 & 255, m >> 8 & 255, (m & 255) / 255) : l === 4 ? rgba(m >> 12 & 15 | m >> 8 & 240, m >> 8 & 15 | m >> 4 & 240, m >> 4 & 15 | m & 240, ((m & 15) << 4 | m & 15) / 255) : null) : (m = reRgbInteger.exec(format)) ? new Rgb(m[1], m[2], m[3], 1) : (m = reRgbPercent.exec(format)) ? new Rgb(m[1] * 255 / 100, m[2] * 255 / 100, m[3] * 255 / 100, 1) : (m = reRgbaInteger.exec(format)) ? rgba(m[1], m[2], m[3], m[4]) : (m = reRgbaPercent.exec(format)) ? rgba(m[1] * 255 / 100, m[2] * 255 / 100, m[3] * 255 / 100, m[4]) : (m = reHslPercent.exec(format)) ? hsla(m[1], m[2] / 100, m[3] / 100, 1) : (m = reHslaPercent.exec(format)) ? hsla(m[1], m[2] / 100, m[3] / 100, m[4]) : named.hasOwnProperty(format) ? rgbn(named[format]) : format === "transparent" ? new Rgb(NaN, NaN, NaN, 0) : null;
+  return (m2 = reHex.exec(format)) ? (l = m2[1].length, m2 = parseInt(m2[1], 16), l === 6 ? rgbn(m2) : l === 3 ? new Rgb(m2 >> 8 & 15 | m2 >> 4 & 240, m2 >> 4 & 15 | m2 & 240, (m2 & 15) << 4 | m2 & 15, 1) : l === 8 ? rgba(m2 >> 24 & 255, m2 >> 16 & 255, m2 >> 8 & 255, (m2 & 255) / 255) : l === 4 ? rgba(m2 >> 12 & 15 | m2 >> 8 & 240, m2 >> 8 & 15 | m2 >> 4 & 240, m2 >> 4 & 15 | m2 & 240, ((m2 & 15) << 4 | m2 & 15) / 255) : null) : (m2 = reRgbInteger.exec(format)) ? new Rgb(m2[1], m2[2], m2[3], 1) : (m2 = reRgbPercent.exec(format)) ? new Rgb(m2[1] * 255 / 100, m2[2] * 255 / 100, m2[3] * 255 / 100, 1) : (m2 = reRgbaInteger.exec(format)) ? rgba(m2[1], m2[2], m2[3], m2[4]) : (m2 = reRgbaPercent.exec(format)) ? rgba(m2[1] * 255 / 100, m2[2] * 255 / 100, m2[3] * 255 / 100, m2[4]) : (m2 = reHslPercent.exec(format)) ? hsla(m2[1], m2[2] / 100, m2[3] / 100, 1) : (m2 = reHslaPercent.exec(format)) ? hsla(m2[1], m2[2] / 100, m2[3] / 100, m2[4]) : named.hasOwnProperty(format) ? rgbn(named[format]) : format === "transparent" ? new Rgb(NaN, NaN, NaN, 0) : null;
 }
 define_default(Rgb, rgb, extend(Color, {
   brighter(k) {
@@ -7280,8 +7094,8 @@ function decompose_default(a, b, c, d, e3, f) {
 
 // node_modules/d3-interpolate/src/transform/parse.js
 function parseCss(value4) {
-  const m = new (typeof DOMMatrix === "function" ? DOMMatrix : WebKitCSSMatrix)(value4 + "");
-  return m.isIdentity ? identity6 : decompose_default(m.a, m.b, m.c, m.d, m.e, m.f);
+  const m2 = new (typeof DOMMatrix === "function" ? DOMMatrix : WebKitCSSMatrix)(value4 + "");
+  return m2.isIdentity ? identity6 : decompose_default(m2.a, m2.b, m2.c, m2.d, m2.e, m2.f);
 }
 function parseSvg(value4) {
   if (value4 == null)
@@ -7574,23 +7388,23 @@ function get2(node2, id) {
     throw new Error("transition not found");
   return schedule;
 }
-var create = function(node2, id, self2) {
+var create = function(node2, id, self) {
   var schedules = node2.__transition, tween;
-  schedules[id] = self2;
-  self2.timer = timer(schedule, 0, self2.time);
+  schedules[id] = self;
+  self.timer = timer(schedule, 0, self.time);
   function schedule(elapsed) {
-    self2.state = SCHEDULED;
-    self2.timer.restart(start, self2.delay, self2.time);
-    if (self2.delay <= elapsed)
-      start(elapsed - self2.delay);
+    self.state = SCHEDULED;
+    self.timer.restart(start, self.delay, self.time);
+    if (self.delay <= elapsed)
+      start(elapsed - self.delay);
   }
   function start(elapsed) {
     var i, j, n, o;
-    if (self2.state !== SCHEDULED)
+    if (self.state !== SCHEDULED)
       return stop();
     for (i in schedules) {
       o = schedules[i];
-      if (o.name !== self2.name)
+      if (o.name !== self.name)
         continue;
       if (o.state === STARTED)
         return timeout_default(start);
@@ -7607,38 +7421,38 @@ var create = function(node2, id, self2) {
       }
     }
     timeout_default(function() {
-      if (self2.state === STARTED) {
-        self2.state = RUNNING;
-        self2.timer.restart(tick, self2.delay, self2.time);
+      if (self.state === STARTED) {
+        self.state = RUNNING;
+        self.timer.restart(tick, self.delay, self.time);
         tick(elapsed);
       }
     });
-    self2.state = STARTING;
-    self2.on.call("start", node2, node2.__data__, self2.index, self2.group);
-    if (self2.state !== STARTING)
+    self.state = STARTING;
+    self.on.call("start", node2, node2.__data__, self.index, self.group);
+    if (self.state !== STARTING)
       return;
-    self2.state = STARTED;
-    tween = new Array(n = self2.tween.length);
+    self.state = STARTED;
+    tween = new Array(n = self.tween.length);
     for (i = 0, j = -1;i < n; ++i) {
-      if (o = self2.tween[i].value.call(node2, node2.__data__, self2.index, self2.group)) {
+      if (o = self.tween[i].value.call(node2, node2.__data__, self.index, self.group)) {
         tween[++j] = o;
       }
     }
     tween.length = j + 1;
   }
   function tick(elapsed) {
-    var t = elapsed < self2.duration ? self2.ease.call(null, elapsed / self2.duration) : (self2.timer.restart(stop), self2.state = ENDING, 1), i = -1, n = tween.length;
+    var t = elapsed < self.duration ? self.ease.call(null, elapsed / self.duration) : (self.timer.restart(stop), self.state = ENDING, 1), i = -1, n = tween.length;
     while (++i < n) {
       tween[i].call(node2, t);
     }
-    if (self2.state === ENDING) {
-      self2.on.call("end", node2, node2.__data__, self2.index, self2.group);
+    if (self.state === ENDING) {
+      self.on.call("end", node2, node2.__data__, self.index, self.group);
       stop();
     }
   }
   function stop() {
-    self2.state = ENDED;
-    self2.timer.stop();
+    self.state = ENDED;
+    self.timer.stop();
     delete schedules[id];
     for (var i in schedules)
       return;
@@ -7933,7 +7747,7 @@ function easeVarying_default(value5) {
 function filter_default3(match) {
   if (typeof match !== "function")
     match = matcher_default(match);
-  for (var groups2 = this._groups, m = groups2.length, subgroups = new Array(m), j = 0;j < m; ++j) {
+  for (var groups2 = this._groups, m2 = groups2.length, subgroups = new Array(m2), j = 0;j < m2; ++j) {
     for (var group3 = groups2[j], n = group3.length, subgroup = subgroups[j] = [], node2, i = 0;i < n; ++i) {
       if ((node2 = group3[i]) && match.call(node2, node2.__data__, i, group3)) {
         subgroup.push(node2);
@@ -7947,7 +7761,7 @@ function filter_default3(match) {
 function merge_default2(transition) {
   if (transition._id !== this._id)
     throw new Error;
-  for (var groups0 = this._groups, groups1 = transition._groups, m0 = groups0.length, m1 = groups1.length, m = Math.min(m0, m1), merges = new Array(m0), j = 0;j < m; ++j) {
+  for (var groups0 = this._groups, groups1 = transition._groups, m0 = groups0.length, m1 = groups1.length, m2 = Math.min(m0, m1), merges = new Array(m0), j = 0;j < m2; ++j) {
     for (var group0 = groups0[j], group1 = groups1[j], n = group0.length, merge3 = merges[j] = new Array(n), node2, i = 0;i < n; ++i) {
       if (node2 = group0[i] || group1[i]) {
         merge3[i] = node2;
@@ -8003,7 +7817,7 @@ function select_default3(select2) {
   var name = this._name, id = this._id;
   if (typeof select2 !== "function")
     select2 = selector_default(select2);
-  for (var groups2 = this._groups, m = groups2.length, subgroups = new Array(m), j = 0;j < m; ++j) {
+  for (var groups2 = this._groups, m2 = groups2.length, subgroups = new Array(m2), j = 0;j < m2; ++j) {
     for (var group3 = groups2[j], n = group3.length, subgroup = subgroups[j] = new Array(n), node2, subnode, i = 0;i < n; ++i) {
       if ((node2 = group3[i]) && (subnode = select2.call(node2, node2.__data__, i, group3))) {
         if ("__data__" in node2)
@@ -8021,7 +7835,7 @@ function selectAll_default2(select2) {
   var name = this._name, id = this._id;
   if (typeof select2 !== "function")
     select2 = selectorAll_default(select2);
-  for (var groups2 = this._groups, m = groups2.length, subgroups = [], parents = [], j = 0;j < m; ++j) {
+  for (var groups2 = this._groups, m2 = groups2.length, subgroups = [], parents = [], j = 0;j < m2; ++j) {
     for (var group3 = groups2[j], n = group3.length, node2, i = 0;i < n; ++i) {
       if (node2 = group3[i]) {
         for (var children2 = select2.call(node2, node2.__data__, i, group3), child, inherit = get2(node2, id), k = 0, l = children2.length;k < l; ++k) {
@@ -8161,7 +7975,7 @@ function textTween_default(value5) {
 // node_modules/d3-transition/src/transition/transition.js
 function transition_default() {
   var name = this._name, id0 = this._id, id1 = newId();
-  for (var groups2 = this._groups, m = groups2.length, j = 0;j < m; ++j) {
+  for (var groups2 = this._groups, m2 = groups2.length, j = 0;j < m2; ++j) {
     for (var group3 = groups2[j], n = group3.length, node2, i = 0;i < n; ++i) {
       if (node2 = group3[i]) {
         var inherit = get2(node2, id0);
@@ -8180,8 +7994,8 @@ function transition_default() {
 // node_modules/d3-transition/src/transition/end.js
 function end_default() {
   var on0, on1, that = this, id = that._id, size2 = that.size();
-  return new Promise(function(resolve, reject4) {
-    var cancel = { value: reject4 }, end = { value: function() {
+  return new Promise(function(resolve, reject) {
+    var cancel = { value: reject }, end = { value: function() {
       if (--size2 === 0)
         resolve();
     } };
@@ -8275,7 +8089,7 @@ function transition_default2(name) {
   } else {
     id2 = newId(), (timing = defaultTiming).time = now(), name = name == null ? null : name + "";
   }
-  for (var groups2 = this._groups, m = groups2.length, j = 0;j < m; ++j) {
+  for (var groups2 = this._groups, m2 = groups2.length, j = 0;j < m2; ++j) {
     for (var group3 = groups2[j], n = group3.length, node2, i = 0;i < n; ++i) {
       if (node2 = group3[i]) {
         schedule_default(node2, name, id2, i, group3, timing || inherit(node2, id2));
@@ -8578,10 +8392,10 @@ function identity_default3(x) {
 }
 
 // node_modules/d3-format/src/locale.js
-var map5 = Array.prototype.map;
+var map6 = Array.prototype.map;
 var prefixes = ["y", "z", "a", "f", "p", "n", "\xB5", "m", "", "k", "M", "G", "T", "P", "E", "Z", "Y"];
 function locale_default(locale) {
-  var group3 = locale.grouping === undefined || locale.thousands === undefined ? identity_default3 : formatGroup_default(map5.call(locale.grouping, Number), locale.thousands + ""), currencyPrefix = locale.currency === undefined ? "" : locale.currency[0] + "", currencySuffix = locale.currency === undefined ? "" : locale.currency[1] + "", decimal = locale.decimal === undefined ? "." : locale.decimal + "", numerals = locale.numerals === undefined ? identity_default3 : formatNumerals_default(map5.call(locale.numerals, String)), percent = locale.percent === undefined ? "%" : locale.percent + "", minus = locale.minus === undefined ? "\u2212" : locale.minus + "", nan = locale.nan === undefined ? "NaN" : locale.nan + "";
+  var group3 = locale.grouping === undefined || locale.thousands === undefined ? identity_default3 : formatGroup_default(map6.call(locale.grouping, Number), locale.thousands + ""), currencyPrefix = locale.currency === undefined ? "" : locale.currency[0] + "", currencySuffix = locale.currency === undefined ? "" : locale.currency[1] + "", decimal = locale.decimal === undefined ? "." : locale.decimal + "", numerals = locale.numerals === undefined ? identity_default3 : formatNumerals_default(map6.call(locale.numerals, String)), percent = locale.percent === undefined ? "%" : locale.percent + "", minus = locale.minus === undefined ? "\u2212" : locale.minus + "", nan = locale.nan === undefined ? "NaN" : locale.nan + "";
   function newFormat(specifier) {
     specifier = formatSpecifier(specifier);
     var { fill, align, sign, symbol, zero: zero3, width, comma, precision, trim, type: type6 } = specifier;
@@ -8913,8 +8727,8 @@ var circleRadius = function(cosRadius, point) {
 function buffer_default() {
   var lines = [], line;
   return {
-    point: function(x, y, m) {
-      line.push([x, y, m]);
+    point: function(x, y, m2) {
+      line.push([x, y, m2]);
     },
     lineStart: function() {
       lines.push(line = []);
@@ -9036,10 +8850,10 @@ function polygonContains_default(polygon, point) {
   else if (sinPhi === -1)
     phi = -halfPi - epsilon3;
   for (var i = 0, n = polygon.length;i < n; ++i) {
-    if (!(m = (ring = polygon[i]).length))
+    if (!(m2 = (ring = polygon[i]).length))
       continue;
-    var ring, m, point0 = ring[m - 1], lambda0 = longitude(point0), phi0 = point0[1] / 2 + quarterPi, sinPhi0 = sin(phi0), cosPhi0 = cos(phi0);
-    for (var j = 0;j < m; ++j, lambda0 = lambda1, sinPhi0 = sinPhi1, cosPhi0 = cosPhi1, point0 = point1) {
+    var ring, m2, point0 = ring[m2 - 1], lambda0 = longitude(point0), phi0 = point0[1] / 2 + quarterPi, sinPhi0 = sin(phi0), cosPhi0 = cos(phi0);
+    for (var j = 0;j < m2; ++j, lambda0 = lambda1, sinPhi0 = sinPhi1, cosPhi0 = cosPhi1, point0 = point1) {
       var point1 = ring[j], lambda1 = longitude(point1), phi1 = point1[1] / 2 + quarterPi, sinPhi1 = sin(phi1), cosPhi1 = cos(phi1), delta = lambda1 - lambda0, sign2 = delta >= 0 ? 1 : -1, absDelta = sign2 * delta, antimeridian = absDelta > pi2, k = sinPhi0 * sinPhi1;
       sum4.add(atan2(k * sign2 * sin(absDelta), cosPhi0 * cosPhi1 + k * cos(absDelta)));
       angle += antimeridian ? delta + sign2 * tau2 : delta;
@@ -9134,7 +8948,7 @@ function clip_default(pointVisible, clipLine, interpolate3, start2) {
     function ringEnd() {
       pointRing(ring[0][0], ring[0][1]);
       ringSink.lineEnd();
-      var clean = ringSink.clean(), ringSegments = ringBuffer.result(), i, n = ringSegments.length, m, segment, point2;
+      var clean = ringSink.clean(), ringSegments = ringBuffer.result(), i, n = ringSegments.length, m2, segment, point2;
       ring.pop();
       polygon.push(ring);
       ring = null;
@@ -9142,11 +8956,11 @@ function clip_default(pointVisible, clipLine, interpolate3, start2) {
         return;
       if (clean & 1) {
         segment = ringSegments[0];
-        if ((m = segment.length - 1) > 0) {
+        if ((m2 = segment.length - 1) > 0) {
           if (!polygonStarted)
             sink.polygonStart(), polygonStarted = true;
           sink.lineStart();
-          for (i = 0;i < m; ++i)
+          for (i = 0;i < m2; ++i)
             sink.point((point2 = segment[i])[0], point2[1]);
           sink.lineEnd();
         }
@@ -9457,7 +9271,7 @@ function clipRectangle(x0, y0, x1, y1) {
     function polygonInside() {
       var winding = 0;
       for (var i = 0, n = polygon.length;i < n; ++i) {
-        for (var ring2 = polygon[i], j = 1, m = ring2.length, point2 = ring2[0], a0, a1, b0 = point2[0], b1 = point2[1];j < m; ++j) {
+        for (var ring2 = polygon[i], j = 1, m2 = ring2.length, point2 = ring2[0], a0, a1, b0 = point2[0], b1 = point2[1];j < m2; ++j) {
           a0 = b0, a1 = b1, point2 = ring2[j], b0 = point2[0], b1 = point2[1];
           if (a1 <= y1) {
             if (b1 > y1 && (b0 - a0) * (y1 - a1) > (b1 - a1) * (x0 - a0))
@@ -10022,9 +9836,9 @@ var resample = function(project, delta2) {
   function resampleLineTo(x05, y05, lambda0, a0, b0, c0, x12, y12, lambda1, a1, b1, c1, depth, stream3) {
     var dx = x12 - x05, dy = y12 - y05, d2 = dx * dx + dy * dy;
     if (d2 > 4 * delta2 && depth--) {
-      var a = a0 + a1, b = b0 + b1, c = c0 + c1, m = sqrt(a * a + b * b + c * c), phi2 = asin(c /= m), lambda2 = abs(abs(c) - 1) < epsilon3 || abs(lambda0 - lambda1) < epsilon3 ? (lambda0 + lambda1) / 2 : atan2(b, a), p = project(lambda2, phi2), x2 = p[0], y2 = p[1], dx2 = x2 - x05, dy2 = y2 - y05, dz = dy * dx2 - dx * dy2;
+      var a = a0 + a1, b = b0 + b1, c = c0 + c1, m2 = sqrt(a * a + b * b + c * c), phi2 = asin(c /= m2), lambda2 = abs(abs(c) - 1) < epsilon3 || abs(lambda0 - lambda1) < epsilon3 ? (lambda0 + lambda1) / 2 : atan2(b, a), p = project(lambda2, phi2), x2 = p[0], y2 = p[1], dx2 = x2 - x05, dy2 = y2 - y05, dz = dy * dx2 - dx * dy2;
       if (dz * dz / d2 > delta2 || abs((dx * dx2 + dy * dy2) / d2 - 0.5) > 0.3 || a0 * a1 + b0 * b1 + c0 * c1 < cosMinDistance) {
-        resampleLineTo(x05, y05, lambda0, a0, b0, c0, x2, y2, lambda2, a /= m, b /= m, c, depth, stream3);
+        resampleLineTo(x05, y05, lambda0, a0, b0, c0, x2, y2, lambda2, a /= m2, b /= m2, c, depth, stream3);
         stream3.point(x2, y2);
         resampleLineTo(x2, y2, lambda2, a, b, c, x12, y12, lambda1, a1, b1, c1, depth, stream3);
       }
@@ -10211,9 +10025,9 @@ function projection(project) {
 
 // node_modules/d3-geo/src/projection/conic.js
 function conicProjection(projectAt) {
-  var phi0 = 0, phi1 = pi2 / 3, m = projectionMutator(projectAt), p = m(phi0, phi1);
+  var phi0 = 0, phi1 = pi2 / 3, m2 = projectionMutator(projectAt), p = m2(phi0, phi1);
   p.parallels = function(_) {
-    return arguments.length ? m(phi0 = _[0] * radians2, phi1 = _[1] * radians2) : [phi0 * degrees3, phi1 * degrees3];
+    return arguments.length ? m2(phi0 = _[0] * radians2, phi1 = _[1] * radians2) : [phi0 * degrees3, phi1 * degrees3];
   };
   return p;
 }
@@ -10393,21 +10207,21 @@ function mercatorRaw(lambda, phi) {
   return [lambda, log2(tan((halfPi + phi) / 2))];
 }
 function mercatorProjection(project) {
-  var m = projection(project), center2 = m.center, scale = m.scale, translate = m.translate, clipExtent = m.clipExtent, x05 = null, y05, x12, y12;
-  m.scale = function(_) {
+  var m2 = projection(project), center2 = m2.center, scale = m2.scale, translate = m2.translate, clipExtent = m2.clipExtent, x05 = null, y05, x12, y12;
+  m2.scale = function(_) {
     return arguments.length ? (scale(_), reclip()) : scale();
   };
-  m.translate = function(_) {
+  m2.translate = function(_) {
     return arguments.length ? (translate(_), reclip()) : translate();
   };
-  m.center = function(_) {
+  m2.center = function(_) {
     return arguments.length ? (center2(_), reclip()) : center2();
   };
-  m.clipExtent = function(_) {
+  m2.clipExtent = function(_) {
     return arguments.length ? (_ == null ? x05 = y05 = x12 = y12 = null : (x05 = +_[0][0], y05 = +_[0][1], x12 = +_[1][0], y12 = +_[1][1]), reclip()) : x05 == null ? null : [[x05, y05], [x12, y12]];
   };
   function reclip() {
-    var k = pi2 * scale(), t = m(rotation_default(m.rotate()).invert([0, 0]));
+    var k = pi2 * scale(), t = m2(rotation_default(m2.rotate()).invert([0, 0]));
     return clipExtent(x05 == null ? [[t[0] - k, t[1] - k], [t[0] + k, t[1] + k]] : project === mercatorRaw ? [[Math.max(t[0] - k, x05), y05], [Math.min(t[0] + k, x12), y12]] : [[x05, Math.max(t[1] - k, y05)], [x12, Math.min(t[1] + k, y12)]]);
   }
   return reclip();
@@ -10545,11 +10359,11 @@ transverseMercatorRaw.invert = function(x, y) {
   return [-y, 2 * atan(exp2(x)) - halfPi];
 };
 function transverseMercator_default() {
-  var m = mercatorProjection(transverseMercatorRaw), center2 = m.center, rotate = m.rotate;
-  m.center = function(_) {
+  var m2 = mercatorProjection(transverseMercatorRaw), center2 = m2.center, rotate = m2.rotate;
+  m2.center = function(_) {
     return arguments.length ? center2([-_[1], _[0]]) : (_ = center2(), [_[1], -_[0]]);
   };
-  m.rotate = function(_) {
+  m2.rotate = function(_) {
     return arguments.length ? rotate([_[0], _[1], _.length > 2 ? _[2] + 90 : 90]) : (_ = rotate(), [_[0], _[1], _[2] - 90]);
   };
   return rotate([0, 0, 90]).scale(159.155);
@@ -11509,10 +11323,10 @@ var utcDate = function(d) {
   }
   return new Date(Date.UTC(d.y, d.m, d.d, d.H, d.M, d.S, d.L));
 };
-var newDate = function(y, m, d) {
-  return { y, m, d, H: 0, M: 0, S: 0, L: 0 };
+var newDate = function(y, m2, d) {
+  return { y, m: m2, d, H: 0, M: 0, S: 0, L: 0 };
 };
-var pad3 = function(value5, fill, width) {
+var pad = function(value5, fill, width) {
   var sign2 = value5 < 0 ? "-" : "", string3 = (sign2 ? -value5 : value5) + "", length2 = string3.length;
   return sign2 + (length2 < width ? new Array(width - length2 + 1).join(fill) + string3 : string3);
 };
@@ -11606,38 +11420,38 @@ var parseUnixTimestampSeconds = function(d, string3, i) {
   return n ? (d.s = +n[0], i + n[0].length) : -1;
 };
 var formatDayOfMonth = function(d, p) {
-  return pad3(d.getDate(), p, 2);
+  return pad(d.getDate(), p, 2);
 };
 var formatHour24 = function(d, p) {
-  return pad3(d.getHours(), p, 2);
+  return pad(d.getHours(), p, 2);
 };
 var formatHour12 = function(d, p) {
-  return pad3(d.getHours() % 12 || 12, p, 2);
+  return pad(d.getHours() % 12 || 12, p, 2);
 };
 var formatDayOfYear = function(d, p) {
-  return pad3(1 + timeDay.count(timeYear(d), d), p, 3);
+  return pad(1 + timeDay.count(timeYear(d), d), p, 3);
 };
 var formatMilliseconds = function(d, p) {
-  return pad3(d.getMilliseconds(), p, 3);
+  return pad(d.getMilliseconds(), p, 3);
 };
 var formatMicroseconds = function(d, p) {
   return formatMilliseconds(d, p) + "000";
 };
 var formatMonthNumber = function(d, p) {
-  return pad3(d.getMonth() + 1, p, 2);
+  return pad(d.getMonth() + 1, p, 2);
 };
 var formatMinutes = function(d, p) {
-  return pad3(d.getMinutes(), p, 2);
+  return pad(d.getMinutes(), p, 2);
 };
 var formatSeconds = function(d, p) {
-  return pad3(d.getSeconds(), p, 2);
+  return pad(d.getSeconds(), p, 2);
 };
 var formatWeekdayNumberMonday = function(d) {
   var day2 = d.getDay();
   return day2 === 0 ? 7 : day2;
 };
 var formatWeekNumberSunday = function(d, p) {
-  return pad3(timeSunday.count(timeYear(d) - 1, d), p, 2);
+  return pad(timeSunday.count(timeYear(d) - 1, d), p, 2);
 };
 var dISO = function(d) {
   var day2 = d.getDay();
@@ -11645,66 +11459,66 @@ var dISO = function(d) {
 };
 var formatWeekNumberISO = function(d, p) {
   d = dISO(d);
-  return pad3(timeThursday.count(timeYear(d), d) + (timeYear(d).getDay() === 4), p, 2);
+  return pad(timeThursday.count(timeYear(d), d) + (timeYear(d).getDay() === 4), p, 2);
 };
 var formatWeekdayNumberSunday = function(d) {
   return d.getDay();
 };
 var formatWeekNumberMonday = function(d, p) {
-  return pad3(timeMonday.count(timeYear(d) - 1, d), p, 2);
+  return pad(timeMonday.count(timeYear(d) - 1, d), p, 2);
 };
 var formatYear = function(d, p) {
-  return pad3(d.getFullYear() % 100, p, 2);
+  return pad(d.getFullYear() % 100, p, 2);
 };
 var formatYearISO = function(d, p) {
   d = dISO(d);
-  return pad3(d.getFullYear() % 100, p, 2);
+  return pad(d.getFullYear() % 100, p, 2);
 };
 var formatFullYear = function(d, p) {
-  return pad3(d.getFullYear() % 1e4, p, 4);
+  return pad(d.getFullYear() % 1e4, p, 4);
 };
 var formatFullYearISO = function(d, p) {
   var day2 = d.getDay();
   d = day2 >= 4 || day2 === 0 ? timeThursday(d) : timeThursday.ceil(d);
-  return pad3(d.getFullYear() % 1e4, p, 4);
+  return pad(d.getFullYear() % 1e4, p, 4);
 };
 var formatZone = function(d) {
   var z = d.getTimezoneOffset();
-  return (z > 0 ? "-" : (z *= -1, "+")) + pad3(z / 60 | 0, "0", 2) + pad3(z % 60, "0", 2);
+  return (z > 0 ? "-" : (z *= -1, "+")) + pad(z / 60 | 0, "0", 2) + pad(z % 60, "0", 2);
 };
 var formatUTCDayOfMonth = function(d, p) {
-  return pad3(d.getUTCDate(), p, 2);
+  return pad(d.getUTCDate(), p, 2);
 };
 var formatUTCHour24 = function(d, p) {
-  return pad3(d.getUTCHours(), p, 2);
+  return pad(d.getUTCHours(), p, 2);
 };
 var formatUTCHour12 = function(d, p) {
-  return pad3(d.getUTCHours() % 12 || 12, p, 2);
+  return pad(d.getUTCHours() % 12 || 12, p, 2);
 };
 var formatUTCDayOfYear = function(d, p) {
-  return pad3(1 + utcDay.count(utcYear(d), d), p, 3);
+  return pad(1 + utcDay.count(utcYear(d), d), p, 3);
 };
 var formatUTCMilliseconds = function(d, p) {
-  return pad3(d.getUTCMilliseconds(), p, 3);
+  return pad(d.getUTCMilliseconds(), p, 3);
 };
 var formatUTCMicroseconds = function(d, p) {
   return formatUTCMilliseconds(d, p) + "000";
 };
 var formatUTCMonthNumber = function(d, p) {
-  return pad3(d.getUTCMonth() + 1, p, 2);
+  return pad(d.getUTCMonth() + 1, p, 2);
 };
 var formatUTCMinutes = function(d, p) {
-  return pad3(d.getUTCMinutes(), p, 2);
+  return pad(d.getUTCMinutes(), p, 2);
 };
 var formatUTCSeconds = function(d, p) {
-  return pad3(d.getUTCSeconds(), p, 2);
+  return pad(d.getUTCSeconds(), p, 2);
 };
 var formatUTCWeekdayNumberMonday = function(d) {
   var dow = d.getUTCDay();
   return dow === 0 ? 7 : dow;
 };
 var formatUTCWeekNumberSunday = function(d, p) {
-  return pad3(utcSunday.count(utcYear(d) - 1, d), p, 2);
+  return pad(utcSunday.count(utcYear(d) - 1, d), p, 2);
 };
 var UTCdISO = function(d) {
   var day2 = d.getUTCDay();
@@ -11712,28 +11526,28 @@ var UTCdISO = function(d) {
 };
 var formatUTCWeekNumberISO = function(d, p) {
   d = UTCdISO(d);
-  return pad3(utcThursday.count(utcYear(d), d) + (utcYear(d).getUTCDay() === 4), p, 2);
+  return pad(utcThursday.count(utcYear(d), d) + (utcYear(d).getUTCDay() === 4), p, 2);
 };
 var formatUTCWeekdayNumberSunday = function(d) {
   return d.getUTCDay();
 };
 var formatUTCWeekNumberMonday = function(d, p) {
-  return pad3(utcMonday.count(utcYear(d) - 1, d), p, 2);
+  return pad(utcMonday.count(utcYear(d) - 1, d), p, 2);
 };
 var formatUTCYear = function(d, p) {
-  return pad3(d.getUTCFullYear() % 100, p, 2);
+  return pad(d.getUTCFullYear() % 100, p, 2);
 };
 var formatUTCYearISO = function(d, p) {
   d = UTCdISO(d);
-  return pad3(d.getUTCFullYear() % 100, p, 2);
+  return pad(d.getUTCFullYear() % 100, p, 2);
 };
 var formatUTCFullYear = function(d, p) {
-  return pad3(d.getUTCFullYear() % 1e4, p, 4);
+  return pad(d.getUTCFullYear() % 1e4, p, 4);
 };
 var formatUTCFullYearISO = function(d, p) {
   var day2 = d.getUTCDay();
   d = day2 >= 4 || day2 === 0 ? utcThursday(d) : utcThursday.ceil(d);
-  return pad3(d.getUTCFullYear() % 1e4, p, 4);
+  return pad(d.getUTCFullYear() % 1e4, p, 4);
 };
 var formatUTCZone = function() {
   return "+0000";
@@ -11860,18 +11674,18 @@ function formatLocale(locale3) {
   utcFormats.c = newFormat(locale_dateTime, utcFormats);
   function newFormat(specifier, formats2) {
     return function(date2) {
-      var string3 = [], i = -1, j = 0, n = specifier.length, c, pad4, format2;
+      var string3 = [], i = -1, j = 0, n = specifier.length, c, pad2, format2;
       if (!(date2 instanceof Date))
         date2 = new Date(+date2);
       while (++i < n) {
         if (specifier.charCodeAt(i) === 37) {
           string3.push(specifier.slice(j, i));
-          if ((pad4 = pads[c = specifier.charAt(++i)]) != null)
+          if ((pad2 = pads[c = specifier.charAt(++i)]) != null)
             c = specifier.charAt(++i);
           else
-            pad4 = c === "e" ? " " : "0";
+            pad2 = c === "e" ? " " : "0";
           if (format2 = formats2[c])
-            c = format2(date2, pad4);
+            c = format2(date2, pad2);
           string3.push(c);
           j = i + 1;
         }
@@ -11931,9 +11745,9 @@ function formatLocale(locale3) {
     };
   }
   function parseSpecifier(d, specifier, string3, j) {
-    var i = 0, n = specifier.length, m = string3.length, c, parse3;
+    var i = 0, n = specifier.length, m2 = string3.length, c, parse3;
     while (i < n) {
-      if (j >= m)
+      if (j >= m2)
         return -1;
       c = specifier.charCodeAt(i++);
       if (c === 37) {
@@ -13116,9 +12930,9 @@ function point5(that, x2, y2) {
     y12 = (y12 * a2 - that._y0 * that._l12_2a + that._y2 * that._l01_2a) / n;
   }
   if (that._l23_a > epsilon4) {
-    var b = 2 * that._l23_2a + 3 * that._l23_a * that._l12_a + that._l12_2a, m = 3 * that._l23_a * (that._l23_a + that._l12_a);
-    x22 = (x22 * b + that._x1 * that._l23_2a - x2 * that._l12_2a) / m;
-    y22 = (y22 * b + that._y1 * that._l23_2a - y2 * that._l12_2a) / m;
+    var b = 2 * that._l23_2a + 3 * that._l23_a * that._l12_a + that._l12_2a, m2 = 3 * that._l23_a * (that._l23_a + that._l12_a);
+    x22 = (x22 * b + that._x1 * that._l23_2a - x2 * that._l12_2a) / m2;
+    y22 = (y22 * b + that._y1 * that._l23_2a - y2 * that._l12_2a) / m2;
   }
   that._context.bezierCurveTo(x12, y12, x22, y22, that._x2, that._y2);
 }
@@ -13443,13 +13257,13 @@ var Natural = function(context2) {
   this._context = context2;
 };
 var controlPoints = function(x2) {
-  var i, n = x2.length - 1, m, a2 = new Array(n), b = new Array(n), r = new Array(n);
+  var i, n = x2.length - 1, m2, a2 = new Array(n), b = new Array(n), r = new Array(n);
   a2[0] = 0, b[0] = 2, r[0] = x2[0] + 2 * x2[1];
   for (i = 1;i < n - 1; ++i)
     a2[i] = 1, b[i] = 4, r[i] = 4 * x2[i] + 2 * x2[i + 1];
   a2[n - 1] = 2, b[n - 1] = 7, r[n - 1] = 8 * x2[n - 1] + x2[n];
   for (i = 1;i < n; ++i)
-    m = a2[i] / b[i - 1], b[i] -= m, r[i] -= m * r[i - 1];
+    m2 = a2[i] / b[i - 1], b[i] -= m2, r[i] -= m2 * r[i - 1];
   a2[n - 1] = r[n - 1] / b[n - 1];
   for (i = n - 2;i >= 0; --i)
     a2[i] = (r[i] - a2[i + 1]) / b[i];
@@ -13627,9 +13441,9 @@ function negative(x2) {
 
 // node_modules/isoformat/src/format.js
 var formatYear2 = function(year2) {
-  return year2 < 0 ? `-${pad4(-year2, 6)}` : year2 > 9999 ? `+${pad4(year2, 6)}` : pad4(year2, 4);
+  return year2 < 0 ? `-${pad2(-year2, 6)}` : year2 > 9999 ? `+${pad2(year2, 6)}` : pad2(year2, 4);
 };
-var pad4 = function(value5, width) {
+var pad2 = function(value5, width) {
   return `${value5}`.padStart(width, "0");
 };
 function format2(date3, fallback) {
@@ -13641,7 +13455,7 @@ function format2(date3, fallback) {
   const minutes = date3.getUTCMinutes();
   const seconds2 = date3.getUTCSeconds();
   const milliseconds2 = date3.getUTCMilliseconds();
-  return `${formatYear2(date3.getUTCFullYear(), 4)}-${pad4(date3.getUTCMonth() + 1, 2)}-${pad4(date3.getUTCDate(), 2)}${hours || minutes || seconds2 || milliseconds2 ? `T${pad4(hours, 2)}:${pad4(minutes, 2)}${seconds2 || milliseconds2 ? `:${pad4(seconds2, 2)}${milliseconds2 ? `.${pad4(milliseconds2, 3)}` : ``}` : ``}Z` : ``}`;
+  return `${formatYear2(date3.getUTCFullYear(), 4)}-${pad2(date3.getUTCMonth() + 1, 2)}-${pad2(date3.getUTCDate(), 2)}${hours || minutes || seconds2 || milliseconds2 ? `T${pad2(hours, 2)}:${pad2(minutes, 2)}${seconds2 || milliseconds2 ? `:${pad2(seconds2, 2)}${milliseconds2 ? `.${pad2(milliseconds2, 3)}` : ``}` : ``}Z` : ``}`;
 }
 // node_modules/isoformat/src/parse.js
 var re2 = /^(?:[-+]\d{2})?\d{4}(?:-\d{2}(?:-\d{2})?)?(?:T\d{2}:\d{2}(?::\d{2}(?:\.\d{3})?)?(?:Z|[-+]\d{2}:?\d{2})?)?$/;
@@ -13796,10 +13610,10 @@ var utcIntervals = new Map([
 // node_modules/@observablehq/plot/src/options.js
 function valueof(data2, value5, type6) {
   const valueType = typeof value5;
-  return valueType === "string" ? maybeTypedMap(data2, field(value5), type6) : valueType === "function" ? maybeTypedMap(data2, value5, type6) : valueType === "number" || value5 instanceof Date || valueType === "boolean" ? map6(data2, constant8(value5), type6) : typeof value5?.transform === "function" ? maybeTypedArrayify(value5.transform(data2), type6) : maybeTypedArrayify(value5, type6);
+  return valueType === "string" ? maybeTypedMap(data2, field(value5), type6) : valueType === "function" ? maybeTypedMap(data2, value5, type6) : valueType === "number" || value5 instanceof Date || valueType === "boolean" ? map7(data2, constant8(value5), type6) : typeof value5?.transform === "function" ? maybeTypedArrayify(value5.transform(data2), type6) : maybeTypedArrayify(value5, type6);
 }
 var maybeTypedMap = function(data2, f, type6) {
-  return map6(data2, type6?.prototype instanceof TypedArray ? floater(f) : f, type6);
+  return map7(data2, type6?.prototype instanceof TypedArray ? floater(f) : f, type6);
 };
 var maybeTypedArrayify = function(data2, type6) {
   return type6 === undefined ? arrayify2(data2) : data2 instanceof type6 ? data2 : type6.prototype instanceof TypedArray && !(data2 instanceof TypedArray) ? type6.from(data2, coerceNumber) : type6.from(data2);
@@ -13812,13 +13626,13 @@ function percentile(reduce3) {
   return (I, f) => quantile(I, p, f);
 }
 function coerceNumbers(values) {
-  return values instanceof TypedArray ? values : map6(values, coerceNumber, Float64Array);
+  return values instanceof TypedArray ? values : map7(values, coerceNumber, Float64Array);
 }
 var coerceNumber = function(x2) {
   return x2 == null ? NaN : Number(x2);
 };
 function coerceDates(values) {
-  return map6(values, coerceDate);
+  return map7(values, coerceDate);
 }
 function coerceDate(x2) {
   return x2 instanceof Date && !isNaN(x2) ? x2 : typeof x2 === "string" ? parse3(x2) : x2 == null || isNaN(x2 = +x2) ? undefined : new Date(x2);
@@ -13846,7 +13660,7 @@ function keyword(input, name, allowed) {
 function arrayify2(data2) {
   return data2 == null || data2 instanceof Array || data2 instanceof TypedArray ? data2 : Array.from(data2);
 }
-function map6(values, f, type6 = Array) {
+function map7(values, f, type6 = Array) {
   return values == null ? values : values instanceof type6 ? values.map(f) : type6.from(values, f);
 }
 function slice2(values, type6 = Array) {
@@ -13901,7 +13715,7 @@ function range4(data2) {
   return r;
 }
 function take(values, index2) {
-  return map6(index2, (i) => values[i]);
+  return map7(index2, (i) => values[i]);
 }
 function subarray(I, i, j) {
   return I.subarray ? I.subarray(i, j) : I.slice(i, j);
@@ -13945,14 +13759,14 @@ function mid(x12, x2) {
     transform(data2) {
       const X12 = x12.transform(data2);
       const X22 = x2.transform(data2);
-      return isTemporal(X12) || isTemporal(X22) ? map6(X12, (_, i) => new Date((+X12[i] + +X22[i]) / 2)) : map6(X12, (_, i) => (+X12[i] + +X22[i]) / 2, Float64Array);
+      return isTemporal(X12) || isTemporal(X22) ? map7(X12, (_, i) => new Date((+X12[i] + +X22[i]) / 2)) : map7(X12, (_, i) => (+X12[i] + +X22[i]) / 2, Float64Array);
     },
     label: x12.label
   };
 }
 function maybeApplyInterval(V, scale) {
   const t = maybeIntervalTransform(scale?.interval, scale?.type);
-  return t ? map6(V, t) : V;
+  return t ? map7(V, t) : V;
 }
 function maybeIntervalTransform(interval10, type6) {
   const i = maybeInterval(interval10, type6);
@@ -14155,6 +13969,9 @@ var second3 = (x2) => x2 ? x2[1] : undefined;
 var constant8 = (x2) => () => x2;
 
 // node_modules/@observablehq/plot/src/scales/index.js
+function isPosition(kind) {
+  return kind === position || kind === projection2;
+}
 var position = Symbol("position");
 var color9 = Symbol("color");
 var radius = Symbol("radius");
@@ -14549,7 +14366,7 @@ var reduceDistinct = {
 var reduceSum = reduceAccessor(sum3);
 
 // node_modules/@observablehq/plot/src/channel.js
-function createChannel(data2, { scale, type: type6, value: value5, filter: filter6, hint }, name) {
+function createChannel(data2, { scale, type: type6, value: value5, filter: filter5, hint }, name) {
   if (hint === undefined && typeof value5?.transform === "function")
     hint = value5.hint;
   return inferChannelScale(name, {
@@ -14557,7 +14374,7 @@ function createChannel(data2, { scale, type: type6, value: value5, filter: filte
     type: type6,
     value: valueof(data2, value5),
     label: labelof(value5),
-    filter: filter6,
+    filter: filter5,
     hint
   });
 }
@@ -14567,7 +14384,7 @@ function createChannels(channels, data2) {
 function valueObject(channels, scales2) {
   const values = Object.fromEntries(Object.entries(channels).map(([name, { scale: scaleName, value: value5 }]) => {
     const scale = scaleName == null ? null : scales2[scaleName];
-    return [name, scale == null ? value5 : map6(value5, scale)];
+    return [name, scale == null ? value5 : map7(value5, scale)];
   }));
   values.channels = channels;
   return values;
@@ -14589,7 +14406,7 @@ function inferChannelScale(name, channel) {
       case "symbol":
         if (scale !== true && isEvery(value5, isSymbol)) {
           channel.scale = null;
-          channel.value = map6(value5, maybeSymbol);
+          channel.value = map7(value5, maybeSymbol);
         } else {
           channel.scale = "symbol";
         }
@@ -14670,7 +14487,7 @@ var reindexFacetChannel = function(facets, channel) {
 var difference = function(channels, k1, k2) {
   const X12 = values(channels, k1);
   const X22 = values(channels, k2);
-  return map6(X22, (x2, i) => Math.abs(x2 - X12[i]), Float64Array);
+  return map7(X22, (x2, i) => Math.abs(x2 - X12[i]), Float64Array);
 };
 var values = function(channels, name, alias) {
   let channel = channels[name];
@@ -14706,14 +14523,40 @@ function getSource(channels, key) {
   return channel.source === null ? null : channel;
 }
 
-// node_modules/@observablehq/plot/src/context.js
-function createContext(options5 = {}) {
-  const { document: document2 = typeof window !== "undefined" ? window.document : undefined } = options5;
-  return { document: document2 };
+// node_modules/@observablehq/plot/src/memoize.js
+function memoize1(compute2) {
+  let cacheValue, cacheKeys;
+  return (...keys7) => {
+    if (cacheKeys?.length !== keys7.length || cacheKeys.some((k2, i) => k2 !== keys7[i])) {
+      cacheKeys = keys7;
+      cacheValue = compute2(...keys7);
+    }
+    return cacheValue;
+  };
 }
-function create2(name, { document: document2 }) {
-  return select_default2(creator_default(name).call(document2.documentElement));
+
+// node_modules/@observablehq/plot/src/format.js
+function formatNumber(locale5 = "en-US") {
+  const format3 = numberFormat(locale5);
+  return (i) => i != null && !isNaN(i) ? format3.format(i) : undefined;
 }
+function formatIsoDate(date3) {
+  return format2(date3, "Invalid Date");
+}
+function formatAuto(locale5 = "en-US") {
+  const number13 = formatNumber(locale5);
+  return (v) => (v instanceof Date ? formatIsoDate : typeof v === "number" ? number13 : string3)(v);
+}
+var numberFormat = memoize1((locale5) => {
+  return new Intl.NumberFormat(locale5);
+});
+var monthFormat = memoize1((locale5, month2) => {
+  return new Intl.DateTimeFormat(locale5, { timeZone: "UTC", ...month2 && { month: month2 } });
+});
+var weekdayFormat = memoize1((locale5, weekday) => {
+  return new Intl.DateTimeFormat(locale5, { timeZone: "UTC", ...weekday && { weekday } });
+});
+var formatDefault = formatAuto();
 
 // node_modules/@observablehq/plot/src/warnings.js
 function consumeWarnings() {
@@ -14726,6 +14569,383 @@ function warn(message) {
   ++warnings;
 }
 var warnings = 0;
+
+// node_modules/@observablehq/plot/src/style.js
+var getClipId = function() {
+  return `plot-clip-${++nextClipId}`;
+};
+function styles(mark, {
+  title,
+  href,
+  ariaLabel: variaLabel,
+  ariaDescription,
+  ariaHidden,
+  target,
+  fill,
+  fillOpacity,
+  stroke,
+  strokeWidth,
+  strokeOpacity,
+  strokeLinejoin,
+  strokeLinecap,
+  strokeMiterlimit,
+  strokeDasharray,
+  strokeDashoffset,
+  opacity: opacity2,
+  mixBlendMode,
+  imageFilter,
+  paintOrder,
+  pointerEvents,
+  shapeRendering,
+  channels
+}, {
+  ariaLabel: cariaLabel,
+  fill: defaultFill = "currentColor",
+  fillOpacity: defaultFillOpacity,
+  stroke: defaultStroke = "none",
+  strokeOpacity: defaultStrokeOpacity,
+  strokeWidth: defaultStrokeWidth,
+  strokeLinecap: defaultStrokeLinecap,
+  strokeLinejoin: defaultStrokeLinejoin,
+  strokeMiterlimit: defaultStrokeMiterlimit,
+  paintOrder: defaultPaintOrder
+}) {
+  if (defaultFill === null) {
+    fill = null;
+    fillOpacity = null;
+  }
+  if (defaultStroke === null) {
+    stroke = null;
+    strokeOpacity = null;
+  }
+  if (isNoneish(defaultFill)) {
+    if (!isNoneish(defaultStroke) && (!isNoneish(fill) || channels?.fill))
+      defaultStroke = "none";
+  } else {
+    if (isNoneish(defaultStroke) && (!isNoneish(stroke) || channels?.stroke))
+      defaultFill = "none";
+  }
+  const [vfill, cfill] = maybeColorChannel(fill, defaultFill);
+  const [vfillOpacity, cfillOpacity] = maybeNumberChannel(fillOpacity, defaultFillOpacity);
+  const [vstroke, cstroke] = maybeColorChannel(stroke, defaultStroke);
+  const [vstrokeOpacity, cstrokeOpacity] = maybeNumberChannel(strokeOpacity, defaultStrokeOpacity);
+  const [vopacity, copacity] = maybeNumberChannel(opacity2);
+  if (!isNone(cstroke)) {
+    if (strokeWidth === undefined)
+      strokeWidth = defaultStrokeWidth;
+    if (strokeLinecap === undefined)
+      strokeLinecap = defaultStrokeLinecap;
+    if (strokeLinejoin === undefined)
+      strokeLinejoin = defaultStrokeLinejoin;
+    if (strokeMiterlimit === undefined && !isRound(strokeLinejoin))
+      strokeMiterlimit = defaultStrokeMiterlimit;
+    if (!isNone(cfill) && paintOrder === undefined)
+      paintOrder = defaultPaintOrder;
+  }
+  const [vstrokeWidth, cstrokeWidth] = maybeNumberChannel(strokeWidth);
+  if (defaultFill !== null) {
+    mark.fill = impliedString(cfill, "currentColor");
+    mark.fillOpacity = impliedNumber(cfillOpacity, 1);
+  }
+  if (defaultStroke !== null) {
+    mark.stroke = impliedString(cstroke, "none");
+    mark.strokeWidth = impliedNumber(cstrokeWidth, 1);
+    mark.strokeOpacity = impliedNumber(cstrokeOpacity, 1);
+    mark.strokeLinejoin = impliedString(strokeLinejoin, "miter");
+    mark.strokeLinecap = impliedString(strokeLinecap, "butt");
+    mark.strokeMiterlimit = impliedNumber(strokeMiterlimit, 4);
+    mark.strokeDasharray = impliedString(strokeDasharray, "none");
+    mark.strokeDashoffset = impliedString(strokeDashoffset, "0");
+  }
+  mark.target = string3(target);
+  mark.ariaLabel = string3(cariaLabel);
+  mark.ariaDescription = string3(ariaDescription);
+  mark.ariaHidden = string3(ariaHidden);
+  mark.opacity = impliedNumber(copacity, 1);
+  mark.mixBlendMode = impliedString(mixBlendMode, "normal");
+  mark.imageFilter = impliedString(imageFilter, "none");
+  mark.paintOrder = impliedString(paintOrder, "normal");
+  mark.pointerEvents = impliedString(pointerEvents, "auto");
+  mark.shapeRendering = impliedString(shapeRendering, "auto");
+  return {
+    title: { value: title, optional: true, filter: null },
+    href: { value: href, optional: true, filter: null },
+    ariaLabel: { value: variaLabel, optional: true, filter: null },
+    fill: { value: vfill, scale: "auto", optional: true },
+    fillOpacity: { value: vfillOpacity, scale: "auto", optional: true },
+    stroke: { value: vstroke, scale: "auto", optional: true },
+    strokeOpacity: { value: vstrokeOpacity, scale: "auto", optional: true },
+    strokeWidth: { value: vstrokeWidth, optional: true },
+    opacity: { value: vopacity, scale: "auto", optional: true }
+  };
+}
+function applyTitle(selection5, L) {
+  if (L)
+    selection5.filter((i) => nonempty(L[i])).append("title").call(applyText, L);
+}
+function applyTitleGroup(selection5, L) {
+  if (L)
+    selection5.filter(([i]) => nonempty(L[i])).append("title").call(applyTextGroup, L);
+}
+function applyText(selection5, T) {
+  if (T)
+    selection5.text((i) => formatDefault(T[i]));
+}
+function applyTextGroup(selection5, T) {
+  if (T)
+    selection5.text(([i]) => formatDefault(T[i]));
+}
+function applyChannelStyles(selection5, { target, tip }, {
+  ariaLabel: AL,
+  title: T,
+  fill: F,
+  fillOpacity: FO,
+  stroke: S,
+  strokeOpacity: SO,
+  strokeWidth: SW,
+  opacity: O,
+  href: H
+}) {
+  if (AL)
+    applyAttr(selection5, "aria-label", (i) => AL[i]);
+  if (F)
+    applyAttr(selection5, "fill", (i) => F[i]);
+  if (FO)
+    applyAttr(selection5, "fill-opacity", (i) => FO[i]);
+  if (S)
+    applyAttr(selection5, "stroke", (i) => S[i]);
+  if (SO)
+    applyAttr(selection5, "stroke-opacity", (i) => SO[i]);
+  if (SW)
+    applyAttr(selection5, "stroke-width", (i) => SW[i]);
+  if (O)
+    applyAttr(selection5, "opacity", (i) => O[i]);
+  if (H)
+    applyHref(selection5, (i) => H[i], target);
+  if (!tip)
+    applyTitle(selection5, T);
+}
+function applyGroupedChannelStyles(selection5, { target, tip }, {
+  ariaLabel: AL,
+  title: T,
+  fill: F,
+  fillOpacity: FO,
+  stroke: S,
+  strokeOpacity: SO,
+  strokeWidth: SW,
+  opacity: O,
+  href: H
+}) {
+  if (AL)
+    applyAttr(selection5, "aria-label", ([i]) => AL[i]);
+  if (F)
+    applyAttr(selection5, "fill", ([i]) => F[i]);
+  if (FO)
+    applyAttr(selection5, "fill-opacity", ([i]) => FO[i]);
+  if (S)
+    applyAttr(selection5, "stroke", ([i]) => S[i]);
+  if (SO)
+    applyAttr(selection5, "stroke-opacity", ([i]) => SO[i]);
+  if (SW)
+    applyAttr(selection5, "stroke-width", ([i]) => SW[i]);
+  if (O)
+    applyAttr(selection5, "opacity", ([i]) => O[i]);
+  if (H)
+    applyHref(selection5, ([i]) => H[i], target);
+  if (!tip)
+    applyTitleGroup(selection5, T);
+}
+var groupAesthetics = function({
+  ariaLabel: AL,
+  title: T,
+  fill: F,
+  fillOpacity: FO,
+  stroke: S,
+  strokeOpacity: SO,
+  strokeWidth: SW,
+  opacity: O,
+  href: H
+}, { tip }) {
+  return [AL, tip ? undefined : T, F, FO, S, SO, SW, O, H].filter((c4) => c4 !== undefined);
+};
+function groupZ(I, Z, z) {
+  const G = group(I, (i) => Z[i]);
+  if (z === undefined && G.size > 1 + I.length >> 1) {
+    warn(`Warning: the implicit z channel has high cardinality. This may occur when the fill or stroke channel is associated with quantitative data rather than ordinal or categorical data. You can suppress this warning by setting the z option explicitly; if this data represents a single series, set z to null.`);
+  }
+  return G.values();
+}
+function* groupIndex(I, position2, mark, channels) {
+  const { z } = mark;
+  const { z: Z } = channels;
+  const A5 = groupAesthetics(channels, mark);
+  const C2 = [...position2, ...A5];
+  for (const G of Z ? groupZ(I, Z, z) : [I]) {
+    let Ag;
+    let Gg;
+    out:
+      for (const i of G) {
+        for (const c4 of C2) {
+          if (!defined(c4[i])) {
+            if (Gg)
+              Gg.push(-1);
+            continue out;
+          }
+        }
+        if (Ag === undefined) {
+          if (Gg)
+            yield Gg;
+          Ag = A5.map((c4) => keyof2(c4[i])), Gg = [i];
+          continue;
+        }
+        Gg.push(i);
+        for (let j = 0;j < A5.length; ++j) {
+          const k2 = keyof2(A5[j][i]);
+          if (k2 !== Ag[j]) {
+            yield Gg;
+            Ag = A5.map((c4) => keyof2(c4[i])), Gg = [i];
+            continue out;
+          }
+        }
+      }
+    if (Gg)
+      yield Gg;
+  }
+}
+function maybeClip(clip) {
+  if (clip === true)
+    clip = "frame";
+  else if (clip === false)
+    clip = null;
+  else if (clip != null)
+    clip = keyword(clip, "clip", ["frame", "sphere"]);
+  return clip;
+}
+var applyClip = function(selection5, mark, dimensions, context3) {
+  let clipUrl;
+  const { clip = context3.clip } = mark;
+  switch (clip) {
+    case "frame": {
+      const { width, height, marginLeft, marginRight, marginTop, marginBottom } = dimensions;
+      const id2 = getClipId();
+      clipUrl = `url(#${id2})`;
+      selection5 = create2("svg:g", context3).call((g) => g.append("svg:clipPath").attr("id", id2).append("rect").attr("x", marginLeft).attr("y", marginTop).attr("width", width - marginRight - marginLeft).attr("height", height - marginTop - marginBottom)).each(function() {
+        this.appendChild(selection5.node());
+        selection5.node = () => this;
+      });
+      break;
+    }
+    case "sphere": {
+      const { projection: projection3 } = context3;
+      if (!projection3)
+        throw new Error(`the "sphere" clip option requires a projection`);
+      const id2 = getClipId();
+      clipUrl = `url(#${id2})`;
+      selection5.append("clipPath").attr("id", id2).append("path").attr("d", path_default(projection3)({ type: "Sphere" }));
+      break;
+    }
+  }
+  applyAttr(selection5, "aria-label", mark.ariaLabel);
+  applyAttr(selection5, "aria-description", mark.ariaDescription);
+  applyAttr(selection5, "aria-hidden", mark.ariaHidden);
+  applyAttr(selection5, "clip-path", clipUrl);
+};
+function applyIndirectStyles(selection5, mark, dimensions, context3) {
+  applyClip(selection5, mark, dimensions, context3);
+  applyAttr(selection5, "fill", mark.fill);
+  applyAttr(selection5, "fill-opacity", mark.fillOpacity);
+  applyAttr(selection5, "stroke", mark.stroke);
+  applyAttr(selection5, "stroke-width", mark.strokeWidth);
+  applyAttr(selection5, "stroke-opacity", mark.strokeOpacity);
+  applyAttr(selection5, "stroke-linejoin", mark.strokeLinejoin);
+  applyAttr(selection5, "stroke-linecap", mark.strokeLinecap);
+  applyAttr(selection5, "stroke-miterlimit", mark.strokeMiterlimit);
+  applyAttr(selection5, "stroke-dasharray", mark.strokeDasharray);
+  applyAttr(selection5, "stroke-dashoffset", mark.strokeDashoffset);
+  applyAttr(selection5, "shape-rendering", mark.shapeRendering);
+  applyAttr(selection5, "filter", mark.imageFilter);
+  applyAttr(selection5, "paint-order", mark.paintOrder);
+  const { pointerEvents = context3.pointerSticky === false ? "none" : undefined } = mark;
+  applyAttr(selection5, "pointer-events", pointerEvents);
+}
+function applyDirectStyles(selection5, mark) {
+  applyStyle(selection5, "mix-blend-mode", mark.mixBlendMode);
+  applyAttr(selection5, "opacity", mark.opacity);
+}
+var applyHref = function(selection5, href, target) {
+  selection5.each(function(i) {
+    const h = href(i);
+    if (h != null) {
+      const a2 = this.ownerDocument.createElementNS(namespaces_default.svg, "a");
+      a2.setAttribute("fill", "inherit");
+      a2.setAttributeNS(namespaces_default.xlink, "href", h);
+      if (target != null)
+        a2.setAttribute("target", target);
+      this.parentNode.insertBefore(a2, this).appendChild(this);
+    }
+  });
+};
+function applyAttr(selection5, name, value5) {
+  if (value5 != null)
+    selection5.attr(name, value5);
+}
+function applyStyle(selection5, name, value5) {
+  if (value5 != null)
+    selection5.style(name, value5);
+}
+function applyTransform(selection5, mark, { x: x2, y: y2 }, tx = offset, ty = offset) {
+  tx += mark.dx;
+  ty += mark.dy;
+  if (x2?.bandwidth)
+    tx += x2.bandwidth() / 2;
+  if (y2?.bandwidth)
+    ty += y2.bandwidth() / 2;
+  if (tx || ty)
+    selection5.attr("transform", `translate(${tx},${ty})`);
+}
+function impliedString(value5, impliedValue) {
+  if ((value5 = string3(value5)) !== impliedValue)
+    return value5;
+}
+function impliedNumber(value5, impliedValue) {
+  if ((value5 = number12(value5)) !== impliedValue)
+    return value5;
+}
+function maybeClassName(name) {
+  if (name === undefined)
+    return "plot-d6a7b5";
+  name = `${name}`;
+  if (!validClassName.test(name))
+    throw new Error(`invalid class name: ${name}`);
+  return name;
+}
+function applyInlineStyles(selection5, style3) {
+  if (typeof style3 === "string") {
+    selection5.property("style", style3);
+  } else if (style3 != null) {
+    for (const element of selection5) {
+      Object.assign(element.style, style3);
+    }
+  }
+}
+function applyFrameAnchor({ frameAnchor }, { width, height, marginTop, marginRight, marginBottom, marginLeft }) {
+  return [
+    /left$/.test(frameAnchor) ? marginLeft : /right$/.test(frameAnchor) ? width - marginRight : (marginLeft + width - marginRight) / 2,
+    /^top/.test(frameAnchor) ? marginTop : /^bottom/.test(frameAnchor) ? height - marginBottom : (marginTop + height - marginBottom) / 2
+  ];
+}
+var offset = (typeof window !== "undefined" ? window.devicePixelRatio > 1 : typeof it === "undefined") ? 0 : 0.5;
+var nextClipId = 0;
+var validClassName = /^-?([_a-z]|[\240-\377]|\\[0-9a-f]{1,6}(\r\n|[ \t\r\n\f])?|\\[^\r\n\f0-9a-f])([_a-z0-9-]|[\240-\377]|\\[0-9a-f]{1,6}(\r\n|[ \t\r\n\f])?|\\[^\r\n\f0-9a-f])*$/i;
+
+// node_modules/@observablehq/plot/src/context.js
+function createContext(options8 = {}) {
+  const { document: document2 = typeof window !== "undefined" ? window.document : undefined, clip } = options8;
+  return { document: document2, clip: maybeClip(clip) };
+}
+function create2(name, { document: document2 }) {
+  return select_default2(creator_default(name).call(document2.documentElement));
+}
 
 // node_modules/@observablehq/plot/src/projection.js
 function createProjection({
@@ -14740,7 +14960,7 @@ function createProjection({
     return;
   if (typeof projection3.stream === "function")
     return projection3;
-  let options6;
+  let options9;
   let domain;
   let clip = "frame";
   if (isObject(projection3)) {
@@ -14754,7 +14974,7 @@ function createProjection({
       insetBottom = inset !== undefined ? inset : insetBottom,
       insetLeft = inset !== undefined ? inset : insetLeft,
       clip = clip,
-      ...options6
+      ...options9
     } = projection3);
     if (projection3 == null)
       return;
@@ -14764,7 +14984,7 @@ function createProjection({
   const { width, height, marginLeft, marginRight, marginTop, marginBottom } = dimensions;
   const dx = width - marginLeft - marginRight - insetLeft - insetRight;
   const dy = height - marginTop - marginBottom - insetTop - insetBottom;
-  projection3 = projection3?.({ width: dx, height: dy, clip, ...options6 });
+  projection3 = projection3?.({ width: dx, height: dy, clip, ...options9 });
   if (projection3 == null)
     return;
   clip = maybePostClip(clip, marginLeft, marginTop, width - marginRight, height - marginBottom);
@@ -14863,9 +15083,9 @@ var scaleProjection = function(createProjection2, kx2, ky2) {
 var conicProjection2 = function(createProjection2, kx2, ky2) {
   const { type: type6, aspectRatio } = scaleProjection(createProjection2, kx2, ky2);
   return {
-    type: (options6) => {
-      const { parallels, domain, width, height } = options6;
-      const projection3 = type6(options6);
+    type: (options9) => {
+      const { parallels, domain, width, height } = options9;
+      const projection3 = type6(options9);
       if (parallels != null) {
         projection3.parallels(parallels);
         if (domain === undefined) {
@@ -15163,8 +15383,8 @@ function createScaleQ(key, scale, channels, {
   reverse2 = !!reverse2;
   if (range5 !== undefined) {
     const n = (domain = arrayify2(domain)).length;
-    const m = (range5 = arrayify2(range5)).length;
-    if (n !== m) {
+    const m2 = (range5 = arrayify2(range5)).length;
+    if (n !== m2) {
       if (interpolate3.length === 1)
         throw new Error("invalid piecewise interpolator");
       interpolate3 = piecewise(interpolate3, range5);
@@ -15209,20 +15429,20 @@ function createScaleQ(key, scale, channels, {
 var maybeNice = function(nice4, type6) {
   return nice4 === true ? undefined : typeof nice4 === "number" ? nice4 : maybeNiceInterval(nice4, type6);
 };
-function createScaleLinear(key, channels, options7) {
-  return createScaleQ(key, linear2(), channels, options7);
+function createScaleLinear(key, channels, options10) {
+  return createScaleQ(key, linear2(), channels, options10);
 }
-function createScaleSqrt(key, channels, options7) {
-  return createScalePow(key, channels, { ...options7, exponent: 0.5 });
+function createScaleSqrt(key, channels, options10) {
+  return createScalePow(key, channels, { ...options10, exponent: 0.5 });
 }
-function createScalePow(key, channels, { exponent: exponent5 = 1, ...options7 }) {
-  return createScaleQ(key, pow2().exponent(exponent5), channels, { ...options7, type: "pow" });
+function createScalePow(key, channels, { exponent: exponent5 = 1, ...options10 }) {
+  return createScaleQ(key, pow2().exponent(exponent5), channels, { ...options10, type: "pow" });
 }
-function createScaleLog(key, channels, { base = 10, domain = inferLogDomain(channels), ...options7 }) {
-  return createScaleQ(key, log3().base(base), channels, { ...options7, domain });
+function createScaleLog(key, channels, { base = 10, domain = inferLogDomain(channels), ...options10 }) {
+  return createScaleQ(key, log3().base(base), channels, { ...options10, domain });
 }
-function createScaleSymlog(key, channels, { constant: constant9 = 1, ...options7 }) {
-  return createScaleQ(key, symlog().constant(constant9), channels, options7);
+function createScaleSymlog(key, channels, { constant: constant9 = 1, ...options10 }) {
+  return createScaleQ(key, symlog().constant(constant9), channels, options10);
 }
 function createScaleQuantile(key, channels, {
   range: range5,
@@ -15413,27 +15633,27 @@ var createScaleD = function(key, scale, transform5, channels, {
     scale.nice(nice4);
   return { type: type6, domain: [min4, max3], pivot, interpolate: interpolate3, scale };
 };
-function createScaleDiverging(key, channels, options8) {
-  return createScaleD(key, diverging(), transformIdentity, channels, options8);
+function createScaleDiverging(key, channels, options11) {
+  return createScaleD(key, diverging(), transformIdentity, channels, options11);
 }
-function createScaleDivergingSqrt(key, channels, options8) {
-  return createScaleDivergingPow(key, channels, { ...options8, exponent: 0.5 });
+function createScaleDivergingSqrt(key, channels, options11) {
+  return createScaleDivergingPow(key, channels, { ...options11, exponent: 0.5 });
 }
-function createScaleDivergingPow(key, channels, { exponent: exponent5 = 1, ...options8 }) {
+function createScaleDivergingPow(key, channels, { exponent: exponent5 = 1, ...options11 }) {
   return createScaleD(key, divergingPow().exponent(exponent5 = +exponent5), transformPow2(exponent5), channels, {
-    ...options8,
+    ...options11,
     type: "diverging-pow"
   });
 }
-function createScaleDivergingLog(key, channels, { base = 10, pivot = 1, domain = inferDomain(channels, pivot < 0 ? negative : positive), ...options8 }) {
+function createScaleDivergingLog(key, channels, { base = 10, pivot = 1, domain = inferDomain(channels, pivot < 0 ? negative : positive), ...options11 }) {
   return createScaleD(key, divergingLog().base(base = +base), transformLog2, channels, {
     domain,
     pivot,
-    ...options8
+    ...options11
   });
 }
-function createScaleDivergingSymlog(key, channels, { constant: constant9 = 1, ...options8 }) {
-  return createScaleD(key, divergingSymlog().constant(constant9 = +constant9), transformSymlog2(constant9), channels, options8);
+function createScaleDivergingSymlog(key, channels, { constant: constant9 = 1, ...options11 }) {
+  return createScaleD(key, divergingSymlog().constant(constant9 = +constant9), transformSymlog2(constant9), channels, options11);
 }
 var transformPow2 = function(exponent5) {
   return exponent5 === 0.5 ? transformSqrt2 : {
@@ -15477,14 +15697,14 @@ var transformSqrt2 = {
 };
 
 // node_modules/@observablehq/plot/src/scales/temporal.js
-var createScaleT = function(key, scale, channels, options8) {
-  return createScaleQ(key, scale, channels, options8);
+var createScaleT = function(key, scale, channels, options11) {
+  return createScaleQ(key, scale, channels, options11);
 };
-function createScaleTime(key, channels, options8) {
-  return createScaleT(key, time(), channels, options8);
+function createScaleTime(key, channels, options11) {
+  return createScaleT(key, time(), channels, options11);
 }
-function createScaleUtc(key, channels, options8) {
-  return createScaleT(key, utcTime(), channels, options8);
+function createScaleUtc(key, channels, options11) {
+  return createScaleT(key, utcTime(), channels, options11);
 }
 
 // node_modules/@observablehq/plot/src/scales/ordinal.js
@@ -15504,14 +15724,14 @@ var createScaleO = function(key, scale, channels, { type: type6, interval: inter
   }
   return { type: type6, domain, range: range5, scale, hint, interval: interval10 };
 };
-function createScaleOrdinal(key, channels, { type: type6, interval: interval10, domain, range: range5, scheme: scheme28, unknown, ...options9 }) {
+function createScaleOrdinal(key, channels, { type: type6, interval: interval10, domain, range: range5, scheme: scheme28, unknown, ...options12 }) {
   interval10 = maybeRangeInterval(interval10, type6);
   if (domain === undefined)
     domain = inferDomain2(channels, interval10, key);
   let hint;
   if (registry.get(key) === symbol) {
     hint = inferSymbolHint(channels);
-    range5 = range5 === undefined ? inferSymbolRange(hint) : map6(range5, maybeSymbol);
+    range5 = range5 === undefined ? inferSymbolRange(hint) : map7(range5, maybeSymbol);
   } else if (registry.get(key) === color9) {
     if (range5 === undefined && (type6 === "ordinal" || type6 === ordinalImplicit)) {
       range5 = maybeBooleanRange(domain, scheme28);
@@ -15534,25 +15754,25 @@ function createScaleOrdinal(key, channels, { type: type6, interval: interval10, 
   if (unknown === implicit) {
     throw new Error(`implicit unknown on ${key} scale is not supported`);
   }
-  return createScaleO(key, ordinal().unknown(unknown), channels, { ...options9, type: type6, domain, range: range5, hint });
+  return createScaleO(key, ordinal().unknown(unknown), channels, { ...options12, type: type6, domain, range: range5, hint });
 }
-function createScalePoint(key, channels, { align = 0.5, padding = 0.5, ...options9 }) {
-  return maybeRound(point().align(align).padding(padding), channels, options9, key);
+function createScalePoint(key, channels, { align = 0.5, padding = 0.5, ...options12 }) {
+  return maybeRound(point().align(align).padding(padding), channels, options12, key);
 }
 function createScaleBand(key, channels, {
   align = 0.5,
   padding = 0.1,
   paddingInner = padding,
   paddingOuter = key === "fx" || key === "fy" ? 0 : padding,
-  ...options9
+  ...options12
 }) {
-  return maybeRound(band().align(align).paddingInner(paddingInner).paddingOuter(paddingOuter), channels, options9, key);
+  return maybeRound(band().align(align).paddingInner(paddingInner).paddingOuter(paddingOuter), channels, options12, key);
 }
-var maybeRound = function(scale, channels, options9, key) {
-  let { round } = options9;
+var maybeRound = function(scale, channels, options12, key) {
+  let { round } = options12;
   if (round !== undefined)
     scale.round(round = !!round);
-  scale = createScaleO(key, scale, channels, options9);
+  scale = createScaleO(key, scale, channels, options12);
   scale.round = round;
   return scale;
 };
@@ -15615,11 +15835,11 @@ function createScales(channelsByScale, {
   padding,
   projection: projection3,
   facet: { label: facetLabel = globalLabel } = {},
-  ...options10
+  ...options13
 } = {}) {
   const scales3 = {};
   for (const [key, channels] of channelsByScale) {
-    const scaleOptions = options10[key];
+    const scaleOptions = options13[key];
     const scale = createScale(key, channels, {
       round: registry.get(key) === position ? round : undefined,
       nice: nice4,
@@ -15773,9 +15993,9 @@ var roundError = function({ scale }) {
   const [start2, stop] = scale.range();
   const paddingInner = scale.paddingInner ? scale.paddingInner() : 1;
   const paddingOuter = scale.paddingOuter ? scale.paddingOuter() : scale.padding();
-  const m = n - paddingInner;
-  const step = Math.abs(stop - start2) / Math.max(1, m + paddingOuter * 2);
-  return (step - Math.floor(step)) * m;
+  const m2 = n - paddingInner;
+  const step = Math.abs(stop - start2) / Math.max(1, m2 + paddingOuter * 2);
+  return (step - Math.floor(step)) * m2;
 };
 var piecewiseRange = function(scale) {
   const length3 = scale.scale.domain().length + isThresholdScale(scale);
@@ -15784,9 +16004,9 @@ var piecewiseRange = function(scale) {
   const [start2, end2] = scale.range;
   return Array.from({ length: length3 }, (_, i) => start2 + i / (length3 - 1) * (end2 - start2));
 };
-var createScale = function(key, channels = [], options10 = {}) {
-  const type6 = inferScaleType(key, channels, options10);
-  if (options10.type === undefined && options10.domain === undefined && options10.range === undefined && options10.interval == null && key !== "fx" && key !== "fy" && isOrdinalScale({ type: type6 })) {
+var createScale = function(key, channels = [], options13 = {}) {
+  const type6 = inferScaleType(key, channels, options13);
+  if (options13.type === undefined && options13.domain === undefined && options13.range === undefined && options13.interval == null && key !== "fx" && key !== "fy" && isOrdinalScale({ type: type6 })) {
     const values2 = channels.map(({ value: value5 }) => value5).filter((value5) => value5 !== undefined);
     if (values2.some(isTemporal))
       warn(`Warning: some data associated with the ${key} scale are dates. Dates are typically associated with a "utc" or "time" scale rather than a "${formatScaleType(type6)}" scale. If you are using a bar mark, you probably want a rect mark with the interval option instead; if you are using a group transform, you probably want a bin transform instead. If you want to treat this data as ordinal, you can specify the interval of the ${key} scale (e.g., d3.utcDay), or you can suppress this warning by setting the type of the ${key} scale to "${formatScaleType(type6)}".`);
@@ -15795,7 +16015,7 @@ var createScale = function(key, channels = [], options10 = {}) {
     else if (values2.some(isNumericString))
       warn(`Warning: some data associated with the ${key} scale are strings that appear to be numbers. If these strings represent numbers, you should parse or coerce them to numbers. Numbers are typically associated with a "linear" scale rather than a "${formatScaleType(type6)}" scale. If you want to treat this data as ordinal, you can specify the interval of the ${key} scale (e.g., 1 for integers), or you can suppress this warning by setting the type of the ${key} scale to "${formatScaleType(type6)}".`);
   }
-  options10.type = type6;
+  options13.type = type6;
   switch (type6) {
     case "diverging":
     case "diverging-sqrt":
@@ -15811,64 +16031,64 @@ var createScale = function(key, channels = [], options10 = {}) {
     case "pow":
     case "log":
     case "symlog":
-      options10 = coerceType(channels, options10, coerceNumbers);
+      options13 = coerceType(channels, options13, coerceNumbers);
       break;
     case "identity":
       switch (registry.get(key)) {
         case position:
-          options10 = coerceType(channels, options10, coerceNumbers);
+          options13 = coerceType(channels, options13, coerceNumbers);
           break;
         case symbol:
-          options10 = coerceType(channels, options10, coerceSymbols);
+          options13 = coerceType(channels, options13, coerceSymbols);
           break;
       }
       break;
     case "utc":
     case "time":
-      options10 = coerceType(channels, options10, coerceDates);
+      options13 = coerceType(channels, options13, coerceDates);
       break;
   }
   switch (type6) {
     case "diverging":
-      return createScaleDiverging(key, channels, options10);
+      return createScaleDiverging(key, channels, options13);
     case "diverging-sqrt":
-      return createScaleDivergingSqrt(key, channels, options10);
+      return createScaleDivergingSqrt(key, channels, options13);
     case "diverging-pow":
-      return createScaleDivergingPow(key, channels, options10);
+      return createScaleDivergingPow(key, channels, options13);
     case "diverging-log":
-      return createScaleDivergingLog(key, channels, options10);
+      return createScaleDivergingLog(key, channels, options13);
     case "diverging-symlog":
-      return createScaleDivergingSymlog(key, channels, options10);
+      return createScaleDivergingSymlog(key, channels, options13);
     case "categorical":
     case "ordinal":
     case ordinalImplicit:
-      return createScaleOrdinal(key, channels, options10);
+      return createScaleOrdinal(key, channels, options13);
     case "cyclical":
     case "sequential":
     case "linear":
-      return createScaleLinear(key, channels, options10);
+      return createScaleLinear(key, channels, options13);
     case "sqrt":
-      return createScaleSqrt(key, channels, options10);
+      return createScaleSqrt(key, channels, options13);
     case "threshold":
-      return createScaleThreshold(key, channels, options10);
+      return createScaleThreshold(key, channels, options13);
     case "quantile":
-      return createScaleQuantile(key, channels, options10);
+      return createScaleQuantile(key, channels, options13);
     case "quantize":
-      return createScaleQuantize(key, channels, options10);
+      return createScaleQuantize(key, channels, options13);
     case "pow":
-      return createScalePow(key, channels, options10);
+      return createScalePow(key, channels, options13);
     case "log":
-      return createScaleLog(key, channels, options10);
+      return createScaleLog(key, channels, options13);
     case "symlog":
-      return createScaleSymlog(key, channels, options10);
+      return createScaleSymlog(key, channels, options13);
     case "utc":
-      return createScaleUtc(key, channels, options10);
+      return createScaleUtc(key, channels, options13);
     case "time":
-      return createScaleTime(key, channels, options10);
+      return createScaleTime(key, channels, options13);
     case "point":
-      return createScalePoint(key, channels, options10);
+      return createScalePoint(key, channels, options13);
     case "band":
-      return createScaleBand(key, channels, options10);
+      return createScaleBand(key, channels, options13);
     case "identity":
       return registry.get(key) === position ? createScaleIdentity() : { type: "identity" };
     case undefined:
@@ -15962,7 +16182,7 @@ function isCollapsed(scale) {
   }
   return true;
 }
-var coerceType = function(channels, { domain, ...options10 }, coerceValues) {
+var coerceType = function(channels, { domain, ...options13 }, coerceValues) {
   for (const c4 of channels) {
     if (c4.value !== undefined) {
       c4.value = coerceValues(c4.value);
@@ -15970,11 +16190,11 @@ var coerceType = function(channels, { domain, ...options10 }, coerceValues) {
   }
   return {
     domain: domain === undefined ? domain : coerceValues(domain),
-    ...options10
+    ...options13
   };
 };
 var coerceSymbols = function(values2) {
-  return map6(values2, maybeSymbol);
+  return map7(values2, maybeSymbol);
 };
 function exposeScales(scaleDescriptors) {
   return (key) => {
@@ -16010,408 +16230,8 @@ var exposeScale = function({ scale, type: type6, domain, range: range5, interpol
 };
 var typeProjection = { toString: () => "projection" };
 
-// node_modules/@observablehq/plot/src/memoize.js
-function memoize1(compute2) {
-  let cacheValue, cacheKeys;
-  return (...keys8) => {
-    if (cacheKeys?.length !== keys8.length || cacheKeys.some((k2, i) => k2 !== keys8[i])) {
-      cacheKeys = keys8;
-      cacheValue = compute2(...keys8);
-    }
-    return cacheValue;
-  };
-}
-
-// node_modules/@observablehq/plot/src/format.js
-function formatNumber(locale5 = "en-US") {
-  const format3 = numberFormat(locale5);
-  return (i) => i != null && !isNaN(i) ? format3.format(i) : undefined;
-}
-function formatIsoDate(date3) {
-  return format2(date3, "Invalid Date");
-}
-function formatAuto(locale5 = "en-US") {
-  const number13 = formatNumber(locale5);
-  return (v) => (v instanceof Date ? formatIsoDate : typeof v === "number" ? number13 : string3)(v);
-}
-var numberFormat = memoize1((locale5) => {
-  return new Intl.NumberFormat(locale5);
-});
-var monthFormat = memoize1((locale5, month2) => {
-  return new Intl.DateTimeFormat(locale5, { timeZone: "UTC", ...month2 && { month: month2 } });
-});
-var weekdayFormat = memoize1((locale5, weekday) => {
-  return new Intl.DateTimeFormat(locale5, { timeZone: "UTC", ...weekday && { weekday } });
-});
-var formatDefault = formatAuto();
-
-// node_modules/@observablehq/plot/src/style.js
-var getClipId = function() {
-  return `plot-clip-${++nextClipId}`;
-};
-function styles(mark, {
-  title,
-  href,
-  ariaLabel: variaLabel,
-  ariaDescription,
-  ariaHidden,
-  target,
-  fill,
-  fillOpacity,
-  stroke,
-  strokeWidth,
-  strokeOpacity,
-  strokeLinejoin,
-  strokeLinecap,
-  strokeMiterlimit,
-  strokeDasharray,
-  strokeDashoffset,
-  opacity: opacity2,
-  mixBlendMode,
-  imageFilter,
-  paintOrder,
-  pointerEvents,
-  shapeRendering,
-  channels
-}, {
-  ariaLabel: cariaLabel,
-  fill: defaultFill = "currentColor",
-  fillOpacity: defaultFillOpacity,
-  stroke: defaultStroke = "none",
-  strokeOpacity: defaultStrokeOpacity,
-  strokeWidth: defaultStrokeWidth,
-  strokeLinecap: defaultStrokeLinecap,
-  strokeLinejoin: defaultStrokeLinejoin,
-  strokeMiterlimit: defaultStrokeMiterlimit,
-  paintOrder: defaultPaintOrder
-}) {
-  if (defaultFill === null) {
-    fill = null;
-    fillOpacity = null;
-  }
-  if (defaultStroke === null) {
-    stroke = null;
-    strokeOpacity = null;
-  }
-  if (isNoneish(defaultFill)) {
-    if (!isNoneish(defaultStroke) && (!isNoneish(fill) || channels?.fill))
-      defaultStroke = "none";
-  } else {
-    if (isNoneish(defaultStroke) && (!isNoneish(stroke) || channels?.stroke))
-      defaultFill = "none";
-  }
-  const [vfill, cfill] = maybeColorChannel(fill, defaultFill);
-  const [vfillOpacity, cfillOpacity] = maybeNumberChannel(fillOpacity, defaultFillOpacity);
-  const [vstroke, cstroke] = maybeColorChannel(stroke, defaultStroke);
-  const [vstrokeOpacity, cstrokeOpacity] = maybeNumberChannel(strokeOpacity, defaultStrokeOpacity);
-  const [vopacity, copacity] = maybeNumberChannel(opacity2);
-  if (!isNone(cstroke)) {
-    if (strokeWidth === undefined)
-      strokeWidth = defaultStrokeWidth;
-    if (strokeLinecap === undefined)
-      strokeLinecap = defaultStrokeLinecap;
-    if (strokeLinejoin === undefined)
-      strokeLinejoin = defaultStrokeLinejoin;
-    if (strokeMiterlimit === undefined && !isRound(strokeLinejoin))
-      strokeMiterlimit = defaultStrokeMiterlimit;
-    if (!isNone(cfill) && paintOrder === undefined)
-      paintOrder = defaultPaintOrder;
-  }
-  const [vstrokeWidth, cstrokeWidth] = maybeNumberChannel(strokeWidth);
-  if (defaultFill !== null) {
-    mark.fill = impliedString(cfill, "currentColor");
-    mark.fillOpacity = impliedNumber(cfillOpacity, 1);
-  }
-  if (defaultStroke !== null) {
-    mark.stroke = impliedString(cstroke, "none");
-    mark.strokeWidth = impliedNumber(cstrokeWidth, 1);
-    mark.strokeOpacity = impliedNumber(cstrokeOpacity, 1);
-    mark.strokeLinejoin = impliedString(strokeLinejoin, "miter");
-    mark.strokeLinecap = impliedString(strokeLinecap, "butt");
-    mark.strokeMiterlimit = impliedNumber(strokeMiterlimit, 4);
-    mark.strokeDasharray = impliedString(strokeDasharray, "none");
-    mark.strokeDashoffset = impliedString(strokeDashoffset, "0");
-  }
-  mark.target = string3(target);
-  mark.ariaLabel = string3(cariaLabel);
-  mark.ariaDescription = string3(ariaDescription);
-  mark.ariaHidden = string3(ariaHidden);
-  mark.opacity = impliedNumber(copacity, 1);
-  mark.mixBlendMode = impliedString(mixBlendMode, "normal");
-  mark.imageFilter = impliedString(imageFilter, "none");
-  mark.paintOrder = impliedString(paintOrder, "normal");
-  mark.pointerEvents = impliedString(pointerEvents, "auto");
-  mark.shapeRendering = impliedString(shapeRendering, "auto");
-  return {
-    title: { value: title, optional: true, filter: null },
-    href: { value: href, optional: true, filter: null },
-    ariaLabel: { value: variaLabel, optional: true, filter: null },
-    fill: { value: vfill, scale: "auto", optional: true },
-    fillOpacity: { value: vfillOpacity, scale: "auto", optional: true },
-    stroke: { value: vstroke, scale: "auto", optional: true },
-    strokeOpacity: { value: vstrokeOpacity, scale: "auto", optional: true },
-    strokeWidth: { value: vstrokeWidth, optional: true },
-    opacity: { value: vopacity, scale: "auto", optional: true }
-  };
-}
-function applyTitle(selection5, L) {
-  if (L)
-    selection5.filter((i) => nonempty(L[i])).append("title").call(applyText, L);
-}
-function applyTitleGroup(selection5, L) {
-  if (L)
-    selection5.filter(([i]) => nonempty(L[i])).append("title").call(applyTextGroup, L);
-}
-function applyText(selection5, T) {
-  if (T)
-    selection5.text((i) => formatDefault(T[i]));
-}
-function applyTextGroup(selection5, T) {
-  if (T)
-    selection5.text(([i]) => formatDefault(T[i]));
-}
-function applyChannelStyles(selection5, { target, tip }, {
-  ariaLabel: AL,
-  title: T,
-  fill: F,
-  fillOpacity: FO,
-  stroke: S,
-  strokeOpacity: SO,
-  strokeWidth: SW,
-  opacity: O,
-  href: H
-}) {
-  if (AL)
-    applyAttr(selection5, "aria-label", (i) => AL[i]);
-  if (F)
-    applyAttr(selection5, "fill", (i) => F[i]);
-  if (FO)
-    applyAttr(selection5, "fill-opacity", (i) => FO[i]);
-  if (S)
-    applyAttr(selection5, "stroke", (i) => S[i]);
-  if (SO)
-    applyAttr(selection5, "stroke-opacity", (i) => SO[i]);
-  if (SW)
-    applyAttr(selection5, "stroke-width", (i) => SW[i]);
-  if (O)
-    applyAttr(selection5, "opacity", (i) => O[i]);
-  if (H)
-    applyHref(selection5, (i) => H[i], target);
-  if (!tip)
-    applyTitle(selection5, T);
-}
-function applyGroupedChannelStyles(selection5, { target, tip }, {
-  ariaLabel: AL,
-  title: T,
-  fill: F,
-  fillOpacity: FO,
-  stroke: S,
-  strokeOpacity: SO,
-  strokeWidth: SW,
-  opacity: O,
-  href: H
-}) {
-  if (AL)
-    applyAttr(selection5, "aria-label", ([i]) => AL[i]);
-  if (F)
-    applyAttr(selection5, "fill", ([i]) => F[i]);
-  if (FO)
-    applyAttr(selection5, "fill-opacity", ([i]) => FO[i]);
-  if (S)
-    applyAttr(selection5, "stroke", ([i]) => S[i]);
-  if (SO)
-    applyAttr(selection5, "stroke-opacity", ([i]) => SO[i]);
-  if (SW)
-    applyAttr(selection5, "stroke-width", ([i]) => SW[i]);
-  if (O)
-    applyAttr(selection5, "opacity", ([i]) => O[i]);
-  if (H)
-    applyHref(selection5, ([i]) => H[i], target);
-  if (!tip)
-    applyTitleGroup(selection5, T);
-}
-var groupAesthetics = function({
-  ariaLabel: AL,
-  title: T,
-  fill: F,
-  fillOpacity: FO,
-  stroke: S,
-  strokeOpacity: SO,
-  strokeWidth: SW,
-  opacity: O,
-  href: H
-}, { tip }) {
-  return [AL, tip ? undefined : T, F, FO, S, SO, SW, O, H].filter((c4) => c4 !== undefined);
-};
-function groupZ(I, Z, z) {
-  const G = group(I, (i) => Z[i]);
-  if (z === undefined && G.size > 1 + I.length >> 1) {
-    warn(`Warning: the implicit z channel has high cardinality. This may occur when the fill or stroke channel is associated with quantitative data rather than ordinal or categorical data. You can suppress this warning by setting the z option explicitly; if this data represents a single series, set z to null.`);
-  }
-  return G.values();
-}
-function* groupIndex(I, position2, mark, channels) {
-  const { z } = mark;
-  const { z: Z } = channels;
-  const A5 = groupAesthetics(channels, mark);
-  const C2 = [...position2, ...A5];
-  for (const G of Z ? groupZ(I, Z, z) : [I]) {
-    let Ag;
-    let Gg;
-    out:
-      for (const i of G) {
-        for (const c4 of C2) {
-          if (!defined(c4[i])) {
-            if (Gg)
-              Gg.push(-1);
-            continue out;
-          }
-        }
-        if (Ag === undefined) {
-          if (Gg)
-            yield Gg;
-          Ag = A5.map((c4) => keyof2(c4[i])), Gg = [i];
-          continue;
-        }
-        Gg.push(i);
-        for (let j = 0;j < A5.length; ++j) {
-          const k2 = keyof2(A5[j][i]);
-          if (k2 !== Ag[j]) {
-            yield Gg;
-            Ag = A5.map((c4) => keyof2(c4[i])), Gg = [i];
-            continue out;
-          }
-        }
-      }
-    if (Gg)
-      yield Gg;
-  }
-}
-function maybeClip(clip) {
-  if (clip === true)
-    clip = "frame";
-  else if (clip === false)
-    clip = null;
-  return maybeKeyword(clip, "clip", ["frame", "sphere"]);
-}
-var applyClip = function(selection5, mark, dimensions, context3) {
-  let clipUrl;
-  switch (mark.clip) {
-    case "frame": {
-      const { width, height, marginLeft, marginRight, marginTop, marginBottom } = dimensions;
-      const id2 = getClipId();
-      clipUrl = `url(#${id2})`;
-      selection5 = create2("svg:g", context3).call((g) => g.append("svg:clipPath").attr("id", id2).append("rect").attr("x", marginLeft).attr("y", marginTop).attr("width", width - marginRight - marginLeft).attr("height", height - marginTop - marginBottom)).each(function() {
-        this.appendChild(selection5.node());
-        selection5.node = () => this;
-      });
-      break;
-    }
-    case "sphere": {
-      const { projection: projection3 } = context3;
-      if (!projection3)
-        throw new Error(`the "sphere" clip option requires a projection`);
-      const id2 = getClipId();
-      clipUrl = `url(#${id2})`;
-      selection5.append("clipPath").attr("id", id2).append("path").attr("d", path_default(projection3)({ type: "Sphere" }));
-      break;
-    }
-  }
-  applyAttr(selection5, "aria-label", mark.ariaLabel);
-  applyAttr(selection5, "aria-description", mark.ariaDescription);
-  applyAttr(selection5, "aria-hidden", mark.ariaHidden);
-  applyAttr(selection5, "clip-path", clipUrl);
-};
-function applyIndirectStyles(selection5, mark, dimensions, context3) {
-  applyClip(selection5, mark, dimensions, context3);
-  applyAttr(selection5, "fill", mark.fill);
-  applyAttr(selection5, "fill-opacity", mark.fillOpacity);
-  applyAttr(selection5, "stroke", mark.stroke);
-  applyAttr(selection5, "stroke-width", mark.strokeWidth);
-  applyAttr(selection5, "stroke-opacity", mark.strokeOpacity);
-  applyAttr(selection5, "stroke-linejoin", mark.strokeLinejoin);
-  applyAttr(selection5, "stroke-linecap", mark.strokeLinecap);
-  applyAttr(selection5, "stroke-miterlimit", mark.strokeMiterlimit);
-  applyAttr(selection5, "stroke-dasharray", mark.strokeDasharray);
-  applyAttr(selection5, "stroke-dashoffset", mark.strokeDashoffset);
-  applyAttr(selection5, "shape-rendering", mark.shapeRendering);
-  applyAttr(selection5, "filter", mark.imageFilter);
-  applyAttr(selection5, "paint-order", mark.paintOrder);
-  const { pointerEvents = context3.pointerSticky === false ? "none" : undefined } = mark;
-  applyAttr(selection5, "pointer-events", pointerEvents);
-}
-function applyDirectStyles(selection5, mark) {
-  applyStyle(selection5, "mix-blend-mode", mark.mixBlendMode);
-  applyAttr(selection5, "opacity", mark.opacity);
-}
-var applyHref = function(selection5, href, target) {
-  selection5.each(function(i) {
-    const h = href(i);
-    if (h != null) {
-      const a2 = this.ownerDocument.createElementNS(namespaces_default.svg, "a");
-      a2.setAttribute("fill", "inherit");
-      a2.setAttributeNS(namespaces_default.xlink, "href", h);
-      if (target != null)
-        a2.setAttribute("target", target);
-      this.parentNode.insertBefore(a2, this).appendChild(this);
-    }
-  });
-};
-function applyAttr(selection5, name, value5) {
-  if (value5 != null)
-    selection5.attr(name, value5);
-}
-function applyStyle(selection5, name, value5) {
-  if (value5 != null)
-    selection5.style(name, value5);
-}
-function applyTransform(selection5, mark, { x: x2, y: y2 }, tx = offset, ty = offset) {
-  tx += mark.dx;
-  ty += mark.dy;
-  if (x2?.bandwidth)
-    tx += x2.bandwidth() / 2;
-  if (y2?.bandwidth)
-    ty += y2.bandwidth() / 2;
-  if (tx || ty)
-    selection5.attr("transform", `translate(${tx},${ty})`);
-}
-function impliedString(value5, impliedValue) {
-  if ((value5 = string3(value5)) !== impliedValue)
-    return value5;
-}
-function impliedNumber(value5, impliedValue) {
-  if ((value5 = number12(value5)) !== impliedValue)
-    return value5;
-}
-function maybeClassName(name) {
-  if (name === undefined)
-    return "plot-d6a7b5";
-  name = `${name}`;
-  if (!validClassName.test(name))
-    throw new Error(`invalid class name: ${name}`);
-  return name;
-}
-function applyInlineStyles(selection5, style3) {
-  if (typeof style3 === "string") {
-    selection5.property("style", style3);
-  } else if (style3 != null) {
-    for (const element of selection5) {
-      Object.assign(element.style, style3);
-    }
-  }
-}
-function applyFrameAnchor({ frameAnchor }, { width, height, marginTop, marginRight, marginBottom, marginLeft }) {
-  return [
-    /left$/.test(frameAnchor) ? marginLeft : /right$/.test(frameAnchor) ? width - marginRight : (marginLeft + width - marginRight) / 2,
-    /^top/.test(frameAnchor) ? marginTop : /^bottom/.test(frameAnchor) ? height - marginBottom : (marginTop + height - marginBottom) / 2
-  ];
-}
-var offset = (typeof window !== "undefined" ? window.devicePixelRatio > 1 : typeof it === "undefined") ? 0 : 0.5;
-var nextClipId = 0;
-var validClassName = /^-?([_a-z]|[\240-\377]|\\[0-9a-f]{1,6}(\r\n|[ \t\r\n\f])?|\\[^\r\n\f0-9a-f])([_a-z0-9-]|[\240-\377]|\\[0-9a-f]{1,6}(\r\n|[ \t\r\n\f])?|\\[^\r\n\f0-9a-f])*$/i;
-
 // node_modules/@observablehq/plot/src/dimensions.js
-function createDimensions(scales4, marks, options12 = {}) {
+function createDimensions(scales4, marks, options13 = {}) {
   let marginTopDefault = 0.5 - offset, marginRightDefault = 0.5 + offset, marginBottomDefault = 0.5 + offset, marginLeftDefault = 0.5 - offset;
   for (const { marginTop: marginTop2, marginRight: marginRight2, marginBottom: marginBottom2, marginLeft: marginLeft2 } of marks) {
     if (marginTop2 > marginTopDefault)
@@ -16429,21 +16249,21 @@ function createDimensions(scales4, marks, options12 = {}) {
     marginRight = margin !== undefined ? margin : marginRightDefault,
     marginBottom = margin !== undefined ? margin : marginBottomDefault,
     marginLeft = margin !== undefined ? margin : marginLeftDefault
-  } = options12;
+  } = options13;
   marginTop = +marginTop;
   marginRight = +marginRight;
   marginBottom = +marginBottom;
   marginLeft = +marginLeft;
   let {
     width = 640,
-    height = autoHeight(scales4, options12, {
+    height = autoHeight(scales4, options13, {
       width,
       marginTopDefault,
       marginRightDefault,
       marginBottomDefault,
       marginLeftDefault
     }) + Math.max(0, marginTop - marginTopDefault + marginBottom - marginBottomDefault)
-  } = options12;
+  } = options13;
   width = +width;
   height = +height;
   const dimensions = {
@@ -16461,7 +16281,7 @@ function createDimensions(scales4, marks, options12 = {}) {
       marginRight: facetMarginRight = facetMargin !== undefined ? facetMargin : marginRight,
       marginBottom: facetMarginBottom = facetMargin !== undefined ? facetMargin : marginBottom,
       marginLeft: facetMarginLeft = facetMargin !== undefined ? facetMargin : marginLeft
-    } = options12.facet ?? {};
+    } = options13.facet ?? {};
     facetMarginTop = +facetMarginTop;
     facetMarginRight = +facetMarginRight;
     facetMarginBottom = +facetMarginBottom;
@@ -16527,8 +16347,8 @@ var aspectRatioLength = function(k2, scale) {
 };
 
 // node_modules/@observablehq/plot/src/facet.js
-function createFacets(channelsByScale, options13) {
-  const { fx, fy } = createScales(channelsByScale, options13);
+function createFacets(channelsByScale, options14) {
+  const { fx, fy } = createScales(channelsByScale, options14);
   const fxDomain = fx?.scale.domain();
   const fyDomain = fy?.scale.domain();
   return fxDomain && fyDomain ? cross(fxDomain, fyDomain).map(([x2, y2], i) => ({ x: x2, y: y2, i })) : fxDomain ? fxDomain.map((x2, i) => ({ x: x2, i })) : fyDomain ? fyDomain.map((y2, i) => ({ y: y2, i })) : undefined;
@@ -16573,7 +16393,7 @@ function maybeFacetAnchor(facetAnchor) {
 var facetIndex = function(V) {
   let I = indexCache.get(V);
   if (!I)
-    indexCache.set(V, I = new InternMap(map6(V, (v, i) => [v, i])));
+    indexCache.set(V, I = new InternMap(map7(V, (v, i) => [v, i])));
   return I;
 };
 var facetIndexOf = function(V, v) {
@@ -16694,12 +16514,12 @@ var maybeChannels = function(channels) {
 var maybeTip = function(tip) {
   return tip === true ? "xy" : tip === false ? null : maybeKeyword(tip, "tip", ["x", "y", "xy"]);
 };
-function withTip(options15, tip) {
-  return options15?.tip === true ? { ...options15, tip } : options15;
+function withTip(options16, tip) {
+  return options16?.tip === true ? { ...options16, tip } : options16;
 }
 
 class Mark {
-  constructor(data2, channels = {}, options15 = {}, defaults) {
+  constructor(data2, channels = {}, options16 = {}, defaults) {
     const {
       facet: facet2 = "auto",
       facetAnchor,
@@ -16713,15 +16533,15 @@ class Mark {
       marginRight = margin,
       marginBottom = margin,
       marginLeft = margin,
-      clip,
+      clip = defaults?.clip,
       channels: extraChannels,
       tip,
       render
-    } = options15;
+    } = options16;
     this.data = data2;
     this.sort = isDomainSort(sort5) ? sort5 : null;
-    this.initializer = initializer(options15).initializer;
-    this.transform = this.initializer ? options15.transform : basic(options15).transform;
+    this.initializer = initializer(options16).initializer;
+    this.transform = this.initializer ? options16.transform : basic(options16).transform;
     if (facet2 === null || facet2 === false) {
       this.facet = null;
     } else {
@@ -16734,7 +16554,7 @@ class Mark {
     if (extraChannels !== undefined)
       channels = { ...maybeChannels(extraChannels), ...channels };
     if (defaults !== undefined)
-      channels = { ...styles(this, options15, defaults), ...channels };
+      channels = { ...styles(this, options16, defaults), ...channels };
     this.channels = Object.fromEntries(Object.entries(channels).map(([name, channel2]) => {
       if (isOptions(channel2.value)) {
         const { value: value5, scale = channel2.scale } = channel2.value;
@@ -16790,10 +16610,10 @@ class Mark {
   }
   filter(index2, channels, values2) {
     for (const name in channels) {
-      const { filter: filter6 = defined } = channels[name];
-      if (filter6 !== null) {
+      const { filter: filter5 = defined } = channels[name];
+      if (filter5 !== null) {
         const value5 = values2[name];
-        index2 = index2.filter((i) => filter6(value5[i]));
+        index2 = index2.filter((i) => filter5(value5[i]));
       }
     }
     return index2;
@@ -16817,7 +16637,7 @@ class Mark {
 }
 
 // node_modules/@observablehq/plot/src/interactions/pointer.js
-var pointerK = function(kx2, ky2, { x: x2, y: y2, px, py, maxRadius = 40, channels, render, ...options15 } = {}) {
+var pointerK = function(kx2, ky2, { x: x2, y: y2, px, py, maxRadius = 40, channels, render, ...options16 } = {}) {
   maxRadius = +maxRadius;
   if (px != null)
     x2 ??= null, channels = { ...channels, px: { value: px, scale: "x" } };
@@ -16827,7 +16647,7 @@ var pointerK = function(kx2, ky2, { x: x2, y: y2, px, py, maxRadius = 40, channe
     x: x2,
     y: y2,
     channels,
-    ...options15,
+    ...options16,
     render: composeRender(function(index2, scales5, values2, dimensions, context3, next) {
       context3 = { ...context3, pointerSticky: false };
       const svg = context3.ownerSVGElement;
@@ -16871,8 +16691,8 @@ var pointerK = function(kx2, ky2, { x: x2, y: y2, px, py, maxRadius = 40, channe
             facetState.set(index2.fi, ri);
             f = requestAnimationFrame(() => {
               f = null;
-              for (const r of facetState.values()) {
-                if (r < ri) {
+              for (const [fi, r] of facetState) {
+                if (r < ri || r === ri && fi < index2.fi) {
                   ii = null;
                   break;
                 }
@@ -16907,7 +16727,8 @@ var pointerK = function(kx2, ky2, { x: x2, y: y2, px, py, maxRadius = 40, channe
           g.replaceWith(r);
         }
         state.roots[renderIndex] = g = r;
-        context3.dispatchValue(i == null ? null : data2[i]);
+        if (!(i == null && facetState?.size > 1))
+          context3.dispatchValue(i == null ? null : data2[i]);
         return r;
       }
       function pointermove(event3) {
@@ -16915,14 +16736,21 @@ var pointerK = function(kx2, ky2, { x: x2, y: y2, px, py, maxRadius = 40, channe
           return;
         let [xp, yp] = pointer_default(event3);
         xp -= tx, yp -= ty;
+        const kpx = xp < dimensions.marginLeft || xp > dimensions.width - dimensions.marginRight ? 1 : kx2;
+        const kpy = yp < dimensions.marginTop || yp > dimensions.height - dimensions.marginBottom ? 1 : ky2;
         let ii = null;
         let ri = maxRadius * maxRadius;
         for (const j of index2) {
-          const dx = kx2 * (px2(j) - xp);
-          const dy = ky2 * (py2(j) - yp);
+          const dx = kpx * (px2(j) - xp);
+          const dy = kpy * (py2(j) - yp);
           const rj = dx * dx + dy * dy;
           if (rj <= ri)
             ii = j, ri = rj;
+        }
+        if (ii != null && (kx2 !== 1 || ky2 !== 1)) {
+          const dx = px2(ii) - xp;
+          const dy = py2(ii) - yp;
+          ri = dx * dx + dy * dy;
         }
         update(ii, ri);
       }
@@ -16953,14 +16781,14 @@ var pointerK = function(kx2, ky2, { x: x2, y: y2, px, py, maxRadius = 40, channe
     }, render)
   };
 };
-function pointer(options15) {
-  return pointerK(1, 1, options15);
+function pointer(options16) {
+  return pointerK(1, 1, options16);
 }
-function pointerX(options15) {
-  return pointerK(1, 0.01, options15);
+function pointerX(options16) {
+  return pointerK(1, 0.01, options16);
 }
-function pointerY(options15) {
-  return pointerK(0.01, 1, options15);
+function pointerY(options16) {
+  return pointerK(0.01, 1, options16);
 }
 function anchorX({ x1: X12, x2: X22, x: X3 = X12 }, cx) {
   return X12 && X22 ? (i) => (X12[i] + X22[i]) / 2 : X3 ? (i) => X3[i] : () => cx;
@@ -16976,7 +16804,7 @@ function inferFontVariant(scale) {
 }
 
 // node_modules/@observablehq/plot/src/legends/ramp.js
-function legendRamp(color10, options16) {
+function legendRamp(color10, options17) {
   let {
     label = color10.label,
     tickSize = 6,
@@ -16986,15 +16814,15 @@ function legendRamp(color10, options16) {
     marginRight = 0,
     marginBottom = 16 + tickSize,
     marginLeft = 0,
-    style: style7,
+    style: style8,
     ticks: ticks2 = (width - marginLeft - marginRight) / 64,
     tickFormat: tickFormat3,
     fontVariant = inferFontVariant(color10),
     round = true,
     opacity: opacity2,
     className
-  } = options16;
-  const context4 = createContext(options16);
+  } = options17;
+  const context4 = createContext(options17);
   className = maybeClassName(className);
   opacity2 = maybeNumberChannel(opacity2)[1];
   if (tickFormat3 === null)
@@ -17009,7 +16837,7 @@ function legendRamp(color10, options16) {
 }
 .${className}-ramp text {
   white-space: pre;
-}`)).call(applyInlineStyles, style7);
+}`)).call(applyInlineStyles, style8);
   let tickAdjust = (g) => g.selectAll(".tick line").attr("y1", marginTop + marginBottom - height);
   let x2;
   const applyRange = round ? (x3, range6) => x3.rangeRound(range6) : (x3, range6) => x3.range(range6);
@@ -17032,7 +16860,7 @@ function legendRamp(color10, options16) {
     const thresholdFormat = tickFormat3 === undefined ? (d) => d : typeof tickFormat3 === "string" ? format(tickFormat3) : tickFormat3;
     x2 = applyRange(linear2().domain([-1, range5.length - 1]), [marginLeft, width - marginRight]);
     svg.append("g").attr("fill-opacity", opacity2).selectAll().data(range5).enter().append("rect").attr("x", (d, i) => x2(i - 1)).attr("y", marginTop).attr("width", (d, i) => x2(i) - x2(i - 1)).attr("height", height - marginTop - marginBottom).attr("fill", (d) => d);
-    ticks2 = map6(thresholds, (_, i) => i);
+    ticks2 = map7(thresholds, (_, i) => i);
     tickFormat3 = (i) => thresholdFormat(thresholds[i], i);
   } else {
     x2 = applyRange(band().domain(domain), [marginLeft, width - marginRight]);
@@ -17126,13 +16954,13 @@ var applyMarkersColor = function(path3, { markerStart, markerMid, markerEnd, str
 var nextMarkerId = 0;
 
 // node_modules/@observablehq/plot/src/transforms/inset.js
-function maybeInsetX({ inset, insetLeft, insetRight, ...options16 } = {}) {
+function maybeInsetX({ inset, insetLeft, insetRight, ...options17 } = {}) {
   [insetLeft, insetRight] = maybeInset(inset, insetLeft, insetRight);
-  return { inset, insetLeft, insetRight, ...options16 };
+  return { inset, insetLeft, insetRight, ...options17 };
 }
-function maybeInsetY({ inset, insetTop, insetBottom, ...options16 } = {}) {
+function maybeInsetY({ inset, insetTop, insetBottom, ...options17 } = {}) {
   [insetTop, insetBottom] = maybeInset(inset, insetTop, insetBottom);
-  return { inset, insetTop, insetBottom, ...options16 };
+  return { inset, insetTop, insetBottom, ...options17 };
 }
 var maybeInset = function(inset, inset1, inset2) {
   return inset === undefined && inset1 === undefined && inset2 === undefined ? offset ? [1, 0] : [0.5, 0.5] : [inset1, inset2];
@@ -17144,17 +16972,17 @@ var maybeIntervalValue = function(value5, { interval: interval10 }) {
   value5.interval = maybeInterval(value5.interval === undefined ? interval10 : value5.interval);
   return value5;
 };
-var maybeIntervalK = function(k2, maybeInsetK, options17, trivial) {
-  const { [k2]: v, [`${k2}1`]: v1, [`${k2}2`]: v2 } = options17;
-  const { value: value5, interval: interval10 } = maybeIntervalValue(v, options17);
+var maybeIntervalK = function(k2, maybeInsetK, options18, trivial) {
+  const { [k2]: v, [`${k2}1`]: v1, [`${k2}2`]: v2 } = options18;
+  const { value: value5, interval: interval10 } = maybeIntervalValue(v, options18);
   if (value5 == null || interval10 == null && !trivial)
-    return options17;
+    return options18;
   const label = labelof(v);
   if (interval10 == null) {
     let V;
     const kv = { transform: (data2) => V || (V = valueof(data2, value5)), label };
     return {
-      ...options17,
+      ...options18,
       [k2]: undefined,
       [`${k2}1`]: v1 === undefined ? kv : v1,
       [`${k2}2`]: v2 === undefined ? kv : v2
@@ -17164,53 +16992,53 @@ var maybeIntervalK = function(k2, maybeInsetK, options17, trivial) {
   function transform5(data2) {
     if (V1 !== undefined && data2 === D1)
       return V1;
-    return V1 = map6(valueof(D1 = data2, value5), (v3) => interval10.floor(v3));
+    return V1 = map7(valueof(D1 = data2, value5), (v3) => interval10.floor(v3));
   }
   return maybeInsetK({
-    ...options17,
+    ...options18,
     [k2]: undefined,
     [`${k2}1`]: v1 === undefined ? { transform: transform5, label } : v1,
     [`${k2}2`]: v2 === undefined ? { transform: (data2) => transform5(data2).map((v3) => interval10.offset(v3)), label } : v2
   });
 };
-var maybeIntervalMidK = function(k2, maybeInsetK, options17) {
-  const { [k2]: v } = options17;
-  const { value: value5, interval: interval10 } = maybeIntervalValue(v, options17);
+var maybeIntervalMidK = function(k2, maybeInsetK, options18) {
+  const { [k2]: v } = options18;
+  const { value: value5, interval: interval10 } = maybeIntervalValue(v, options18);
   if (value5 == null || interval10 == null)
-    return options17;
+    return options18;
   return maybeInsetK({
-    ...options17,
+    ...options18,
     [k2]: {
       label: labelof(v),
       transform: (data2) => {
-        const V1 = map6(valueof(data2, value5), (v2) => interval10.floor(v2));
+        const V1 = map7(valueof(data2, value5), (v2) => interval10.floor(v2));
         const V2 = V1.map((v2) => interval10.offset(v2));
         return V1.map(isTemporal(V1) ? (v1, v2) => v1 == null || isNaN(v1 = +v1) || (v2 = V2[v2], v2 == null) || isNaN(v2 = +v2) ? undefined : new Date((v1 + v2) / 2) : (v1, v2) => v1 == null || (v2 = V2[v2], v2 == null) ? NaN : (+v1 + +v2) / 2);
       }
     }
   });
 };
-function maybeIntervalX(options17 = {}) {
-  return maybeIntervalK("x", maybeInsetX, options17);
+function maybeIntervalX(options18 = {}) {
+  return maybeIntervalK("x", maybeInsetX, options18);
 }
-function maybeIntervalY(options17 = {}) {
-  return maybeIntervalK("y", maybeInsetY, options17);
+function maybeIntervalY(options18 = {}) {
+  return maybeIntervalK("y", maybeInsetY, options18);
 }
-function maybeIntervalMidX(options17 = {}) {
-  return maybeIntervalMidK("x", maybeInsetX, options17);
+function maybeIntervalMidX(options18 = {}) {
+  return maybeIntervalMidK("x", maybeInsetX, options18);
 }
-function maybeIntervalMidY(options17 = {}) {
-  return maybeIntervalMidK("y", maybeInsetY, options17);
+function maybeIntervalMidY(options18 = {}) {
+  return maybeIntervalMidK("y", maybeInsetY, options18);
 }
 
 // node_modules/@observablehq/plot/src/marks/rule.js
-function ruleX(data2, options18) {
-  let { x: x2 = identity13, y: y2, y1: y12, y2: y22, ...rest } = maybeIntervalY(options18);
+function ruleX(data2, options19) {
+  let { x: x2 = identity13, y: y2, y1: y12, y2: y22, ...rest } = maybeIntervalY(options19);
   [y12, y22] = maybeOptionalZero(y2, y12, y22);
   return new RuleX(data2, { ...rest, x: x2, y1: y12, y2: y22 });
 }
-function ruleY(data2, options18) {
-  let { y: y2 = identity13, x: x2, x1: x12, x2: x22, ...rest } = maybeIntervalX(options18);
+function ruleY(data2, options19) {
+  let { y: y2 = identity13, x: x2, x1: x12, x2: x22, ...rest } = maybeIntervalX(options19);
   [x12, x22] = maybeOptionalZero(x2, x12, x22);
   return new RuleY(data2, { ...rest, y: y2, x1: x12, x2: x22 });
 }
@@ -17237,16 +17065,16 @@ var defaults = {
 };
 
 class RuleX extends Mark {
-  constructor(data2, options18 = {}) {
-    const { x: x2, y1: y12, y2, inset: inset2 = 0, insetTop = inset2, insetBottom = inset2 } = options18;
+  constructor(data2, options19 = {}) {
+    const { x: x2, y1: y12, y2, inset: inset2 = 0, insetTop = inset2, insetBottom = inset2 } = options19;
     super(data2, {
       x: { value: x2, scale: "x", optional: true },
       y1: { value: y12, scale: "y", optional: true },
       y2: { value: y2, scale: "y", optional: true }
-    }, withTip(options18, "x"), defaults);
+    }, withTip(options19, "x"), defaults);
     this.insetTop = number12(insetTop);
     this.insetBottom = number12(insetBottom);
-    markers(this, options18);
+    markers(this, options19);
   }
   render(index2, scales7, channels, dimensions, context6) {
     const { x: x2, y: y2 } = scales7;
@@ -17258,16 +17086,16 @@ class RuleX extends Mark {
 }
 
 class RuleY extends Mark {
-  constructor(data2, options18 = {}) {
-    const { x1: x12, x2, y: y2, inset: inset2 = 0, insetRight = inset2, insetLeft = inset2 } = options18;
+  constructor(data2, options19 = {}) {
+    const { x1: x12, x2, y: y2, inset: inset2 = 0, insetRight = inset2, insetLeft = inset2 } = options19;
     super(data2, {
       y: { value: y2, scale: "y", optional: true },
       x1: { value: x12, scale: "x", optional: true },
       x2: { value: x2, scale: "x", optional: true }
-    }, withTip(options18, "y"), defaults);
+    }, withTip(options19, "y"), defaults);
     this.insetRight = number12(insetRight);
     this.insetLeft = number12(insetLeft);
-    markers(this, options18);
+    markers(this, options19);
   }
   render(index2, scales7, channels, dimensions, context6) {
     const { x: x2, y: y2 } = scales7;
@@ -17322,20 +17150,20 @@ var applyMultilineText = function(selection5, mark4, T, TL) {
     const n = lines.length;
     const y2 = lineAnchor === "top" ? 0.71 : lineAnchor === "bottom" ? 1 - n : (164 - n * 100) / 200;
     if (n > 1) {
-      let m = 0;
+      let m2 = 0;
       for (let i2 = 0;i2 < n; ++i2) {
-        ++m;
+        ++m2;
         if (!lines[i2])
           continue;
         const tspan = this.ownerDocument.createElementNS(namespaces_default.svg, "tspan");
         tspan.setAttribute("x", 0);
-        if (i2 === m - 1)
+        if (i2 === m2 - 1)
           tspan.setAttribute("y", `${(y2 + i2) * lineHeight}em`);
         else
-          tspan.setAttribute("dy", `${m * lineHeight}em`);
+          tspan.setAttribute("dy", `${m2 * lineHeight}em`);
         tspan.textContent = lines[i2];
         this.appendChild(tspan);
-        m = 0;
+        m2 = 0;
       }
     } else {
       if (y2)
@@ -17349,16 +17177,16 @@ var applyMultilineText = function(selection5, mark4, T, TL) {
     }
   });
 };
-function text3(data2, { x: x2, y: y2, ...options19 } = {}) {
-  if (options19.frameAnchor === undefined)
+function text3(data2, { x: x2, y: y2, ...options20 } = {}) {
+  if (options20.frameAnchor === undefined)
     [x2, y2] = maybeTuple(x2, y2);
-  return new Text(data2, { ...options19, x: x2, y: y2 });
+  return new Text(data2, { ...options20, x: x2, y: y2 });
 }
-function textX(data2, { x: x2 = identity13, ...options19 } = {}) {
-  return new Text(data2, maybeIntervalMidY({ ...options19, x: x2 }));
+function textX(data2, { x: x2 = identity13, ...options20 } = {}) {
+  return new Text(data2, maybeIntervalMidY({ ...options20, x: x2 }));
 }
-function textY(data2, { y: y2 = identity13, ...options19 } = {}) {
-  return new Text(data2, maybeIntervalMidX({ ...options19, y: y2 }));
+function textY(data2, { y: y2 = identity13, ...options20 } = {}) {
+  return new Text(data2, maybeIntervalMidX({ ...options20, y: y2 }));
 }
 function applyIndirectTextStyles(selection5, mark4, T) {
   applyAttr(selection5, "text-anchor", mark4.textAnchor);
@@ -17549,7 +17377,7 @@ var defaults2 = {
 var softHyphen = "\xAD";
 
 class Text extends Mark {
-  constructor(data2, options19 = {}) {
+  constructor(data2, options20 = {}) {
     const {
       x: x2,
       y: y2,
@@ -17567,7 +17395,7 @@ class Text extends Mark {
       fontVariant,
       fontWeight,
       rotate
-    } = options19;
+    } = options20;
     const [vrotate, crotate] = maybeNumberChannel(rotate, 0);
     const [vfontSize, cfontSize] = maybeFontSizeChannel(fontSize);
     super(data2, {
@@ -17576,7 +17404,7 @@ class Text extends Mark {
       fontSize: { value: vfontSize, optional: true },
       rotate: { value: numberChannel(vrotate), optional: true },
       text: { value: text4, filter: nonempty, optional: true }
-    }, options19, defaults2);
+    }, options20, defaults2);
     this.rotate = crotate;
     this.textAnchor = impliedString(textAnchor, "middle");
     this.lineAnchor = keyword(lineAnchor, "lineAnchor", ["top", "middle", "bottom"]);
@@ -17717,12 +17545,12 @@ var maybeShape = function(shape) {
     return value5;
   throw new Error(`invalid shape: ${shape}`);
 };
-function vectorX(data2, options20 = {}) {
-  const { x: x2 = identity13, ...rest } = options20;
+function vectorX(data2, options21 = {}) {
+  const { x: x2 = identity13, ...rest } = options21;
   return new Vector(data2, { ...rest, x: x2 });
 }
-function vectorY(data2, options20 = {}) {
-  const { y: y2 = identity13, ...rest } = options20;
+function vectorY(data2, options21 = {}) {
+  const { y: y2 = identity13, ...rest } = options21;
   return new Vector(data2, { ...rest, y: y2 });
 }
 var defaults3 = {
@@ -17758,8 +17586,8 @@ var shapes = new Map([
 ]);
 
 class Vector extends Mark {
-  constructor(data2, options20 = {}) {
-    const { x: x2, y: y2, r = defaultRadius, length: length3, rotate, shape = shapeArrow, anchor = "middle", frameAnchor } = options20;
+  constructor(data2, options21 = {}) {
+    const { x: x2, y: y2, r = defaultRadius, length: length3, rotate, shape = shapeArrow, anchor = "middle", frameAnchor } = options21;
     const [vl, cl] = maybeNumberChannel(length3, 12);
     const [vr, cr] = maybeNumberChannel(rotate, 0);
     super(data2, {
@@ -17767,7 +17595,7 @@ class Vector extends Mark {
       y: { value: y2, scale: "y", optional: true },
       length: { value: vl, scale: "length", optional: true },
       rotate: { value: vr, optional: true }
-    }, options20, defaults3);
+    }, options21, defaults3);
     this.r = +r;
     this.length = cl;
     this.rotate = cr;
@@ -17793,43 +17621,43 @@ class Vector extends Mark {
 }
 
 // node_modules/@observablehq/plot/src/marks/axis.js
-var maybeData = function(data2, options23) {
+var maybeData = function(data2, options24) {
   if (arguments.length < 2 && !isIterable(data2))
-    options23 = data2, data2 = null;
-  if (options23 === undefined)
-    options23 = {};
-  return [data2, options23];
+    options24 = data2, data2 = null;
+  if (options24 === undefined)
+    options24 = {};
+  return [data2, options24];
 };
 var maybeAnchor2 = function({ anchor } = {}, anchors) {
   return anchor === undefined ? anchors[0] : keyword(anchor, "anchor", anchors);
 };
-var anchorY2 = function(options23) {
-  return maybeAnchor2(options23, ["left", "right"]);
+var anchorY2 = function(options24) {
+  return maybeAnchor2(options24, ["left", "right"]);
 };
-var anchorFy = function(options23) {
-  return maybeAnchor2(options23, ["right", "left"]);
+var anchorFy = function(options24) {
+  return maybeAnchor2(options24, ["right", "left"]);
 };
-var anchorX2 = function(options23) {
-  return maybeAnchor2(options23, ["bottom", "top"]);
+var anchorX2 = function(options24) {
+  return maybeAnchor2(options24, ["bottom", "top"]);
 };
-var anchorFx = function(options23) {
-  return maybeAnchor2(options23, ["top", "bottom"]);
+var anchorFx = function(options24) {
+  return maybeAnchor2(options24, ["top", "bottom"]);
 };
 function axisY() {
-  const [data2, options23] = maybeData(...arguments);
-  return axisKy("y", anchorY2(options23), data2, options23);
+  const [data2, options24] = maybeData(...arguments);
+  return axisKy("y", anchorY2(options24), data2, options24);
 }
 function axisFy() {
-  const [data2, options23] = maybeData(...arguments);
-  return axisKy("fy", anchorFy(options23), data2, options23);
+  const [data2, options24] = maybeData(...arguments);
+  return axisKy("fy", anchorFy(options24), data2, options24);
 }
 function axisX() {
-  const [data2, options23] = maybeData(...arguments);
-  return axisKx("x", anchorX2(options23), data2, options23);
+  const [data2, options24] = maybeData(...arguments);
+  return axisKx("x", anchorX2(options24), data2, options24);
 }
 function axisFx() {
-  const [data2, options23] = maybeData(...arguments);
-  return axisKx("fx", anchorFx(options23), data2, options23);
+  const [data2, options24] = maybeData(...arguments);
+  return axisKx("fx", anchorFx(options24), data2, options24);
 }
 var axisKy = function(k2, anchor, data2, {
   color: color10 = "currentColor",
@@ -17856,7 +17684,7 @@ var axisKy = function(k2, anchor, data2, {
   labelAnchor,
   labelArrow,
   labelOffset,
-  ...options23
+  ...options24
 }) {
   tickSize = number12(tickSize);
   tickPadding = number12(tickPadding);
@@ -17872,7 +17700,7 @@ var axisKy = function(k2, anchor, data2, {
     tickPadding,
     tickRotate,
     x: x2,
-    ...options23
+    ...options24
   }) : null, !isNoneish(fill) ? axisTextKy(k2, anchor, data2, {
     fill,
     fillOpacity,
@@ -17888,8 +17716,8 @@ var axisKy = function(k2, anchor, data2, {
     marginRight,
     marginBottom,
     marginLeft,
-    ...options23
-  }) : null, !isNoneish(fill) && label !== null ? text3([], labelOptions({ fill, fillOpacity, ...options23 }, function(data3, facets, channels, scales8, dimensions) {
+    ...options24
+  }) : null, !isNoneish(fill) && label !== null ? text3([], labelOptions({ fill, fillOpacity, ...options24 }, function(data3, facets, channels, scales8, dimensions) {
     const scale = scales8[k2];
     const { marginTop: marginTop2, marginRight: marginRight2, marginBottom: marginBottom2, marginLeft: marginLeft2 } = k2 === "y" && dimensions.inset || dimensions;
     const cla = labelAnchor ?? (scale.bandwidth ? "center" : "top");
@@ -17939,7 +17767,7 @@ var axisKx = function(k2, anchor, data2, {
   labelAnchor,
   labelArrow,
   labelOffset,
-  ...options23
+  ...options24
 }) {
   tickSize = number12(tickSize);
   tickPadding = number12(tickPadding);
@@ -17955,7 +17783,7 @@ var axisKx = function(k2, anchor, data2, {
     tickPadding,
     tickRotate,
     y: y2,
-    ...options23
+    ...options24
   }) : null, !isNoneish(fill) ? axisTextKx(k2, anchor, data2, {
     fill,
     fillOpacity,
@@ -17971,8 +17799,8 @@ var axisKx = function(k2, anchor, data2, {
     marginRight,
     marginBottom,
     marginLeft,
-    ...options23
-  }) : null, !isNoneish(fill) && label !== null ? text3([], labelOptions({ fill, fillOpacity, ...options23 }, function(data3, facets, channels, scales8, dimensions) {
+    ...options24
+  }) : null, !isNoneish(fill) && label !== null ? text3([], labelOptions({ fill, fillOpacity, ...options24 }, function(data3, facets, channels, scales8, dimensions) {
     const scale = scales8[k2];
     const { marginTop: marginTop2, marginRight: marginRight2, marginBottom: marginBottom2, marginLeft: marginLeft2 } = k2 === "x" && dimensions.inset || dimensions;
     const cla = labelAnchor ?? (scale.bandwidth ? "center" : "right");
@@ -18006,7 +17834,7 @@ var axisTickKy = function(k2, anchor, data2, {
   insetRight = inset2,
   dx = 0,
   y: y2 = k2 === "y" ? undefined : null,
-  ...options23
+  ...options24
 }) {
   return axisMark(vectorY, k2, `${k2}-axis tick`, data2, {
     strokeWidth,
@@ -18015,7 +17843,7 @@ var axisTickKy = function(k2, anchor, data2, {
     facetAnchor,
     frameAnchor,
     y: y2,
-    ...options23,
+    ...options24,
     dx: anchor === "left" ? +dx - offset + +insetLeft : +dx + offset - insetRight,
     anchor: "start",
     length: tickSize,
@@ -18034,7 +17862,7 @@ var axisTickKx = function(k2, anchor, data2, {
   insetBottom = inset2,
   dy = 0,
   x: x2 = k2 === "x" ? undefined : null,
-  ...options23
+  ...options24
 }) {
   return axisMark(vectorX, k2, `${k2}-axis tick`, data2, {
     strokeWidth,
@@ -18043,7 +17871,7 @@ var axisTickKx = function(k2, anchor, data2, {
     facetAnchor,
     frameAnchor,
     x: x2,
-    ...options23,
+    ...options24,
     dy: anchor === "bottom" ? +dy - offset - insetBottom : +dy + offset + +insetTop,
     anchor: "start",
     length: tickSize,
@@ -18066,7 +17894,7 @@ var axisTextKy = function(k2, anchor, data2, {
   insetRight = inset2,
   dx = 0,
   y: y2 = k2 === "y" ? undefined : null,
-  ...options23
+  ...options24
 }) {
   return axisMark(textY, k2, `${k2}-axis tick label`, data2, {
     facetAnchor,
@@ -18077,7 +17905,7 @@ var axisTextKy = function(k2, anchor, data2, {
     fontVariant,
     rotate: tickRotate,
     y: y2,
-    ...options23,
+    ...options24,
     dx: anchor === "left" ? +dx - tickSize - tickPadding + +insetLeft : +dx + +tickSize + +tickPadding - insetRight
   }, function(scale, data3, ticks2, channels) {
     if (fontVariant === undefined)
@@ -18102,7 +17930,7 @@ var axisTextKx = function(k2, anchor, data2, {
   insetBottom = inset2,
   dy = 0,
   x: x2 = k2 === "x" ? undefined : null,
-  ...options23
+  ...options24
 }) {
   return axisMark(textX, k2, `${k2}-axis tick label`, data2, {
     facetAnchor,
@@ -18113,7 +17941,7 @@ var axisTextKx = function(k2, anchor, data2, {
     fontVariant,
     rotate: tickRotate,
     x: x2,
-    ...options23,
+    ...options24,
     dy: anchor === "bottom" ? +dy + +tickSize + +tickPadding - insetBottom : +dy - tickSize - tickPadding + +insetTop
   }, function(scale, data3, ticks2, channels) {
     if (fontVariant === undefined)
@@ -18123,38 +17951,38 @@ var axisTextKx = function(k2, anchor, data2, {
   });
 };
 function gridY() {
-  const [data2, options23] = maybeData(...arguments);
-  return gridKy("y", anchorY2(options23), data2, options23);
+  const [data2, options24] = maybeData(...arguments);
+  return gridKy("y", anchorY2(options24), data2, options24);
 }
 function gridFy() {
-  const [data2, options23] = maybeData(...arguments);
-  return gridKy("fy", anchorFy(options23), data2, options23);
+  const [data2, options24] = maybeData(...arguments);
+  return gridKy("fy", anchorFy(options24), data2, options24);
 }
 function gridX() {
-  const [data2, options23] = maybeData(...arguments);
-  return gridKx("x", anchorX2(options23), data2, options23);
+  const [data2, options24] = maybeData(...arguments);
+  return gridKx("x", anchorX2(options24), data2, options24);
 }
 function gridFx() {
-  const [data2, options23] = maybeData(...arguments);
-  return gridKx("fx", anchorFx(options23), data2, options23);
+  const [data2, options24] = maybeData(...arguments);
+  return gridKx("fx", anchorFx(options24), data2, options24);
 }
 var gridKy = function(k2, anchor, data2, {
   y: y2 = k2 === "y" ? undefined : null,
   x: x2 = null,
   x1: x12 = anchor === "left" ? x2 : null,
   x2: x22 = anchor === "right" ? x2 : null,
-  ...options23
+  ...options24
 }) {
-  return axisMark(ruleY, k2, `${k2}-grid`, data2, { y: y2, x1: x12, x2: x22, ...gridDefaults(options23) });
+  return axisMark(ruleY, k2, `${k2}-grid`, data2, { y: y2, x1: x12, x2: x22, ...gridDefaults(options24) });
 };
 var gridKx = function(k2, anchor, data2, {
   x: x2 = k2 === "x" ? undefined : null,
   y: y2 = null,
   y1: y12 = anchor === "top" ? y2 : null,
   y2: y22 = anchor === "bottom" ? y2 : null,
-  ...options23
+  ...options24
 }) {
-  return axisMark(ruleX, k2, `${k2}-grid`, data2, { x: x2, y1: y12, y2: y22, ...gridDefaults(options23) });
+  return axisMark(ruleX, k2, `${k2}-grid`, data2, { x: x2, y1: y12, y2: y22, ...gridDefaults(options24) });
 };
 var gridDefaults = function({
   color: color10 = "currentColor",
@@ -18162,11 +17990,22 @@ var gridDefaults = function({
   stroke = color10,
   strokeOpacity = opacity2,
   strokeWidth = 1,
-  ...options23
+  ...options24
 }) {
-  return { stroke, strokeOpacity, strokeWidth, ...options23 };
+  return { stroke, strokeOpacity, strokeWidth, ...options24 };
 };
-var labelOptions = function({ fill, fillOpacity, fontFamily, fontSize, fontStyle, fontWeight, monospace, pointerEvents, shapeRendering }, initializer2) {
+var labelOptions = function({
+  fill,
+  fillOpacity,
+  fontFamily,
+  fontSize,
+  fontStyle,
+  fontWeight,
+  monospace,
+  pointerEvents,
+  shapeRendering,
+  clip = false
+}, initializer2) {
   [, fill] = maybeColorChannel(fill);
   [, fillOpacity] = maybeNumberChannel(fillOpacity);
   return {
@@ -18182,17 +18021,18 @@ var labelOptions = function({ fill, fillOpacity, fontFamily, fontSize, fontStyle
     monospace,
     pointerEvents,
     shapeRendering,
+    clip,
     initializer: initializer2
   };
 };
-var axisMark = function(mark6, k2, ariaLabel, data2, options23, initialize) {
+var axisMark = function(mark6, k2, ariaLabel, data2, options24, initialize) {
   let channels;
   function axisInitializer(data3, facets, _channels, scales8, dimensions, context8) {
     const initializeFacets = data3 == null && (k2 === "fx" || k2 === "fy");
     const { [k2]: scale } = scales8;
     if (!scale)
       throw new Error(`missing scale: ${k2}`);
-    let { ticks: ticks2, tickSpacing, interval: interval12 } = options23;
+    let { ticks: ticks2, tickSpacing, interval: interval12 } = options24;
     if (isTemporalScale(scale) && typeof ticks2 === "string")
       interval12 = ticks2, ticks2 = undefined;
     if (data3 == null) {
@@ -18229,16 +18069,18 @@ var axisMark = function(mark6, k2, ariaLabel, data2, options23, initialize) {
       facets = context8.filterFacets(data3, initializedChannels);
     return { data: data3, facets, channels: initializedChannels };
   }
-  const basicInitializer = initializer(options23).initializer;
-  const m = mark6(data2, initializer({ ...options23, initializer: axisInitializer }, basicInitializer));
+  const basicInitializer = initializer(options24).initializer;
+  const m2 = mark6(data2, initializer({ ...options24, initializer: axisInitializer }, basicInitializer));
   if (data2 == null) {
-    channels = m.channels;
-    m.channels = {};
+    channels = m2.channels;
+    m2.channels = {};
   } else {
     channels = {};
   }
-  m.ariaLabel = ariaLabel;
-  return m;
+  m2.ariaLabel = ariaLabel;
+  if (m2.clip === undefined)
+    m2.clip = false;
+  return m2;
 };
 var inferTextChannel = function(scale, data2, ticks2, tickFormat3, anchor) {
   return { value: inferTickFormat(scale, data2, ticks2, tickFormat3, anchor) };
@@ -18317,10 +18159,10 @@ var maybeScale = function(scale, key) {
     throw new Error(`scale not found: ${key}`);
   return s2;
 };
-function legendSwatches(color10, { opacity: opacity2, ...options24 } = {}) {
+function legendSwatches(color10, { opacity: opacity2, ...options25 } = {}) {
   if (!isOrdinalScale(color10) && !isThresholdScale(color10))
     throw new Error(`swatches legend requires ordinal or threshold color scale (not ${color10.type})`);
-  return legendItems(color10, options24, (selection5, scale, width, height) => selection5.append("svg").attr("width", width).attr("height", height).attr("fill", scale.scale).attr("fill-opacity", maybeNumberChannel(opacity2)[1]).append("rect").attr("width", "100%").attr("height", "100%"));
+  return legendItems(color10, options25, (selection5, scale, width, height) => selection5.append("svg").attr("width", width).attr("height", height).attr("fill", scale.scale).attr("fill-opacity", maybeNumberChannel(opacity2)[1]).append("rect").attr("width", "100%").attr("height", "100%"));
 }
 function legendSymbols(symbol5, {
   fill = symbol5.hint?.fill !== undefined ? symbol5.hint.fill : "none",
@@ -18329,7 +18171,7 @@ function legendSymbols(symbol5, {
   strokeOpacity = 1,
   strokeWidth = 1.5,
   r = 4.5,
-  ...options24
+  ...options25
 } = {}, scale) {
   const [vf, cf] = maybeColorChannel(fill);
   const [vs, cs] = maybeColorChannel(stroke);
@@ -18339,13 +18181,13 @@ function legendSymbols(symbol5, {
   fillOpacity = maybeNumberChannel(fillOpacity)[1];
   strokeOpacity = maybeNumberChannel(strokeOpacity)[1];
   strokeWidth = maybeNumberChannel(strokeWidth)[1];
-  return legendItems(symbol5, options24, (selection5, scale2, width, height) => selection5.append("svg").attr("viewBox", "-8 -8 16 16").attr("width", width).attr("height", height).attr("fill", vf === "color" ? (d) => sf.scale(d) : cf).attr("fill-opacity", fillOpacity).attr("stroke", vs === "color" ? (d) => ss.scale(d) : cs).attr("stroke-opacity", strokeOpacity).attr("stroke-width", strokeWidth).append("path").attr("d", (d) => {
+  return legendItems(symbol5, options25, (selection5, scale2, width, height) => selection5.append("svg").attr("viewBox", "-8 -8 16 16").attr("width", width).attr("height", height).attr("fill", vf === "color" ? (d) => sf.scale(d) : cf).attr("fill-opacity", fillOpacity).attr("stroke", vs === "color" ? (d) => ss.scale(d) : cs).attr("stroke-opacity", strokeOpacity).attr("stroke-width", strokeWidth).append("path").attr("d", (d) => {
     const p = pathRound();
     symbol5.scale(d).draw(p, size2);
     return p;
   }));
 }
-var legendItems = function(scale, options24 = {}, swatch) {
+var legendItems = function(scale, options25 = {}, swatch) {
   let {
     columns,
     tickFormat: tickFormat3,
@@ -18355,10 +18197,10 @@ var legendItems = function(scale, options24 = {}, swatch) {
     swatchHeight = swatchSize,
     marginLeft = 0,
     className,
-    style: style13,
+    style: style14,
     width
-  } = options24;
-  const context9 = createContext(options24);
+  } = options25;
+  const context9 = createContext(options25);
   className = maybeClassName(className);
   if (typeof tickFormat3 !== "function")
     tickFormat3 = inferTickFormat(scale.scale, scale.domain, undefined, tickFormat3);
@@ -18405,53 +18247,53 @@ var legendItems = function(scale, options24 = {}, swatch) {
   margin-right: 0.5em;
   overflow: visible;
 }
-${extraStyle}`)).style("margin-left", marginLeft ? `${+marginLeft}px` : null).style("width", width === undefined ? null : `${+width}px`).style("font-variant", impliedString(fontVariant, "normal")).call(applyInlineStyles, style13).node();
+${extraStyle}`)).style("margin-left", marginLeft ? `${+marginLeft}px` : null).style("width", width === undefined ? null : `${+width}px`).style("font-variant", impliedString(fontVariant, "normal")).call(applyInlineStyles, style14).node();
 };
 
 // node_modules/@observablehq/plot/src/legends.js
 function exposeLegends(scales9, context9, defaults4 = {}) {
-  return (key, options25) => {
+  return (key, options26) => {
     if (!legendRegistry.has(key))
       throw new Error(`unknown legend type: ${key}`);
     if (!(key in scales9))
       return;
-    return legendRegistry.get(key)(scales9[key], legendOptions(context9, defaults4[key], options25), (key2) => scales9[key2]);
+    return legendRegistry.get(key)(scales9[key], legendOptions(context9, defaults4[key], options26), (key2) => scales9[key2]);
   };
 }
-var legendOptions = function({ className, ...context9 }, { label, ticks: ticks2, tickFormat: tickFormat3 } = {}, options25) {
-  return inherit2(options25, { className, ...context9 }, { label, ticks: ticks2, tickFormat: tickFormat3 });
+var legendOptions = function({ className, ...context9 }, { label, ticks: ticks2, tickFormat: tickFormat3 } = {}, options26) {
+  return inherit2(options26, { className, ...context9 }, { label, ticks: ticks2, tickFormat: tickFormat3 });
 };
-var legendColor = function(color10, { legend = true, ...options25 }) {
+var legendColor = function(color10, { legend = true, ...options26 }) {
   if (legend === true)
     legend = color10.type === "ordinal" ? "swatches" : "ramp";
   if (color10.domain === undefined)
     return;
   switch (`${legend}`.toLowerCase()) {
     case "swatches":
-      return legendSwatches(color10, options25);
+      return legendSwatches(color10, options26);
     case "ramp":
-      return legendRamp(color10, options25);
+      return legendRamp(color10, options26);
     default:
       throw new Error(`unknown legend type: ${legend}`);
   }
 };
-var legendOpacity = function({ type: type6, interpolate: interpolate3, ...scale }, { legend = true, color: color10 = rgb(0, 0, 0), ...options25 }) {
+var legendOpacity = function({ type: type6, interpolate: interpolate3, ...scale }, { legend = true, color: color10 = rgb(0, 0, 0), ...options26 }) {
   if (!interpolate3)
     throw new Error(`${type6} opacity scales are not supported`);
   if (legend === true)
     legend = "ramp";
   if (`${legend}`.toLowerCase() !== "ramp")
     throw new Error(`${legend} opacity legends are not supported`);
-  return legendColor({ type: type6, ...scale, interpolate: interpolateOpacity(color10) }, { legend, ...options25 });
+  return legendColor({ type: type6, ...scale, interpolate: interpolateOpacity(color10) }, { legend, ...options26 });
 };
 var interpolateOpacity = function(color10) {
   const { r, g, b } = rgb(color10) || rgb(0, 0, 0);
   return (t) => `rgba(${r},${g},${b},${t})`;
 };
-function createLegends(scales9, context9, options25) {
+function createLegends(scales9, context9, options26) {
   const legends = [];
   for (const [key, value5] of legendRegistry) {
-    const o = options25[key];
+    const o = options26[key];
     if (o?.legend && (key in scales9)) {
       const legend = value5(scales9[key], legendOptions(context9, scales9[key], o), (key2) => scales9[key2]);
       if (legend != null)
@@ -18467,23 +18309,25 @@ var legendRegistry = new Map([
 ]);
 
 // node_modules/@observablehq/plot/src/marks/frame.js
-function frame2(options26) {
-  return new Frame(options26);
+function frame2(options27) {
+  return new Frame(options27);
 }
 var defaults4 = {
   ariaLabel: "frame",
   fill: "none",
-  stroke: "currentColor"
+  stroke: "currentColor",
+  clip: false
 };
 var lineDefaults = {
   ariaLabel: "frame",
   fill: null,
   stroke: "currentColor",
-  strokeLinecap: "square"
+  strokeLinecap: "square",
+  clip: false
 };
 
 class Frame extends Mark {
-  constructor(options26 = {}) {
+  constructor(options27 = {}) {
     const {
       anchor = null,
       inset: inset2 = 0,
@@ -18493,8 +18337,8 @@ class Frame extends Mark {
       insetLeft = inset2,
       rx,
       ry
-    } = options26;
-    super(singleton, undefined, options26, anchor == null ? defaults4 : lineDefaults);
+    } = options27;
+    super(singleton, undefined, options27, anchor == null ? defaults4 : lineDefaults);
     this.anchor = maybeKeyword(anchor, "anchor", ["top", "right", "bottom", "left"]);
     this.insetTop = number12(insetTop);
     this.insetRight = number12(insetRight);
@@ -18515,58 +18359,58 @@ class Frame extends Mark {
 }
 
 // node_modules/@observablehq/plot/src/marks/tip.js
-function tip(data2, { x: x2, y: y2, ...options28 } = {}) {
-  if (options28.frameAnchor === undefined)
+function tip(data2, { x: x2, y: y2, ...options29 } = {}) {
+  if (options29.frameAnchor === undefined)
     [x2, y2] = maybeTuple(x2, y2);
-  return new Tip(data2, { ...options28, x: x2, y: y2 });
+  return new Tip(data2, { ...options29, x: x2, y: y2 });
 }
 var getLineOffset = function(anchor, length3, lineHeight) {
   return /^top(?:-|$)/.test(anchor) ? 0.94 - lineHeight : -0.29 - length3 * lineHeight;
 };
-var getTextTranslate = function(anchor, m, r, width, height) {
+var getTextTranslate = function(anchor, m2, r, width, height) {
   switch (anchor) {
     case "middle":
       return [-width / 2, height / 2];
     case "top-left":
-      return [r, m + r];
+      return [r, m2 + r];
     case "top":
-      return [-width / 2, m / 2 + r];
+      return [-width / 2, m2 / 2 + r];
     case "top-right":
-      return [-width - r, m + r];
+      return [-width - r, m2 + r];
     case "right":
-      return [-m / 2 - width - r, height / 2];
+      return [-m2 / 2 - width - r, height / 2];
     case "bottom-left":
-      return [r, -m - r];
+      return [r, -m2 - r];
     case "bottom":
-      return [-width / 2, -m / 2 - r];
+      return [-width / 2, -m2 / 2 - r];
     case "bottom-right":
-      return [-width - r, -m - r];
+      return [-width - r, -m2 - r];
     case "left":
-      return [r + m / 2, height / 2];
+      return [r + m2 / 2, height / 2];
   }
 };
-var getPath = function(anchor, m, r, width, height) {
+var getPath = function(anchor, m2, r, width, height) {
   const w = width + r * 2;
   const h = height + r * 2;
   switch (anchor) {
     case "middle":
       return `M${-w / 2},${-h / 2}h${w}v${h}h${-w}z`;
     case "top-left":
-      return `M0,0l${m},${m}h${w - m}v${h}h${-w}z`;
+      return `M0,0l${m2},${m2}h${w - m2}v${h}h${-w}z`;
     case "top":
-      return `M0,0l${m / 2},${m / 2}h${(w - m) / 2}v${h}h${-w}v${-h}h${(w - m) / 2}z`;
+      return `M0,0l${m2 / 2},${m2 / 2}h${(w - m2) / 2}v${h}h${-w}v${-h}h${(w - m2) / 2}z`;
     case "top-right":
-      return `M0,0l${-m},${m}h${m - w}v${h}h${w}z`;
+      return `M0,0l${-m2},${m2}h${m2 - w}v${h}h${w}z`;
     case "right":
-      return `M0,0l${-m / 2},${-m / 2}v${m / 2 - h / 2}h${-w}v${h}h${w}v${m / 2 - h / 2}z`;
+      return `M0,0l${-m2 / 2},${-m2 / 2}v${m2 / 2 - h / 2}h${-w}v${h}h${w}v${m2 / 2 - h / 2}z`;
     case "bottom-left":
-      return `M0,0l${m},${-m}h${w - m}v${-h}h${-w}z`;
+      return `M0,0l${m2},${-m2}h${w - m2}v${-h}h${-w}z`;
     case "bottom":
-      return `M0,0l${m / 2},${-m / 2}h${(w - m) / 2}v${-h}h${-w}v${h}h${(w - m) / 2}z`;
+      return `M0,0l${m2 / 2},${-m2 / 2}h${(w - m2) / 2}v${-h}h${-w}v${h}h${(w - m2) / 2}z`;
     case "bottom-right":
-      return `M0,0l${-m},${-m}h${m - w}v${-h}h${w}z`;
+      return `M0,0l${-m2},${-m2}h${m2 - w}v${-h}h${w}z`;
     case "left":
-      return `M0,0l${m / 2},${-m / 2}v${m / 2 - h / 2}h${w}v${h}h${-w}v${m / 2 - h / 2}z`;
+      return `M0,0l${m2 / 2},${-m2 / 2}v${m2 / 2 - h / 2}h${w}v${h}h${-w}v${m2 / 2 - h / 2}z`;
   }
 };
 var getSources = function({ channels }) {
@@ -18583,6 +18427,11 @@ var getSources = function({ channels }) {
 var formatPair = function(c1, c22, i) {
   return c22.hint?.length ? `${formatDefault(c22.value[i] - c1.value[i])}` : `${formatDefault(c1.value[i])}\u2013${formatDefault(c22.value[i])}`;
 };
+var formatPairLabel = function(scales9, c1, c22, defaultLabel) {
+  const l1 = formatLabel(scales9, c1, defaultLabel);
+  const l2 = formatLabel(scales9, c22, defaultLabel);
+  return l1 === l2 ? l1 : `${l1}\u2013${l2}`;
+};
 var formatLabel = function(scales9, c4, defaultLabel) {
   return String(scales9[c4.scale]?.label ?? c4?.label ?? defaultLabel);
 };
@@ -18594,11 +18443,11 @@ var defaults5 = {
 var ignoreChannels = new Set(["geometry", "href", "src", "ariaLabel"]);
 
 class Tip extends Mark {
-  constructor(data2, options28 = {}) {
-    if (options28.tip)
-      options28 = { ...options28, tip: false };
-    if (options28.title === undefined && isIterable(data2) && isTextual(data2))
-      options28 = { ...options28, title: identity13 };
+  constructor(data2, options29 = {}) {
+    if (options29.tip)
+      options29 = { ...options29, tip: false };
+    if (options29.title === undefined && isIterable(data2) && isTextual(data2))
+      options29 = { ...options29, title: identity13 };
     const {
       x: x2,
       y: y2,
@@ -18622,7 +18471,7 @@ class Tip extends Mark {
       title,
       pointerSize = 12,
       pathFilter = "drop-shadow(0 3px 4px rgba(0,0,0,0.2))"
-    } = options28;
+    } = options29;
     super(data2, {
       x: { value: x12 != null && x22 != null ? null : x2, scale: "x", optional: true },
       y: { value: y12 != null && y22 != null ? null : y2, scale: "y", optional: true },
@@ -18631,7 +18480,7 @@ class Tip extends Mark {
       x2: { value: x22, scale: "x", optional: x12 == null },
       y2: { value: y22, scale: "y", optional: y12 == null },
       title: { value: title, optional: true }
-    }, options28, defaults5);
+    }, options29, defaults5);
     this.anchor = maybeAnchor(anchor, "anchor");
     this.previousAnchor = this.anchor ?? "top-left";
     this.frameAnchor = maybeFrameAnchor(frameAnchor);
@@ -18659,7 +18508,7 @@ class Tip extends Mark {
     const { x: x2, y: y2, fx, fy } = scales9;
     const { ownerSVGElement: svg, document: document2 } = context11;
     const { anchor, monospace, lineHeight, lineWidth } = this;
-    const { textPadding: r, pointerSize: m, pathFilter } = this;
+    const { textPadding: r, pointerSize: m2, pathFilter } = this;
     const { marginTop, marginLeft } = dimensions;
     const sources = getSources(values2);
     const { x1: X12, y1: Y12, x2: X22, y2: Y22, x: X3 = X12 ?? X22, y: Y3 = Y12 ?? Y22 } = values2;
@@ -18690,9 +18539,9 @@ class Tip extends Mark {
         if (!defined(value5) && channel3.scale == null)
           continue;
         if (key === "x2" && ("x1" in sources2)) {
-          yield { name: formatLabel(scales9, channel3, "x"), value: formatPair(sources2.x1, channel3, i) };
+          yield { name: formatPairLabel(scales9, sources2.x1, channel3, "x"), value: formatPair(sources2.x1, channel3, i) };
         } else if (key === "y2" && ("y1" in sources2)) {
-          yield { name: formatLabel(scales9, channel3, "y"), value: formatPair(sources2.y1, channel3, i) };
+          yield { name: formatPairLabel(scales9, sources2.y1, channel3, "y"), value: formatPair(sources2.y1, channel3, i) };
         } else {
           const scale = channel3.scale;
           const line2 = { name: formatLabel(scales9, channel3, key), value: formatDefault(value5) };
@@ -18761,20 +18610,20 @@ class Tip extends Mark {
           const y3 = py(i) + oy;
           const fitLeft = x3 + w + r * 2 < width;
           const fitRight = x3 - w - r * 2 > 0;
-          const fitTop = y3 + h + m + r * 2 + 7 < height;
-          const fitBottom = y3 - h - m - r * 2 > 0;
+          const fitTop = y3 + h + m2 + r * 2 + 7 < height;
+          const fitBottom = y3 - h - m2 - r * 2 > 0;
           const ax = (/-left$/.test(a2) ? fitLeft || !fitRight : fitLeft && !fitRight) ? "left" : "right";
           const ay = (/^top-/.test(a2) ? fitTop || !fitBottom : fitTop && !fitBottom) ? "top" : "bottom";
           a2 = mark8.previousAnchor = `${ay}-${ax}`;
         }
         const path3 = this.firstChild;
         const text7 = this.lastChild;
-        path3.setAttribute("d", getPath(a2, m, r, w, h));
+        path3.setAttribute("d", getPath(a2, m2, r, w, h));
         if (tx)
           for (const t of text7.childNodes)
             t.setAttribute("x", -tx);
         text7.setAttribute("y", `${+getLineOffset(a2, text7.childNodes.length, lineHeight).toFixed(6)}em`);
-        text7.setAttribute("transform", `translate(${getTextTranslate(a2, m, r, w, h)})`);
+        text7.setAttribute("transform", `translate(${getTextTranslate(a2, m2, r, w, h)})`);
       });
     }
     if (svg.isConnected)
@@ -18786,30 +18635,30 @@ class Tip extends Mark {
 }
 
 // node_modules/@observablehq/plot/src/plot.js
-function plot(options30 = {}) {
-  const { facet: facet3, style: style16, caption, ariaLabel, ariaDescription } = options30;
-  const className = maybeClassName(options30.className);
-  const marks2 = options30.marks === undefined ? [] : flatMarks(options30.marks);
+function plot(options31 = {}) {
+  const { facet: facet3, style: style17, title, subtitle, caption, ariaLabel, ariaDescription } = options31;
+  const className = maybeClassName(options31.className);
+  const marks2 = options31.marks === undefined ? [] : flatMarks(options31.marks);
   marks2.push(...inferTips(marks2));
-  const topFacetState = maybeTopFacet(facet3, options30);
+  const topFacetState = maybeTopFacet(facet3, options31);
   const facetStateByMark = new Map;
   for (const mark9 of marks2) {
-    const facetState = maybeMarkFacet(mark9, topFacetState, options30);
+    const facetState = maybeMarkFacet(mark9, topFacetState, options31);
     if (facetState)
       facetStateByMark.set(mark9, facetState);
   }
   const channelsByScale = new Map;
   if (topFacetState)
-    addScaleChannels(channelsByScale, [topFacetState], options30);
-  addScaleChannels(channelsByScale, facetStateByMark, options30);
-  const axes3 = flatMarks(inferAxes(marks2, channelsByScale, options30));
+    addScaleChannels(channelsByScale, [topFacetState], options31);
+  addScaleChannels(channelsByScale, facetStateByMark, options31);
+  const axes3 = flatMarks(inferAxes(marks2, channelsByScale, options31));
   for (const mark9 of axes3) {
-    const facetState = maybeMarkFacet(mark9, topFacetState, options30);
+    const facetState = maybeMarkFacet(mark9, topFacetState, options31);
     if (facetState)
       facetStateByMark.set(mark9, facetState);
   }
   marks2.unshift(...axes3);
-  let facets = createFacets(channelsByScale, options30);
+  let facets = createFacets(channelsByScale, options31);
   if (facets !== undefined) {
     const topFacetsIndex = topFacetState ? facetFilter(facets, topFacetState) : undefined;
     for (const mark9 of marks2) {
@@ -18838,7 +18687,7 @@ function plot(options30 = {}) {
     }
   }
   for (const key of registry.keys()) {
-    if (isScaleOptions(options30[key]) && key !== "fx" && key !== "fy") {
+    if (isScaleOptions(options31[key]) && key !== "fx" && key !== "fy") {
       channelsByScale.set(key, []);
     }
   }
@@ -18847,24 +18696,24 @@ function plot(options30 = {}) {
     if (stateByMark.has(mark9))
       throw new Error("duplicate mark; each mark must be unique");
     const { facetsIndex, channels: facetChannels } = facetStateByMark.get(mark9) ?? {};
-    const { data: data2, facets: facets2, channels } = mark9.initialize(facetsIndex, facetChannels, options30);
-    applyScaleTransforms(channels, options30);
+    const { data: data2, facets: facets2, channels } = mark9.initialize(facetsIndex, facetChannels, options31);
+    applyScaleTransforms(channels, options31);
     stateByMark.set(mark9, { data: data2, facets: facets2, channels });
   }
-  const scaleDescriptors = createScales(addScaleChannels(channelsByScale, stateByMark, options30), options30);
+  const scaleDescriptors = createScales(addScaleChannels(channelsByScale, stateByMark, options31), options31);
   const scales12 = createScaleFunctions(scaleDescriptors);
-  const dimensions2 = createDimensions(scaleDescriptors, marks2, options30);
+  const dimensions2 = createDimensions(scaleDescriptors, marks2, options31);
   autoScaleRange(scaleDescriptors, dimensions2);
   const { fx, fy } = scales12;
   const subdimensions = fx || fy ? innerDimensions(scaleDescriptors, dimensions2) : dimensions2;
   const superdimensions = fx || fy ? actualDimensions(scales12, dimensions2) : dimensions2;
-  const context12 = createContext(options30);
+  const context12 = createContext(options31);
   const document2 = context12.document;
   const svg = creator_default("svg").call(document2.documentElement);
   let figure = svg;
   context12.ownerSVGElement = svg;
   context12.className = className;
-  context12.projection = createProjection(options30, subdimensions);
+  context12.projection = createProjection(options31, subdimensions);
   context12.filterFacets = (data2, channels) => {
     return facetFilter(facets, { channels, groups: facetGroups(data2, channels) });
   };
@@ -18896,8 +18745,8 @@ function plot(options30 = {}) {
         Object.assign(state.channels, channels);
         for (const channel4 of Object.values(channels)) {
           const { scale } = channel4;
-          if (scale != null && registry.get(scale) !== position) {
-            applyScaleTransform(channel4, options30);
+          if (scale != null && !isPosition(registry.get(scale))) {
+            applyScaleTransform(channel4, options31);
             newByScale.add(scale);
           }
         }
@@ -18908,9 +18757,9 @@ function plot(options30 = {}) {
   }
   if (newByScale.size) {
     const newChannelsByScale = new Map;
-    addScaleChannels(newChannelsByScale, stateByMark, options30, (key) => newByScale.has(key));
-    addScaleChannels(channelsByScale, stateByMark, options30, (key) => newByScale.has(key));
-    const newScaleDescriptors = inheritScaleLabels(createScales(newChannelsByScale, options30), scaleDescriptors);
+    addScaleChannels(newChannelsByScale, stateByMark, options31, (key) => newByScale.has(key));
+    addScaleChannels(channelsByScale, stateByMark, options31, (key) => newByScale.has(key));
+    const newScaleDescriptors = inheritScaleLabels(createScales(newChannelsByScale, options31), scaleDescriptors);
     const newScales = createScaleFunctions(newScaleDescriptors);
     Object.assign(scaleDescriptors, newScaleDescriptors);
     Object.assign(scales12, newScales);
@@ -18935,7 +18784,7 @@ function plot(options30 = {}) {
 .${className} text,
 .${className} tspan {
   white-space: pre;
-}`)).call(applyInlineStyles, style16);
+}`)).call(applyInlineStyles, style17);
   for (const mark9 of marks2) {
     const { channels, values: values2, facets: indexes2 } = stateByMark.get(mark9);
     if (facets === undefined || mark9.facet === "super") {
@@ -18980,29 +18829,42 @@ function plot(options30 = {}) {
       g?.selectChildren().attr("transform", facetTranslate);
     }
   }
-  const legends2 = createLegends(scaleDescriptors, context12, options30);
-  if (caption != null || legends2.length > 0) {
+  const legends2 = createLegends(scaleDescriptors, context12, options31);
+  const { figure: figured = title != null || subtitle != null || caption != null || legends2.length > 0 } = options31;
+  if (figured) {
     figure = document2.createElement("figure");
+    figure.className = `${className}-figure`;
     figure.style.maxWidth = "initial";
-    for (const legend of legends2)
-      figure.appendChild(legend);
-    figure.appendChild(svg);
-    if (caption != null) {
-      const figcaption = document2.createElement("figcaption");
-      figcaption.appendChild(caption?.ownerDocument ? caption : document2.createTextNode(caption));
-      figure.appendChild(figcaption);
-    }
+    if (title != null)
+      figure.append(createTitleElement(document2, title, "h2"));
+    if (subtitle != null)
+      figure.append(createTitleElement(document2, subtitle, "h3"));
+    figure.append(...legends2, svg);
+    if (caption != null)
+      figure.append(createFigcaption(document2, caption));
   }
   figure.scale = exposeScales(scaleDescriptors);
-  figure.legend = exposeLegends(scaleDescriptors, context12, options30);
+  figure.legend = exposeLegends(scaleDescriptors, context12, options31);
   const w = consumeWarnings();
   if (w > 0) {
     select_default2(svg).append("text").attr("x", width).attr("y", 20).attr("dy", "-1em").attr("text-anchor", "end").attr("font-family", "initial").text("\u26A0\uFE0F").append("title").text(`${w.toLocaleString("en-US")} warning${w === 1 ? "" : "s"}. Please check the console.`);
   }
   return figure;
 }
-var plotThis = function({ marks: marks2 = [], ...options30 } = {}) {
-  return plot({ ...options30, marks: [...marks2, this] });
+var createTitleElement = function(document2, contents, tag) {
+  if (contents.ownerDocument)
+    return contents;
+  const e3 = document2.createElement(tag);
+  e3.append(document2.createTextNode(contents));
+  return e3;
+};
+var createFigcaption = function(document2, caption) {
+  const e3 = document2.createElement("figcaption");
+  e3.append(caption.ownerDocument ? caption : document2.createTextNode(caption));
+  return e3;
+};
+var plotThis = function({ marks: marks2 = [], ...options31 } = {}) {
+  return plot({ ...options31, marks: [...marks2, this] });
 };
 var flatMarks = function(marks2) {
   return marks2.flat(Infinity).filter((mark9) => mark9 != null).map(markify);
@@ -19010,12 +18872,12 @@ var flatMarks = function(marks2) {
 var markify = function(mark9) {
   return typeof mark9.render === "function" ? mark9 : new Render(mark9);
 };
-var applyScaleTransforms = function(channels, options30) {
+var applyScaleTransforms = function(channels, options31) {
   for (const name in channels)
-    applyScaleTransform(channels[name], options30);
+    applyScaleTransform(channels[name], options31);
   return channels;
 };
-var applyScaleTransform = function(channel4, options30) {
+var applyScaleTransform = function(channel4, options31) {
   const { scale, transform: t = true } = channel4;
   if (scale == null || !t)
     return;
@@ -19024,10 +18886,10 @@ var applyScaleTransform = function(channel4, options30) {
     percent,
     interval: interval12,
     transform: transform5 = percent ? (x2) => x2 * 100 : maybeIntervalTransform(interval12, type6)
-  } = options30[scale] ?? {};
+  } = options31[scale] ?? {};
   if (transform5 == null)
     return;
-  channel4.value = map6(channel4.value, transform5);
+  channel4.value = map7(channel4.value, transform5);
   channel4.transform = false;
 };
 var inferChannelScales = function(channels) {
@@ -19035,16 +18897,16 @@ var inferChannelScales = function(channels) {
     inferChannelScale(name, channels[name]);
   }
 };
-var addScaleChannels = function(channelsByScale, stateByMark, options30, filter6 = yes) {
+var addScaleChannels = function(channelsByScale, stateByMark, options31, filter5 = yes) {
   for (const { channels } of stateByMark.values()) {
     for (const name in channels) {
       const channel4 = channels[name];
       const { scale } = channel4;
-      if (scale != null && filter6(scale)) {
+      if (scale != null && filter5(scale)) {
         if (scale === "projection") {
-          if (!hasProjection(options30)) {
-            const gx = options30.x?.domain === undefined;
-            const gy = options30.y?.domain === undefined;
+          if (!hasProjection(options31)) {
+            const gx = options31.x?.domain === undefined;
+            const gy = options31.y?.domain === undefined;
             if (gx || gy) {
               const [x2, y2] = getGeometryChannels(channel4);
               if (gx)
@@ -19068,7 +18930,7 @@ var addScaleChannel = function(channelsByScale, scale, channel4) {
   else
     channelsByScale.set(scale, [channel4]);
 };
-var maybeTopFacet = function(facet3, options30) {
+var maybeTopFacet = function(facet3, options31) {
   if (facet3 == null)
     return;
   const { x: x2, y: y2 } = facet3;
@@ -19082,11 +18944,11 @@ var maybeTopFacet = function(facet3, options30) {
     channels.fx = createChannel(data2, { value: x2, scale: "fx" });
   if (y2 != null)
     channels.fy = createChannel(data2, { value: y2, scale: "fy" });
-  applyScaleTransforms(channels, options30);
+  applyScaleTransforms(channels, options31);
   const groups2 = facetGroups(data2, channels);
   return { channels, groups: groups2, data: facet3.data };
 };
-var maybeMarkFacet = function(mark9, topFacetState, options30) {
+var maybeMarkFacet = function(mark9, topFacetState, options31) {
   if (mark9.facet === null || mark9.facet === "super")
     return;
   const { fx, fy } = mark9;
@@ -19101,7 +18963,7 @@ var maybeMarkFacet = function(mark9, topFacetState, options30) {
       channels2.fx = createChannel(data3, { value: fx, scale: "fx" });
     if (fy != null)
       channels2.fy = createChannel(data3, { value: fy, scale: "fy" });
-    applyScaleTransforms(channels2, options30);
+    applyScaleTransforms(channels2, options31);
     return { channels: channels2, groups: facetGroups(data3, channels2) };
   }
   if (topFacetState === undefined)
@@ -19113,8 +18975,8 @@ var maybeMarkFacet = function(mark9, topFacetState, options30) {
     warn(`Warning: the ${mark9.ariaLabel} mark appears to use faceted data, but isn\u2019t faceted. The mark data has the same length as the facet data and the mark facet option is "auto", but the mark data and facet data are distinct. If this mark should be faceted, set the mark facet option to true; otherwise, suppress this warning by setting the mark facet option to false.`);
   }
 };
-var derive = function(mark9, options30 = {}) {
-  return initializer({ ...options30, x: null, y: null }, (data2, facets, channels, scales12, dimensions2, context12) => {
+var derive = function(mark9, options31 = {}) {
+  return initializer({ ...options31, x: null, y: null }, (data2, facets, channels, scales12, dimensions2, context12) => {
     return context12.getMarkState(mark9);
   });
 };
@@ -19124,14 +18986,14 @@ var inferTips = function(marks2) {
     const t = mark9.tip;
     if (t) {
       const p = t === "x" ? pointerX : t === "y" ? pointerY : pointer;
-      const options30 = p(derive(mark9));
-      options30.title = null;
-      tips.push(tip(mark9.data, options30));
+      const options31 = p(derive(mark9));
+      options31.title = null;
+      tips.push(tip(mark9.data, options31));
     }
   }
   return tips;
 };
-var inferAxes = function(marks2, channelsByScale, options30) {
+var inferAxes = function(marks2, channelsByScale, options31) {
   let {
     projection: projection6,
     x: x2 = {},
@@ -19146,7 +19008,7 @@ var inferAxes = function(marks2, channelsByScale, options30) {
     y: { axis: yAxis = axis5, grid: yGrid = yAxis === null ? null : grid } = y2,
     fx: { axis: fxAxis = facetAxis, grid: fxGrid = fxAxis === null ? null : facetGrid } = fx,
     fy: { axis: fyAxis = facetAxis, grid: fyGrid = fyAxis === null ? null : facetGrid } = fy
-  } = options30;
+  } = options31;
   if (projection6 || !isScaleOptions(x2) && !hasPositionChannel("x", marks2))
     xAxis = xGrid = null;
   if (projection6 || !isScaleOptions(y2) && !hasPositionChannel("y", marks2))
@@ -19177,27 +19039,27 @@ var inferAxes = function(marks2, channelsByScale, options30) {
   maybeGrid(axes3, fxGrid, gridFx, fx);
   maybeAxis(axes3, fxAxis, axisFx, "top", "bottom", facet3, fx);
   maybeGrid(axes3, yGrid, gridY, y2);
-  maybeAxis(axes3, yAxis, axisY, "left", "right", options30, y2);
+  maybeAxis(axes3, yAxis, axisY, "left", "right", options31, y2);
   maybeGrid(axes3, xGrid, gridX, x2);
-  maybeAxis(axes3, xAxis, axisX, "bottom", "top", options30, x2);
+  maybeAxis(axes3, xAxis, axisX, "bottom", "top", options31, x2);
   return axes3;
 };
-var maybeAxis = function(axes3, axis5, axisType, primary, secondary, defaults6, options30) {
+var maybeAxis = function(axes3, axis5, axisType, primary, secondary, defaults6, options31) {
   if (!axis5)
     return;
   const both = isBoth(axis5);
-  options30 = axisOptions(both ? primary : axis5, defaults6, options30);
-  const { line: line2 } = options30;
+  options31 = axisOptions(both ? primary : axis5, defaults6, options31);
+  const { line: line2 } = options31;
   if ((axisType === axisY || axisType === axisX) && line2 && !isNone(line2))
-    axes3.push(frame2(lineOptions(options30)));
-  axes3.push(axisType(options30));
+    axes3.push(frame2(lineOptions(options31)));
+  axes3.push(axisType(options31));
   if (both)
-    axes3.push(axisType({ ...options30, anchor: secondary, label: null }));
+    axes3.push(axisType({ ...options31, anchor: secondary, label: null }));
 };
-var maybeGrid = function(axes3, grid, gridType, options30) {
+var maybeGrid = function(axes3, grid, gridType, options31) {
   if (!grid || isNone(grid))
     return;
-  axes3.push(gridType(gridOptions(grid, options30)));
+  axes3.push(gridType(gridOptions(grid, options31)));
 };
 var isBoth = function(value5) {
   return /^\s*both\s*$/i.test(value5);
@@ -19236,8 +19098,8 @@ var axisOptions = function(anchor, defaults6, {
     labelOffset
   };
 };
-var lineOptions = function(options30) {
-  const { anchor, line: line2 } = options30;
+var lineOptions = function(options31) {
+  const { anchor, line: line2 } = options31;
   return { anchor, facetAnchor: anchor + "-empty", stroke: line2 === true ? undefined : line2 };
 };
 var gridOptions = function(grid, {
@@ -19266,7 +19128,7 @@ var isGridTicks = function(grid) {
 };
 var hasAxis = function(marks2, k2) {
   const prefix = `${k2}-axis `;
-  return marks2.some((m) => m.ariaLabel?.startsWith(prefix));
+  return marks2.some((m2) => m2.ariaLabel?.startsWith(prefix));
 };
 var hasPositionChannel = function(k2, marks2) {
   for (const mark9 of marks2) {
@@ -19376,20 +19238,20 @@ var curves = new Map([
 ]);
 
 // node_modules/@observablehq/plot/src/transforms/bin.js
-function binX(outputs = { y: "count" }, options31 = {}) {
-  [outputs, options31] = mergeOptions(outputs, options31);
-  const { x: x2, y: y2 } = options31;
-  return binn(maybeBinValue(x2, options31, identity13), null, null, y2, outputs, maybeInsetX(options31));
+function binX(outputs = { y: "count" }, options32 = {}) {
+  [outputs, options32] = mergeOptions(outputs, options32);
+  const { x: x2, y: y2 } = options32;
+  return binn(maybeBinValue(x2, options32, identity13), null, null, y2, outputs, maybeInsetX(options32));
 }
-var maybeDenseInterval = function(bin, k2, options31 = {}) {
-  return options31?.interval == null ? options31 : bin({ [k2]: options31?.reduce === undefined ? reduceFirst : options31.reduce, filter: null }, options31);
+var maybeDenseInterval = function(bin, k2, options32 = {}) {
+  return options32?.interval == null ? options32 : bin({ [k2]: options32?.reduce === undefined ? reduceFirst : options32.reduce, filter: null }, options32);
 };
-function maybeDenseIntervalX(options31 = {}) {
-  return maybeDenseInterval(binX, "y", withTip(options31, "x"));
+function maybeDenseIntervalX(options32 = {}) {
+  return maybeDenseInterval(binX, "y", withTip(options32, "x"));
 }
 var binn = function(bx, by, gx, gy, {
   data: reduceData = reduceIdentity,
-  filter: filter6 = reduceCount,
+  filter: filter5 = reduceCount,
   sort: sort5,
   reverse: reverse2,
   ...outputs
@@ -19399,7 +19261,7 @@ var binn = function(bx, by, gx, gy, {
   outputs = maybeBinOutputs(outputs, inputs);
   reduceData = maybeBinReduce(reduceData, identity13);
   sort5 = sort5 == null ? undefined : maybeBinOutput("sort", sort5, inputs);
-  filter6 = filter6 == null ? undefined : maybeBinEvaluator("filter", filter6, inputs);
+  filter5 = filter5 == null ? undefined : maybeBinEvaluator("filter", filter5, inputs);
   if (gx != null && hasOutput(outputs, "x", "x1", "x2"))
     gx = null;
   if (gy != null && hasOutput(outputs, "y", "y1", "y2"))
@@ -19424,7 +19286,7 @@ var binn = function(bx, by, gx, gy, {
     cumulative,
     thresholds,
     interval: interval12,
-    ...options31
+    ...options32
   } = inputs;
   const [GZ, setGZ] = maybeColumn(z);
   const [vfill] = maybeColorChannel(fill);
@@ -19435,7 +19297,7 @@ var binn = function(bx, by, gx, gy, {
     ...("z" in inputs) && { z: GZ || z },
     ...("fill" in inputs) && { fill: GF || fill },
     ...("stroke" in inputs) && { stroke: GS || stroke },
-    ...basic(options31, (data2, facets, plotOptions) => {
+    ...basic(options32, (data2, facets, plotOptions) => {
       const K2 = maybeApplyInterval(valueof(data2, k2), plotOptions?.[gk]);
       const Z = valueof(data2, z);
       const F = valueof(data2, vfill);
@@ -19457,20 +19319,20 @@ var binn = function(bx, by, gx, gy, {
         o.initialize(data2);
       if (sort5)
         sort5.initialize(data2);
-      if (filter6)
-        filter6.initialize(data2);
+      if (filter5)
+        filter5.initialize(data2);
       for (const facet3 of facets) {
         const groupFacet = [];
         for (const o of outputs)
           o.scope("facet", facet3);
         if (sort5)
           sort5.scope("facet", facet3);
-        if (filter6)
-          filter6.scope("facet", facet3);
+        if (filter5)
+          filter5.scope("facet", facet3);
         for (const [f, I] of maybeGroup(facet3, G)) {
           for (const [k3, g] of maybeGroup(I, K2)) {
             for (const [b, extent2] of bin(g)) {
-              if (filter6 && !filter6.reduce(b, extent2))
+              if (filter5 && !filter5.reduce(b, extent2))
                 continue;
               groupFacet.push(i++);
               groupData.push(reduceData.reduceIndex(b, data2, extent2));
@@ -19504,8 +19366,8 @@ var binn = function(bx, by, gx, gy, {
     ...Object.fromEntries(outputs.map(({ name, output }) => [name, output]))
   };
 };
-var mergeOptions = function({ cumulative, domain, thresholds, interval: interval12, ...outputs }, options31) {
-  return [outputs, { cumulative, domain, thresholds, interval: interval12, ...options31 }];
+var mergeOptions = function({ cumulative, domain, thresholds, interval: interval12, ...outputs }, options32) {
+  return [outputs, { cumulative, domain, thresholds, interval: interval12, ...options32 }];
 };
 var maybeBinValue = function(value5, { cumulative, domain, thresholds, interval: interval12 }, defaultValue) {
   value5 = { ...maybeValue(value5) };
@@ -19522,15 +19384,15 @@ var maybeBinValue = function(value5, { cumulative, domain, thresholds, interval:
   value5.thresholds = maybeThresholds(value5.thresholds, value5.interval);
   return value5;
 };
-var maybeBin = function(options31) {
-  if (options31 == null)
+var maybeBin = function(options32) {
+  if (options32 == null)
     return;
-  const { value: value5, cumulative, domain = extent, thresholds } = options31;
+  const { value: value5, cumulative, domain = extent, thresholds } = options32;
   const bin = (data2) => {
     let V = valueof(data2, value5);
     let T;
     if (isTemporal(V) || isTimeThresholds(thresholds)) {
-      V = map6(V, coerceDate, Float64Array);
+      V = map7(V, coerceDate, Float64Array);
       let [min4, max3] = typeof domain === "function" ? domain(V) : domain;
       let t = typeof thresholds === "function" && !isInterval(thresholds) ? thresholds(V, min4, max3) : thresholds;
       if (typeof t === "number")
@@ -19721,8 +19583,8 @@ var bin1cn = function(E2, T, V) {
   };
 };
 var mid1 = function(x12, x2) {
-  const m = (+x12 + +x2) / 2;
-  return x12 instanceof Date ? new Date(m) : m;
+  const m2 = (+x12 + +x2) / 2;
+  return x12 instanceof Date ? new Date(m2) : m2;
 };
 var reduceX = {
   reduceIndex(I, X3, { x1: x12, x2 }) {
@@ -19756,31 +19618,33 @@ var reduceY2 = {
 };
 
 // node_modules/@observablehq/plot/src/transforms/identity.js
-function maybeIdentityX(options32 = {}) {
-  return hasX(options32) ? options32 : { ...options32, x: identity13 };
+function maybeIdentityX(options33 = {}) {
+  return hasX(options33) ? options33 : { ...options33, x: identity13 };
 }
 
 // node_modules/@observablehq/plot/src/transforms/stack.js
-function stackX(stackOptions = {}, options34 = {}) {
+function stackX(stackOptions = {}, options35 = {}) {
   if (arguments.length === 1)
-    [stackOptions, options34] = mergeOptions2(stackOptions);
-  const { y1: y12, y: y2 = y12, x: x2, ...rest } = options34;
+    [stackOptions, options35] = mergeOptions2(stackOptions);
+  const { y1: y12, y: y2 = y12, x: x2, ...rest } = options35;
   const [transform5, Y3, x12, x22] = stack(y2, x2, "y", "x", stackOptions, rest);
   return { ...transform5, y1: y12, y: Y3, x1: x12, x2: x22, x: mid(x12, x22) };
 }
-function maybeStackX({ x: x2, x1: x12, x2: x22, ...options34 } = {}) {
-  options34 = withTip(options34, "y");
+function maybeStackX({ x: x2, x1: x12, x2: x22, ...options35 } = {}) {
+  options35 = withTip(options35, "y");
   if (x12 === undefined && x22 === undefined)
-    return stackX({ x: x2, ...options34 });
+    return stackX({ x: x2, ...options35 });
   [x12, x22] = maybeZero(x2, x12, x22);
-  return { ...options34, x1: x12, x2: x22 };
+  return { ...options35, x1: x12, x2: x22 };
 }
-var mergeOptions2 = function(options34) {
-  const { offset: offset2, order: order2, reverse: reverse2, ...rest } = options34;
+var mergeOptions2 = function(options35) {
+  const { offset: offset2, order: order2, reverse: reverse2, ...rest } = options35;
   return [{ offset: offset2, order: order2, reverse: reverse2 }, rest];
 };
-var stack = function(x2, y2 = one2, kx2, ky2, { offset: offset2, order: order2, reverse: reverse2 }, options34) {
-  const z = maybeZ(options34);
+var stack = function(x2, y2 = one2, kx2, ky2, { offset: offset2, order: order2, reverse: reverse2 }, options35) {
+  if (y2 === null)
+    throw new Error(`stack requires ${ky2}`);
+  const z = maybeZ(options35);
   const [X3, setX] = maybeColumn(x2);
   const [Y12, setY1] = column(y2);
   const [Y22, setY2] = column(y2);
@@ -19788,7 +19652,7 @@ var stack = function(x2, y2 = one2, kx2, ky2, { offset: offset2, order: order2, 
   offset2 = maybeOffset(offset2);
   order2 = maybeOrder2(order2, offset2, ky2);
   return [
-    basic(options34, (data2, facets, plotOptions) => {
+    basic(options35, (data2, facets, plotOptions) => {
       const X4 = x2 == null ? undefined : setX(maybeApplyInterval(valueof(data2, x2), plotOptions?.[kx2]));
       const Y3 = valueof(data2, y2, Float64Array);
       const Z = valueof(data2, z);
@@ -19861,9 +19725,9 @@ var offsetExpand = function(facetstacks, Y12, Y22) {
     for (const stack2 of stacks) {
       const [yn, yp] = extent2(stack2, Y22);
       for (const i of stack2) {
-        const m = 1 / (yp - yn || 1);
-        Y12[i] = m * (Y12[i] - yn);
-        Y22[i] = m * (Y22[i] - yn);
+        const m2 = 1 / (yp - yn || 1);
+        Y12[i] = m2 * (Y12[i] - yn);
+        Y22[i] = m2 * (Y22[i] - yn);
       }
     }
   }
@@ -19873,9 +19737,9 @@ var offsetCenter = function(facetstacks, Y12, Y22) {
     for (const stack2 of stacks) {
       const [yn, yp] = extent2(stack2, Y22);
       for (const i of stack2) {
-        const m = (yp + yn) / 2;
-        Y12[i] -= m;
-        Y22[i] -= m;
+        const m2 = (yp + yn) / 2;
+        Y12[i] -= m2;
+        Y22[i] -= m2;
       }
     }
     offsetZero(stacks, Y12, Y22);
@@ -19910,11 +19774,11 @@ var offsetWiggle = function(facetstacks, Y12, Y22, Z) {
   offsetCenterFacets(facetstacks, Y12, Y22);
 };
 var offsetZero = function(stacks, Y12, Y22) {
-  const m = min(stacks, (stack2) => min(stack2, (i) => Y12[i]));
+  const m2 = min(stacks, (stack2) => min(stack2, (i) => Y12[i]));
   for (const stack2 of stacks) {
     for (const i of stack2) {
-      Y12[i] -= m;
-      Y22[i] -= m;
+      Y12[i] -= m2;
+      Y22[i] -= m2;
     }
   }
 };
@@ -19923,10 +19787,10 @@ var offsetCenterFacets = function(facetstacks, Y12, Y22) {
   if (n === 1)
     return;
   const facets = facetstacks.map((stacks) => stacks.flat());
-  const m = facets.map((I) => (min(I, (i) => Y12[i]) + max(I, (i) => Y22[i])) / 2);
-  const m0 = min(m);
+  const m2 = facets.map((I) => (min(I, (i) => Y12[i]) + max(I, (i) => Y22[i])) / 2);
+  const m0 = min(m2);
   for (let j = 0;j < n; j++) {
-    const p = m0 - m[j];
+    const p = m0 - m2[j];
     for (const i of facets[j]) {
       Y12[i] += p;
       Y22[i] += p;
@@ -20009,22 +19873,22 @@ var orderZDomain = function(compare, domain) {
   return (data2, X3, Y3, Z) => {
     if (!Z)
       throw new Error("missing channel: z");
-    const map7 = new InternMap(domain(data2, X3, Y3, Z).map((d, i) => [d, i]));
-    return (i, j) => compare(map7.get(Z[i]), map7.get(Z[j]));
+    const map8 = new InternMap(domain(data2, X3, Y3, Z).map((d, i) => [d, i]));
+    return (i, j) => compare(map8.get(Z[i]), map8.get(Z[j]));
   };
 };
 var lengthy = { length: true };
 
 // node_modules/@observablehq/plot/src/marks/bar.js
-function barX(data2, options35 = {}) {
-  if (!hasXY(options35))
-    options35 = { ...options35, y: indexOf, x2: identity13 };
-  return new BarX(data2, maybeStackX(maybeIntervalX(maybeIdentityX(options35))));
+function barX(data2, options36 = {}) {
+  if (!hasXY(options36))
+    options36 = { ...options36, y: indexOf, x2: identity13 };
+  return new BarX(data2, maybeStackX(maybeIntervalX(maybeIdentityX(options36))));
 }
 class AbstractBar extends Mark {
-  constructor(data2, channels, options35 = {}, defaults6) {
-    super(data2, channels, options35, defaults6);
-    const { inset: inset3 = 0, insetTop = inset3, insetRight = inset3, insetBottom = inset3, insetLeft = inset3, rx, ry } = options35;
+  constructor(data2, channels, options36 = {}, defaults6) {
+    super(data2, channels, options36, defaults6);
+    const { inset: inset3 = 0, insetTop = inset3, insetRight = inset3, insetBottom = inset3, insetLeft = inset3, rx, ry } = options36;
     this.insetTop = number12(insetTop);
     this.insetRight = number12(insetRight);
     this.insetBottom = number12(insetBottom);
@@ -20060,13 +19924,13 @@ var defaults6 = {
 };
 
 class BarX extends AbstractBar {
-  constructor(data2, options35 = {}) {
-    const { x1: x12, x2, y: y2 } = options35;
+  constructor(data2, options36 = {}) {
+    const { x1: x12, x2, y: y2 } = options36;
     super(data2, {
       x1: { value: x12, scale: "x" },
       x2: { value: x2, scale: "x" },
       y: { value: y2, scale: "y", type: "band", optional: true }
-    }, options35, defaults6);
+    }, options36, defaults6);
   }
   _transform(selection5, mark12, { x: x2 }) {
     selection5.call(applyTransform, mark12, { x: x2 }, 0, 0);
@@ -20100,8 +19964,8 @@ var sphereLine = function(projection6, X3, Y3) {
     return path3({ type: "MultiLineString", coordinates: lines });
   };
 };
-function lineY(data2, { x: x2 = indexOf, y: y2 = identity13, ...options36 } = {}) {
-  return new Line(data2, maybeDenseIntervalX({ ...options36, x: x2, y: y2 }));
+function lineY(data2, { x: x2 = indexOf, y: y2 = identity13, ...options37 } = {}) {
+  return new Line(data2, maybeDenseIntervalX({ ...options37, x: x2, y: y2 }));
 }
 var defaults7 = {
   ariaLabel: "line",
@@ -20114,16 +19978,16 @@ var defaults7 = {
 };
 
 class Line extends Mark {
-  constructor(data2, options36 = {}) {
-    const { x: x2, y: y2, z, curve: curve2, tension } = options36;
+  constructor(data2, options37 = {}) {
+    const { x: x2, y: y2, z, curve: curve2, tension } = options37;
     super(data2, {
       x: { value: x2, scale: "x" },
       y: { value: y2, scale: "y" },
-      z: { value: maybeZ(options36), optional: true }
-    }, options36, defaults7);
+      z: { value: maybeZ(options37), optional: true }
+    }, options37, defaults7);
     this.z = z;
     this.curve = maybeCurveAuto(curve2, tension);
-    markers(this, options36);
+    markers(this, options37);
   }
   filter(index2) {
     return index2;
@@ -20139,12 +20003,69 @@ class Line extends Mark {
     return create2("svg:g", context14).call(applyIndirectStyles, this, dimensions2, context14).call(applyTransform, this, scales13).call((g) => g.selectAll().data(groupIndex(index2, [X3, Y3], this, channels)).enter().append("path").call(applyDirectStyles, this).call(applyGroupedChannelStyles, this, channels).call(applyGroupedMarkers, this, channels, context14).attr("d", curve2 === curveAuto && context14.projection ? sphereLine(context14.projection, X3, Y3) : line_default2().curve(curve2).defined((i) => i >= 0).x((i) => X3[i]).y((i) => Y3[i]))).node();
   }
 }
-// client/index.ts
+// node_modules/@observablehq/plot/src/marks/tick.js
+function tickX(data2, { x: x2 = identity13, ...options38 } = {}) {
+  return new TickX(data2, { ...options38, x: x2 });
+}
+var defaults8 = {
+  ariaLabel: "tick",
+  fill: null,
+  stroke: "currentColor"
+};
+
+class AbstractTick extends Mark {
+  constructor(data2, channels, options38) {
+    super(data2, channels, options38, defaults8);
+    markers(this, options38);
+  }
+  render(index2, scales13, channels, dimensions2, context15) {
+    return create2("svg:g", context15).call(applyIndirectStyles, this, dimensions2, context15).call(this._transform, this, scales13).call((g) => g.selectAll().data(index2).enter().append("line").call(applyDirectStyles, this).attr("x1", this._x1(scales13, channels, dimensions2)).attr("x2", this._x2(scales13, channels, dimensions2)).attr("y1", this._y1(scales13, channels, dimensions2)).attr("y2", this._y2(scales13, channels, dimensions2)).call(applyChannelStyles, this, channels).call(applyMarkers, this, channels, context15)).node();
+  }
+}
+
+class TickX extends AbstractTick {
+  constructor(data2, options38 = {}) {
+    const { x: x2, y: y2, inset: inset3 = 0, insetTop = inset3, insetBottom = inset3 } = options38;
+    super(data2, {
+      x: { value: x2, scale: "x" },
+      y: { value: y2, scale: "y", type: "band", optional: true }
+    }, options38);
+    this.insetTop = number12(insetTop);
+    this.insetBottom = number12(insetBottom);
+  }
+  _transform(selection5, mark14, { x: x2 }) {
+    selection5.call(applyTransform, mark14, { x: x2 }, offset, 0);
+  }
+  _x1(scales13, { x: X3 }) {
+    return (i) => X3[i];
+  }
+  _x2(scales13, { x: X3 }) {
+    return (i) => X3[i];
+  }
+  _y1({ y: y2 }, { y: Y3 }, { marginTop }) {
+    const { insetTop } = this;
+    return Y3 && y2 ? (i) => Y3[i] + insetTop : marginTop + insetTop;
+  }
+  _y2({ y: y2 }, { y: Y3 }, { height, marginBottom }) {
+    const { insetBottom } = this;
+    return Y3 && y2 ? (i) => Y3[i] + y2.bandwidth() - insetBottom : height - marginBottom - insetBottom;
+  }
+}
+// client/views/plots.ts
+var import_mithril2 = __toESM(require_mithril(), 1);
 var cdfplot = function(f) {
   let data2 = range_default(1, 100).map((x2) => [f(x2 / 100), x2 / 100]);
   return plot({
+    marginTop: 50,
+    marginBottom: 50,
+    style: {
+      "background-color": "#111",
+      color: "white",
+      "font-size": "110%"
+    },
     x: {
-      label: "value"
+      label: "value",
+      tickFormat: "~s"
     },
     y: {
       label: "quantile",
@@ -20158,79 +20079,129 @@ var cdfplot = function(f) {
     ]
   });
 };
-var CDFPlot = function(f) {
+function CDFPlot(f) {
   return {
     oncreate: function(vnode) {
-      const chart = cdfplot(f);
-      vnode.dom.append(chart);
+      vnode.dom.append(cdfplot(f));
     },
     view: function(vnode) {
-      return import_mithril.default("div.cdf-plot");
+      return import_mithril2.default("div.cdf-plot");
     }
   };
+}
+var tornadoplot = function(data2) {
+  return plot({
+    marginLeft: 120,
+    marginBottom: 50,
+    style: {
+      "background-color": "#111",
+      color: "white",
+      "font-size": "130%"
+    },
+    x: {
+      label: "opportunity",
+      tickFormat: "~s"
+    },
+    y: { label: "" },
+    color: {
+      scheme: "Greens"
+    },
+    marks: [
+      barX(data2, {
+        y: "variable",
+        fillOpacity: 0.8,
+        fill: (d) => Math.abs(d.value[2] - d.value[0]),
+        x1: (d) => Math.min(...d.value),
+        x2: (d) => Math.max(...d.value)
+      }),
+      tickX([0], { stroke: "white", x: (d) => d }),
+      tickX([data2[0].value[1]], { stroke: "white", strokeDasharray: "3 2", x: (d) => d })
+    ]
+  });
 };
-var TornadoPlot = function(data2) {
+function TornadoPlot(data2) {
   return {
     oncreate: function(vnode) {
       vnode.dom.append(tornadoplot(data2));
     },
     view: function(vnode) {
-      return import_mithril.default("div.tornado-plot");
+      return import_mithril2.default("div.tornado-plot");
     }
   };
-};
-var tornadoplot = function(data2) {
-  return plot({
-    marginLeft: 80,
-    x: {
-      label: "value"
-    },
-    y: { label: "" },
-    marks: [
-      barX(sortBy_default((d) => Math.abs(d.value[2] - d.value[0]), data2), {
-        y: "variable",
-        fillOpacity: 0.5,
-        fill: "grey",
-        x1: (d) => d.value[0],
-        x2: (d) => d.value[2]
-      }),
-      ruleX([data2[0].value[1]])
-    ]
-  });
-};
-var actions = {
-  add_scenario(cell) {
-    return cell.update({ scenarios: (s2) => concat_default(s2, [clone_default(last_default(s2))]) });
-  },
-  scenario: {
-    update_inputs(cell, scenario, input, values2) {
-      scenario.set(input, values2);
-    },
-    update_formula(cell, scenario, formula) {
-      console.log("action: update_formula");
-      scenario.model = new Model(formula);
-    },
-    update_name(cell, scenario, name) {
-      scenario.name = name;
+}
+
+// client/views/views.ts
+function MainView(db3) {
+  return {
+    view: ({ attrs: {} }) => import_mithril3.default("div.main-view", import_mithril3.default("div.nav-bar", import_mithril3.default("button.save", { onclick: () => Actions.save(db3) }, "Save")), import_mithril3.default("h1.title", "DA Product Valuations"), map5(db3.ideas, (idea) => import_mithril3.default("div.idea-summary", { onclick: () => {
+      console.log("clicked");
+      import_mithril3.default.route.set(`/idea/:id`, { id: idea.id });
+    } }, import_mithril3.default("h3.name", idea.name), import_mithril3.default("p.description", idea.description), import_mithril3.default("p.proposer", idea.proposer ?? ""))), import_mithril3.default("button", { onclick: () => {
+      db3.ideas.add(new Idea("New Idea", "Fill in a description"));
+    } }, "+ Add Idea"))
+  };
+}
+function IdeaView(db3) {
+  return {
+    view({ attrs: { id: id2 } }) {
+      const idea = db3.ideas.get(id2);
+      return import_mithril3.default("div.idea-view", import_mithril3.default("h1.title", idea.name), import_mithril3.default("p.description", idea.description), import_mithril3.default("p.proposer", idea.proposer ?? ""), import_mithril3.default("div.scenarios", db3.scenarios.get({ idea: id2 }).map((s2) => import_mithril3.default(ScenarioSummary, { scenario: s2, update: (s3) => db3.scenarios.upsert(s3) })), import_mithril3.default("div.scenario-summary.new", { onclick: () => db3.scenarios.add(new Scenario(new Model("value = price * reach"), "New Scenario", idea.id)) }, import_mithril3.default("span", "+ Add Scenario"))));
     }
+  };
+}
+function ScenarioView(db3) {
+  return {
+    view({ attrs: { id: id2 } }) {
+      const scenario = db3.scenarios.get(id2);
+      return import_mithril3.default("div.scenario", import_mithril3.default("h1.name[contenteditable=true]", import_mithril3.default.trust(scenario.name)), import_mithril3.default(FormulaText, { formula: scenario.model.formulaString(), update: (s2) => {
+        scenario.model = new Model(s2);
+      } }), import_mithril3.default(FormulaInputView, { scenario }), import_mithril3.default("div.rationales", scenario.model.inputs.map((input) => import_mithril3.default("div.input-rationale", import_mithril3.default(FormulaText, { title: "Rationale for Low Side", formula: scenario.rationales[input].low, update: (s2) => {
+        scenario.rationales[input].low = s2;
+        db3.scenarios.upsert(scenario);
+      } }), import_mithril3.default(SPTInputView, {
+        name: input,
+        input: scenario.inputs[input],
+        update: (values2) => {
+          scenario.set(input, values2);
+          db3.scenarios.upsert(scenario);
+        }
+      }), import_mithril3.default(FormulaText, { title: "Rationale for High Side", formula: scenario.rationales[input].high, update: (s2) => {
+        scenario.rationales[input].high = s2;
+        db3.scenarios.upsert(scenario);
+      } })))));
+    }
+  };
+}
+var CE = {
+  view: ({ attrs: { selector: selector3, onchange, value: value5 } }) => {
+    return import_mithril3.default(selector3, { contentEditable: true, onblur: (e3) => onchange(e3.target.innerText) }, import_mithril3.default.trust(value5));
   }
 };
-var FormulaText = {
-  view({ attrs: { formula, update } }) {
-    return import_mithril.default("div.formula", import_mithril.default("p", "Formula:"), import_mithril.default("textarea", { onblur: (e3) => update(e3.target.value) }, formula));
+var LabeledNumber = {
+  view: ({ attrs: { label, number: number13 } }) => {
+    return import_mithril3.default("span.labeled-number", import_mithril3.default("span.label", label), import_mithril3.default("span.number", number13.toLocaleString("en-US", { maximumFractionDigits: 0 })));
   }
 };
-var ScenarioView = {
-  view: ({ attrs: { scenario, cell } }) => {
-    return import_mithril.default("div.scenario", import_mithril.default("div.inputs", import_mithril.default("p", "Name: ", import_mithril.default("input", { type: "field", oninput: (e3) => actions.scenario.update_name(cell, scenario, e3.target.value) }, scenario.name), import_mithril.default("button", import_mithril.default("a", { href: `#!/scenario/${scenario.id}` }, "Inspect"))), import_mithril.default(FormulaText, { formula: scenario.model.formulaString(), update: (s2) => actions.scenario.update_formula(cell, scenario, s2) }), import_mithril.default("div.spts", scenario.model.inputs.map((x2) => import_mithril.default(SPTInputView, {
+var ScenarioSummary = {
+  view: ({ attrs: { scenario, update } }) => {
+    return import_mithril3.default("div.scenario-summary", import_mithril3.default("div.top-bar", import_mithril3.default(CE, { selector: "span.name", onchange: (s2) => {
+      scenario.name = s2;
+      update(scenario);
+    }, value: scenario.name }), import_mithril3.default("button", import_mithril3.default("a", { href: `#!/scenario/${scenario.id}` }, ">"))), import_mithril3.default("div.outputs", import_mithril3.default("div.stats", import_mithril3.default(LabeledNumber, { number: mean_default(scenario.samples), label: "Mean" }), import_mithril3.default(LabeledNumber, { number: scenario.quantile(mean_default(scenario.samples)), label: "MeanQ" }), import_mithril3.default(LabeledNumber, { number: median_default(scenario.samples), label: "Median" }), import_mithril3.default(LabeledNumber, { number: 100 * filter_default((x2) => x2 < 0, scenario.samples).length / scenario.samples.length, label: "Loss Chance" })), import_mithril3.default(CDFPlot(scenario.quantileF())), import_mithril3.default(TornadoPlot(scenario.sensitivity()))), import_mithril3.default("div.inputs", import_mithril3.default(FormulaText, { formula: scenario.model.formulaString(), update: (s2) => {
+      scenario.model = new Model(s2);
+      update(scenario);
+    } }), import_mithril3.default("div.spts", scenario.model.inputs.map((x2) => import_mithril3.default(SPTInputView, {
       name: x2,
       input: scenario.inputs[x2],
-      update: (values2) => actions.scenario.update_inputs(cell, scenario, x2, values2)
-    })))), import_mithril.default("div.outputs", import_mithril.default("div.stats", import_mithril.default("p", "Mean: ", mean_default(scenario.samples).toFixed(2)), import_mithril.default("p", "MeanQ: ", scenario.quantile(mean_default(scenario.samples)).toFixed(2)), import_mithril.default("p", "Median: ", median_default(scenario.samples).toFixed(2))), import_mithril.default(CDFPlot(scenario.quantileF())), import_mithril.default(TornadoPlot(scenario.sensitivity()))));
+      update: (values2) => {
+        scenario.set(x2, values2);
+        update(scenario);
+      }
+    })))));
   }
 };
 var SPTInputView = {
-  view: ({ attrs: { name, input, update } }) => import_mithril.default("div.spt-input", import_mithril.default("h4", name), import_mithril.default("div.input-stack", ["min", "low", "med", "high", "max"].map((q) => import_mithril.default("input", {
+  view: ({ attrs: { name, input, update, simple } }) => import_mithril3.default("div.spt-input", import_mithril3.default("h4", name), import_mithril3.default("div.input-stack", (simple ? ["low", "med", "high"] : ["min", "low", "med", "high", "max"]).map((q) => import_mithril3.default("input", {
     type: "number",
     value: input[q],
     oninput: (e3) => update(Object.assign(input, {
@@ -20238,67 +20209,53 @@ var SPTInputView = {
     }))
   }))))
 };
-var app = {
-  initial: {
-    models: map_default((x2) => new Model(x2), {
-      "maker-wtp-model": `
-      reach = endusers * (1 - cann)
-      tlift = reach * (lift * wtp - cost)
-      devtime = (0.25 + log(endusers) / log(120) * ntools * tptool)
-      value = nmakers * (ntools * tlift - (devtime * devcost + devlic))`,
-      "basic-wtp-model": "value = reach * (wtp * price - cost) - fixed_cost"
-    }),
-    scenarios: [new Scenario(new Model(`
-      reach = endusers * (1 - cann)
-      tlift = reach * (lift * wtp - cost)
-      devtime = (0.25 + log(endusers) / log(120) * ntools * tptool)
-      value = nmakers * (ntools * tlift - (devtime * devcost + devlic))`))]
-  },
-  view: (cell) => import_mithril.default("div.app", import_mithril.default("h1", "DA Product Value Scenarios"), import_mithril.default("div.scenarios", cell.state.scenarios.map((s2) => import_mithril.default(ScenarioView, { cell, scenario: s2 })), import_mithril.default("div.scenario.new", { onclick: () => actions.add_scenario(cell) }, import_mithril.default("span", "+ Add Scenario"))))
-};
-var ScenarioFocus = {
-  view: ({ attrs: { cell, id: id2 } }) => {
-    const scenario = find_default((x2) => x2.id === id2, cell.getState().scenarios);
-    return import_mithril.default("div.scenario-focus", import_mithril.default("h1.name[contenteditable=true]", import_mithril.default.trust(scenario.name)), import_mithril.default(FormulaText, { formula: scenario.model.formulaString(), update: (s2) => actions.scenario.update_formula(cell, scenario, s2) }), import_mithril.default(FormulaInputView, { cell, scenario }));
+var FormulaText = {
+  view({ attrs: { formula, update, title } }) {
+    return import_mithril3.default("div.formula", import_mithril3.default("p", title ?? "Formula:"), import_mithril3.default("textarea", { onblur: (e3) => update(e3.target.value) }, formula));
   }
 };
 var FormulaInputView = {
-  view({ attrs: { cell, scenario } }) {
-    return import_mithril.default("div.formula-input-view", scenario.model.formulas.map((f) => import_mithril.default("div.formula-view", import_mithril.default("span.variable", f[1]), import_mithril.default("span.equals", `=`), this.construct(f[2], scenario, cell))));
+  view({ attrs: { scenario } }) {
+    return import_mithril3.default("div.formula-input-view", scenario.model.formulas.map((f) => import_mithril3.default("div.formula-view", import_mithril3.default("span.variable", f[1]), import_mithril3.default("span.equals", `=`), this.construct(f[2], scenario))));
   },
-  construct(formula, scenario, cell) {
+  construct(formula, scenario) {
     if (isLeaf(formula)) {
       if (typeof formula === "number") {
-        return import_mithril.default("span.number", `${formula}`);
+        return import_mithril3.default("span.number", `${formula}`);
       } else {
         if (includes_default(formula, scenario.model.derived_vars)) {
-          return import_mithril.default("span.variable", `${formula}`);
+          return import_mithril3.default("span.variable", `${formula}`);
         }
-        return import_mithril.default(SPTInputView, {
+        return import_mithril3.default(SPTInputView, {
           name: formula,
           input: scenario.inputs[formula],
-          update: (v) => actions.scenario.update_inputs(cell, scenario, formula, v)
+          update: (v) => {
+            scenario.set(formula, v);
+          }
         });
       }
     }
-    const children2 = formula.slice(1).map((x2) => this.construct(x2, scenario, cell));
+    const children2 = formula.slice(1).map((x2) => this.construct(x2, scenario));
     if (!/\w+/.test(formula[0])) {
-      const term = intersperse_default(import_mithril.default("span.operator", { "+": "+", "-": "-", "*": "\xD7", "/": "\xF7" }[formula[0]]), children2);
+      const term = intersperse_default(import_mithril3.default("span.operator", { "+": "+", "-": "-", "*": "\xD7", "/": "\xF7" }[formula[0]]), children2);
       if (formula[0] === "+" || formula[0] === "-") {
-        return import_mithril.default("span.factor", import_mithril.default("span.open-bracket", ``), ...term, import_mithril.default("span.closed-bracket", ``));
+        return import_mithril3.default("span.factor", import_mithril3.default("span.open-bracket", ``), ...term, import_mithril3.default("span.closed-bracket", ``));
       }
-      return import_mithril.default("span.factor", ...term);
+      return import_mithril3.default("span.factor", ...term);
     } else {
-      return import_mithril.default("span.function", import_mithril.default("span.variable", `${formula[0]}`), import_mithril.default("span.open-bracket"), ...intersperse_default(",", children2), import_mithril.default("span.closed-bracket"));
+      return import_mithril3.default("span.function", import_mithril3.default("span.variable", `${formula[0]}`), import_mithril3.default("span.open-bracket"), ...intersperse_default(",", children2), import_mithril3.default("span.closed-bracket"));
     }
   }
 };
-var cells = import_meiosis_setup.meiosisSetup({ app });
-import_mithril.default.route(document.getElementById("app"), "/", {
-  "/": {
-    view: () => app.view(cells())
-  },
-  "/scenario/:id": {
-    view: (vnode) => import_mithril.default(ScenarioFocus, { cell: cells(), id: vnode.attrs.id })
-  }
+
+// client/index.ts
+var DB;
+Actions.load().then((data2) => {
+  DB = data2;
+  console.log("[INFO] Initial DB is: ", DB);
+  import_mithril4.default.route(document.getElementById("app"), "/", {
+    "/": MainView(DB),
+    "/idea/:id": IdeaView(DB),
+    "/scenario/:id": ScenarioView(DB)
+  });
 });

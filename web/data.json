@@ -1,0 +1,233 @@
+{
+  "ideas": [
+    {
+      "name": "New Idea",
+      "description": "Fill in a description",
+      "id": "New-Idea--4a0mzx7"
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "New Scenario",
+      "id": "New-Scenario--5os7nu4",
+      "description": "",
+      "idea": "New-Idea--4a0mzx7",
+      "model": "value = (reach * (wtp * lift - cost) - fixedcost)",
+      "inputs": {
+        "reach": {
+          "alpha": 0.1,
+          "low": 0,
+          "med": 5,
+          "high": 10
+        },
+        "wtp": {
+          "alpha": 0.1,
+          "low": 0,
+          "med": 5,
+          "high": 10
+        },
+        "lift": {
+          "alpha": 0.1,
+          "low": 0,
+          "med": 5,
+          "high": 10
+        },
+        "cost": {
+          "alpha": 0.1,
+          "low": 0,
+          "med": 5,
+          "high": 10
+        },
+        "fixedcost": {
+          "alpha": 0.1,
+          "low": 0,
+          "med": 5,
+          "high": 10
+        },
+        "price": {
+          "alpha": 0.1,
+          "low": 0,
+          "med": 5,
+          "high": 10
+        }
+      },
+      "rationales": {
+        "reach": {
+          "low": "",
+          "high": ""
+        },
+        "wtp": {
+          "low": "",
+          "high": ""
+        },
+        "lift": {
+          "low": "",
+          "high": ""
+        },
+        "cost": {
+          "low": "",
+          "high": ""
+        },
+        "fixedcost": {
+          "low": "",
+          "high": ""
+        },
+        "price": {
+          "low": "",
+          "high": ""
+        }
+      }
+    },
+    {
+      "name": "Tool Value Estimate",
+      "id": "New-Scenario--61zbhf1",
+      "description": "",
+      "idea": "New-Idea--4a0mzx7",
+      "model": "reach = endusers * (1 - cann)\ndevtime = (0.25 + log(endusers) * ntools * tptool / log(120))\nvalue = nmakers * (ntools * reach * (lift * wtp - cost) - (devtime * devcost + devlic))",
+      "inputs": {
+        "endusers": {
+          "alpha": 0.1,
+          "low": 3,
+          "med": 5,
+          "high": 10,
+          "min": 1,
+          "max": 1000
+        },
+        "cann": {
+          "alpha": 0.1,
+          "low": 0.2,
+          "med": 0.5,
+          "high": 0.8,
+          "min": 0,
+          "max": 1
+        },
+        "ntools": {
+          "alpha": 0.1,
+          "low": 2,
+          "med": 5,
+          "high": 10,
+          "min": 1,
+          "max": 20
+        },
+        "tptool": {
+          "alpha": 0.1,
+          "low": 5,
+          "med": 10,
+          "high": 20,
+          "min": 0,
+          "max": 50
+        },
+        "nmakers": {
+          "alpha": 0.1,
+          "low": 5000,
+          "med": 10000,
+          "high": 20000,
+          "min": 0,
+          "max": 50000
+        },
+        "lift": {
+          "alpha": 0.1,
+          "low": 1,
+          "med": 3,
+          "high": 6,
+          "min": 0,
+          "max": 20
+        },
+        "wtp": {
+          "alpha": 0.1,
+          "low": 45,
+          "med": 90,
+          "high": 120,
+          "min": 20,
+          "max": 150
+        },
+        "cost": {
+          "alpha": 0.1,
+          "low": 1,
+          "med": 2,
+          "high": 3,
+          "min": 0,
+          "max": 5
+        },
+        "devcost": {
+          "alpha": 0.1,
+          "low": 75,
+          "med": 150,
+          "high": 200,
+          "min": 50,
+          "max": 300
+        },
+        "devlic": {
+          "alpha": 0.1,
+          "low": 50,
+          "med": 75,
+          "high": 100,
+          "min": 0,
+          "max": 400
+        },
+        "price": {
+          "alpha": 0.1,
+          "low": 0,
+          "med": 5,
+          "high": 10
+        },
+        "reach": {
+          "alpha": 0.1,
+          "low": 0,
+          "med": 7,
+          "high": 18
+        }
+      },
+      "rationales": {
+        "endusers": {
+          "low": "",
+          "high": ""
+        },
+        "cann": {
+          "low": "",
+          "high": ""
+        },
+        "ntools": {
+          "low": "",
+          "high": ""
+        },
+        "tptool": {
+          "low": "",
+          "high": ""
+        },
+        "nmakers": {
+          "low": "",
+          "high": ""
+        },
+        "lift": {
+          "low": "",
+          "high": ""
+        },
+        "wtp": {
+          "low": "",
+          "high": ""
+        },
+        "cost": {
+          "low": "",
+          "high": ""
+        },
+        "devcost": {
+          "low": "",
+          "high": ""
+        },
+        "devlic": {
+          "low": "",
+          "high": ""
+        },
+        "price": {
+          "low": "",
+          "high": ""
+        },
+        "reach": {
+          "low": "",
+          "high": ""
+        }
+      }
+    }
+  ]
+}
