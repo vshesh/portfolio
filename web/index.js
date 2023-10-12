@@ -4375,6 +4375,8 @@ class Scenario {
   _model;
   inputs;
   rationales;
+  risk_model;
+  risk_inputs;
   samples;
   constructor(model, name = "New Scenario", idea, inputs = {}) {
     this.inputs = inputs;
@@ -20145,7 +20147,8 @@ function IdeaView(db3) {
   return {
     view({ attrs: { id: id2 } }) {
       const idea = db3.ideas.get(id2);
-      return import_mithril3.default("div.idea-view", import_mithril3.default("h1.title", idea.name), import_mithril3.default("p.description", idea.description), import_mithril3.default("p.proposer", idea.proposer ?? ""), import_mithril3.default("div.scenarios", db3.scenarios.get({ idea: id2 }).map((s2) => import_mithril3.default(ScenarioSummary, { scenario: s2, update: (s3) => db3.scenarios.upsert(s3) })), import_mithril3.default("div.scenario-summary.new", { onclick: () => db3.scenarios.add(new Scenario(new Model("value = price * reach"), "New Scenario", idea.id)) }, import_mithril3.default("span", "+ Add Scenario"))));
+      console.log("idea view", idea);
+      return import_mithril3.default("div.idea-view", import_mithril3.default(CE, { selector: "h1.title", value: idea.name, onchange: (name) => db3.ideas.upsert(Object.assign(idea, { name })) }), import_mithril3.default("p.description", idea.description), import_mithril3.default("p.proposer", idea.proposer ?? ""), import_mithril3.default("div.scenarios", db3.scenarios.get({ idea: id2 }).map((s2) => import_mithril3.default(ScenarioSummary, { scenario: s2, update: (s3) => db3.scenarios.upsert(s3) })), import_mithril3.default("div.scenario-summary.new", { onclick: () => db3.scenarios.add(new Scenario(new Model("value = price * reach"), "New Scenario", idea.id)) }, import_mithril3.default("span", "+ Add Scenario"))));
     }
   };
 }
@@ -20174,6 +20177,7 @@ function ScenarioView(db3) {
 }
 var CE = {
   view: ({ attrs: { selector: selector3, onchange, value: value5 } }) => {
+    console.log("CE", selector3, value5);
     return import_mithril3.default(selector3, { contentEditable: true, onblur: (e3) => onchange(e3.target.innerText) }, import_mithril3.default.trust(value5));
   }
 };

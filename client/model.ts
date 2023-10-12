@@ -136,6 +136,9 @@ export class Scenario {
   inputs: { [_: string]: SPTInput }
   rationales!: { [_: string]: { low: string, high: string } }
 
+  risk_model: Model; 
+  risk_inputs: {[_:string]: number}
+
   // derived data only
   // technically should be private
   samples!: number[]
