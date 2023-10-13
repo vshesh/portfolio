@@ -93,5 +93,5 @@ export function sptq({
 
 // TODO: 
 // - add feasibility constraints
-// - support more tha 3 params in the main function
+// - support more than 3 params in the main function
 // - move formula and sampling functions here instead of having them in the model.

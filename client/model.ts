@@ -1,8 +1,11 @@
 import { parse } from "./exprparser"
 import * as R from 'ramda'
 import { sptq, SPTInput } from './metalog'
+import { IndexedSet, map } from "./db"
 
+// --------------------
 // Formula stuff 
+// --------------------
 
 // this ArrayTree stuff should be its own file/library
 type ArrayBranch<B, L> = [B, ...(L | ArrayBranch<B, L>)[]]
@@ -56,10 +59,6 @@ export function compute(formula: ASTTree, inputs: { [s: string]: number }): numb
   return f(...branch(formula).map(x => compute(x, inputs)))
 }
 
-
-// --------------------------------------------------------------------------
-
-
 export class Model {
   formulas: ["=", string, ASTBranch][];
   derived_vars: string[];
@@ -106,87 +105,92 @@ export class Model {
   }
 }
 
-interface ScenarioData {
-    name: string;
-    id: string;
-    description: string;
-    idea: string | undefined;
-    assessor: string | undefined;
-    model: string;
-    inputs: {
-        [_: string]: SPTInput;
-    };
-    rationales: {
-        [_: string]: {
-            low: string;
-            high: string;
-        };
-    };
+// --------------------------------------------------------------------------
+
+
+export type ModelInput<T, R> = {
+  name: string;
+  units?: string;
+  // what this input is measuring.
+  description: string;
+  rationales: R;
+  // values needed to describe the quantity
+  estimate: T
 }
 
-export class Scenario {
-  id: string
-  name: string
-  description: string = "";
+// represets a uncertain quantity that has a range of possibliities.
+export type UncertainQuantity = ModelInput<SPTInput, {low: string, high: string}>;
+// represents a known quantity with a fixed value
+export type CertainQuantity = ModelInput<number, {comments: string}>
+export type Quantity = UncertainQuantity | CertainQuantity;
 
-  idea?: Idea['id'] // parent idea this scenario is estimating. 
-  assessor?: Person['id'] // person who did the estimates for this idea. 
+// every reasonable complexity program has a half-baked implementation of multiple dispatch
+// this is annoying but necessary.
+// inv_q means inverse quantile function.
+// could consider extending to normal distributions, but those have infinite tails which doesn't make
+// sense for estimating values. 
+function inv_q(q: Quantity): (_:number) => number
+function inv_q(q: (Quantity)['estimate']): (_:number) => number
+function inv_q(q: Quantity | (Quantity)['estimate']) {
+  // @ts-ignore
+  if (typeof q === 'object' && Object.hasOwn(q, 'estimate')) {
+    // @ts-ignore
+    return inv_q(q.estimate!);
+  }
+  // @ts-ignore
+  return typeof q === 'number' ? (_:number) => q : sptq(q)
+}
 
-  private _model!: Model;
-  inputs: { [_: string]: SPTInput }
-  rationales!: { [_: string]: { low: string, high: string } }
+// represents a single proof point in a phase of development
+export type ProofPoint = ModelInput<number, {criteria: string, comments: string}>;
+// so that we can refer to them together.
+export type Input = UncertainQuantity | ProofPoint
 
-  risk_model: Model; 
-  risk_inputs: {[_:string]: number}
+class QuantityT extends IndexedSet<string, Quantity> {id(q:Quantity) {return q.name}}
+class ProofPointT extends IndexedSet<string, ProofPoint> {id(q:ProofPoint) {return q.name}}
 
-  // derived data only
-  // technically should be private
-  samples!: number[]
+export class SPTModel {
+  _model!: Model
+  inputs: QuantityT
+  private _samples!: number[]
 
-  constructor(model: Model, name: string = "New Scenario", idea?: Idea['id'], inputs: { [_: string]: SPTInput } = {}, ) {
-    // this is just to make the ts compiler happy
-    // the values are actually set when the model is set
-    this.inputs = inputs;
-
-    this.name = name;
-    this.model = model; // note calls set model below, ts doesn't check this control flow.
-    this.id = makeId(name);
-    this.idea = idea;
+  constructor(formula: string, inputs?: Iterable<Quantity>) {
+    this.inputs = new QuantityT(inputs ?? []);
+    this.model = new Model(formula);
   }
 
-  public get model() { return this._model; }
+  upsert(value: Quantity) {
+    this.inputs.upsert(value)
+    this.update_samples()
+    console.log('new samples', R.mean(this.samples), R.median(this.samples), this.inputs, this.model)
+  }
 
-  public set model(m: Model) {
+  public get model() {return this._model}
+  public set model(model:Model) {
     console.log('setting model')
-    this._model = m;
-    this.inputs = Object.assign(
-      R.fromPairs(this.model.inputs.map(
-        (i) => [i, { alpha: 0.1, low: 0, med: 5, high: 10, min: undefined, max: undefined }])),
-      this.inputs);
-    this.rationales = Object.assign(
-      R.fromPairs(this.model.inputs.map(
-        (i) => [i, { low: "", high: "" }]
-      )),
-      this.rationales)
+    this._model = model;
+    this.inputs.addAll(this.model.inputs.map(
+        (i) => ({
+          name: i, 
+          description: "", 
+          rationales: {low: '', high: ''}, 
+          estimate: { alpha: 0.1, low: 0, med: 5, high: 10, min: undefined, max: undefined }
+        })
+      )
+    )
     this.update_samples();
   }
 
-  protected update_samples() {
-    this.samples = R.pluck(R.last(this.model.derived_vars)!, this.sample(10000)).sort((a, b) => a - b);
-  }
+  // you can read samples, but not write them
+  get samples() { return this._samples;}
 
-  set(name: string, value: SPTInput, rationale?: { low: string, high: string }) {
-    this.inputs[name] = value;
-    this.update_samples()
-    if (rationale) {
-      this.rationales[name] = rationale;
-    }
-    console.log('new samples', R.mean(this.samples), R.median(this.samples), this.inputs, this.model)
+  protected update_samples() {
+    this._samples = R.pluck(R.last(this.model.derived_vars)!, this.sample(10000)).sort((a, b) => a - b);
   }
 
   protected has_all_inputs() {
     for (let i of this.model.inputs) {
-      if (!(this.inputs[i])) {
+      if (!(this.inputs.get(i))) {
         console.log(`Warning: Not all inputs are present. Need [${this.model.inputs}], have [${R.keys(this.inputs)}]`)
         return false;
       }
@@ -197,7 +201,9 @@ export class Scenario {
   sample(n: number): { [s: string]: number }[] {
     if (!this.has_all_inputs()) return []
     return R.range(0, n).map(
-      (_) => this.model.compute(R.map(x => sptq(x)(Math.random()), this.inputs)))
+      (_) => this.model.compute(
+        R.fromPairs(map(this.inputs, x => [x.name, inv_q(x.estimate)(Math.random())] ))
+      ))
   }
 
   quantileF() {
@@ -213,40 +219,145 @@ export class Scenario {
    * *around* the `med` point for each of the variables. 
 
    * the concept falls apart for nonlinear relationships, especially
-   * when some variable 
+   * when some variable contributes to both cost and value in the model formula.
+   * I have had situations where a variable is optimized in the middle of the 
+   * distribution instead of at the ends. 
    */
   sensitivity(around: 'med' | 'low' | 'high' = 'med'): { variable: string, value: [number, number, number] }[] {
     if (!this.has_all_inputs()) return [];
-    const basepoint = (s: SPTInput) => ({ med: 0.5, low: s.alpha, high: 1 - s.alpha })[around]!
+
+    const basepoint = (s: SPTInput | number) => typeof s === 'number' ? 0 : ({ med: 0.5, low: s.alpha, high: 1 - s.alpha })[around]!
     return this.model.inputs.map(i => ({
       variable: i, 
       value: R.tap(x => console.log('value', i, x), [0.1, 0.5, 0.9].map(q => 
         this.model.compute( R.fromPairs(this.model.inputs.map(
-          x => [x, sptq(this.inputs[x]!)(x === i ? q : basepoint(this.inputs[x]))]
+          x => {
+            const estimate = this.inputs.get(x)?.estimate!;
+            const value = inv_q(estimate)(x === i ? q : basepoint(estimate))
+            return [x, value]
+          }
         )))[R.last(this.model.derived_vars)!])
       ) as [number, number, number]
     }))
   }
 
-  serialize(): ScenarioData {
+  serialize() {
+    return {
+      inputs: Array.from(this.inputs),
+      formula: this.model.formulaString()
+    }
+  }
+
+  static deserialize(data: {formula: string, inputs: Quantity[]}) {
+    return new SPTModel(data.formula, data.inputs)
+  }
+}
+
+
+export class Phase {
+  name: string
+  description?: string
+  proof_points: IndexedSet<string, ProofPoint>
+  cost: SPTModel
+
+  constructor(name: string, description?: string, proof_points?: Iterable<ProofPoint>) {
+    this.name = name; 
+    this.description = description || "";
+    this.proof_points = new ProofPointT(proof_points);
+    this.cost = new SPTModel('value = devtime * devcost')
+  }
+
+  public chanceOfSuccess(){
+    let p = 1; 
+    for (const pp of this.proof_points) {
+      p *= pp.estimate;
+    }
+    return p;
+  }
+
+  serialize() {
+    return {
+      name: this.name,
+      description: this.description,
+      proof_points: Array.from(this.proof_points),
+      cost: this.cost.serialize()
+    }
+  }
+
+  static deserialize(data: ReturnType<Phase['serialize']>) {
+    let p = new Phase(data.name, data.description, data.proof_points)
+    p.cost = SPTModel.deserialize(data.cost)
+    return p;
+  }
+}
+
+export class Roadmap {
+  phases: Phase[]
+
+  constructor(phases?: Iterable<Phase>) {
+    this.phases = Array.from(phases ?? [])
+  } 
+
+  public chanceOfSuccess() {
+    let p = 1;
+    for (const phase of this.phases) {
+      p *= phase.chanceOfSuccess()
+    }
+    return p;
+  }
+
+  serialize() {
+    return {phases: this.phases.map(x => x.serialize())}
+  }
+
+  static deserialize(data: ReturnType<Roadmap['serialize']>) {
+    return new Roadmap(data.phases.map(Phase.deserialize))
+  }
+}
+
+
+export class Scenario {
+  id: string
+  name: string
+  description: string = "";
+
+  idea?: Idea['id'] // parent idea this scenario is estimating. 
+  assessor?: Person['id'] // person who did the estimates for this idea. 
+
+  opportunity: SPTModel;
+  roadmap: Roadmap;
+
+  constructor(formula: string, name: string = "New Scenario", idea?: Idea['id']) {
+    // this is just to make the ts compiler happy
+    // the values are actually set when the model is set
+
+    this.name = name;
+    this.id = makeId(name);
+    this.idea = idea;
+
+    this.opportunity = new SPTModel(formula)
+    this.roadmap = new Roadmap();
+  }
+
+  serialize() {
     return {
       name: this.name, 
       id: this.id, 
       description: this.description,
       idea: this.idea, 
       assessor: this.assessor,
-      model: this.model.formulaString(),
-      inputs: this.inputs, 
-      rationales: this.rationales
+      opportunity: this.opportunity.serialize(),
+      roadmap: this.roadmap.serialize()
     }
   }
 
-  static deserialize(data: ScenarioData) {
-    let s = new Scenario(new Model(data.model), data.name, data.idea, data.inputs)
+  static deserialize(data: ReturnType<Scenario['serialize']>) {
+    let s = new Scenario(data.opportunity.formula, data.name, data.idea)
     s.assessor = data.assessor
-    s.rationales = data.rationales
     s.id = data.id
     s.description = data.description
+    s.opportunity = SPTModel.deserialize(data.opportunity)
+    s.roadmap = Roadmap.deserialize(data.roadmap)
     return s;
   }
 }

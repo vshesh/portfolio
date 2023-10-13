@@ -76,6 +76,12 @@ export abstract class IndexedSet<Id, T> {
     return this;
   }
 
+  addAll(objects: Iterable<T>) {
+    for (const o of objects) {
+      this.add(o);
+    }
+  }
+
   // replaces or adds an object to the db.
   // add will throw if the object already exists. 
   upsert(object: T) {
