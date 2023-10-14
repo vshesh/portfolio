@@ -23,9 +23,10 @@
             },
             "estimate": {
               "alpha": 0.1,
-              "low": 0,
+              "low": 2.5,
               "med": 5,
-              "high": 10
+              "high": 10,
+              "min": 1
             }
           },
           "cann": {

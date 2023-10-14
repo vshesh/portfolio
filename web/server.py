@@ -179,6 +179,11 @@ app = Bottle()
 def index():
   return static_file('index.html', './')
 
+
+@app.get('/storybook')
+def index():
+  return static_file('storybook.html', './')
+
 @app.get('/<resource:path>')
 def resources(resource): 
   return static_file('./' + resource.replace('../', ''), './')
@@ -193,5 +198,6 @@ def save():
 def load():
   with open('data.json') as file: 
     return json.load(file)
+
 
 app.run()

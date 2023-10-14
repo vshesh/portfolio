@@ -1,7 +1,6 @@
 import { parse } from "./exprparser"
 import * as R from 'ramda'
 import { sptq, SPTInput } from './metalog'
-import { IndexedSet, map } from "./db"
 
 // --------------------
 // Formula stuff 
@@ -59,7 +58,7 @@ export function compute(formula: ASTTree, inputs: { [s: string]: number }): numb
   return f(...branch(formula).map(x => compute(x, inputs)))
 }
 
-export class Model {
+export class Formula {
   formulas: ["=", string, ASTBranch][];
   derived_vars: string[];
   inputs: string[];
@@ -86,12 +85,19 @@ export class Model {
   }
 
   formulaString(): string {
-    return this.formulas.map(f => `${f[1]} = ${Model.formulaToString(f[2])}`).join('\n')
+    return this.formulas.map(f => { 
+      let formulaString = Formula.formulaToString(f[2]);
+      // remove a pair of surrounding parens if there. 
+      if (formulaString.startsWith('(') && formulaString.endsWith(')')) {
+        formulaString = formulaString.slice(1, -1);
+      }
+      return `${f[1]} = ${formulaString}`
+    }).join('\n')
   }
 
   static formulaToString(formula: ASTTree): string {
     if (isLeaf(formula)) { return `${formula}` };
-    const children = formula.slice(1).map(Model.formulaToString)
+    const children = formula.slice(1).map(Formula.formulaToString)
     if (!(/\w+/.test(formula[0]))) {
       const term = R.intersperse(formula[0], children).join(" ")
       if (formula[0] === '+' || formula[0] === '-') {
@@ -146,14 +152,15 @@ export type ProofPoint = ModelInput<number, {criteria: string, comments: string}
 // so that we can refer to them together.
 export type Input = UncertainQuantity | ProofPoint
 
-export class SPTModel {
-  _model!: Model
+
+export class Assessment {
+  _model!: Formula
   inputs: {[s: string]: Quantity}
   private _samples!: number[]
 
   constructor(formula: string, inputs?: {[s:string]: Quantity}) {
     this.inputs = inputs ?? {}; // R.fromPairs(Array.from(inputs).map(x => [x.name, x])) 
-    this.model = new Model(formula);
+    this.model = new Formula(formula);
   }
 
   set(name: string, value: Quantity) {
@@ -167,7 +174,7 @@ export class SPTModel {
   }
 
   public get model() {return this._model}
-  public set model(model:Model) {
+  public set model(model:Formula) {
     console.log('setting model')
     this._model = model;
     this.inputs = Object.assign(R.fromPairs(this.model.inputs.map(
@@ -250,22 +257,30 @@ export class SPTModel {
   }
 
   static deserialize(data: {formula: string, inputs: {[s:string]: Quantity}}) {
-    return new SPTModel(data.formula, data.inputs)
+    return new Assessment(data.formula, data.inputs)
   }
 }
 
 
+/**
+ * Technically 
+ * this object would contain
+ * two assessments, but 
+ * because we know that dev cost is additive 
+ * there's no need to store a formula for 
+ * how to combine proof points into risk.
+ */
 export class Phase {
   name: string
   description?: string
   proof_points: {[_:string]: ProofPoint}
-  cost: SPTModel
+  cost: Assessment
 
   constructor(name: string, description?: string, proof_points?: {[s:string]: ProofPoint}) {
     this.name = name; 
     this.description = description || "";
     this.proof_points = proof_points ?? {}; // !!proof_points ? R.fromPairs(Array.from(proof_points).map(x => [x.name, x])) : {};;
-    this.cost = new SPTModel('value = devtime * devcost')
+    this.cost = new Assessment('value = devtime * devcost')
   }
 
   public chanceOfSuccess(){
@@ -287,11 +302,22 @@ export class Phase {
 
   static deserialize(data: ReturnType<Phase['serialize']>) {
     let p = new Phase(data.name, data.description, data.proof_points)
-    p.cost = SPTModel.deserialize(data.cost)
+    p.cost = Assessment.deserialize(data.cost)
     return p;
   }
 }
 
+/**
+ * Similarly technially 
+ * this would be an assessment 
+ * where phases are combined according 
+ * to a editable formula
+
+ * but again we know cost just adds, 
+ * so there is no need to do that. 
+ * we simply zip the samples for each phase and then add each 
+ * set of samples up to arrive at a distribution for dev cost. 
+ */
 export class Roadmap {
   phases: Phase[]
 
@@ -325,7 +351,7 @@ export class Scenario {
   idea?: Idea['id'] // parent idea this scenario is estimating. 
   assessor?: Person['id'] // person who did the estimates for this idea. 
 
-  opportunity: SPTModel;
+  opportunity: Assessment;
   roadmap: Roadmap;
 
   constructor(formula: string, name: string = "New Scenario", idea?: Idea['id']) {
@@ -336,7 +362,7 @@ export class Scenario {
     this.id = makeId(name);
     this.idea = idea;
 
-    this.opportunity = new SPTModel(formula)
+    this.opportunity = new Assessment(formula)
     this.roadmap = new Roadmap();
   }
 
@@ -357,7 +383,7 @@ export class Scenario {
     s.assessor = data.assessor
     s.id = data.id
     s.description = data.description
-    s.opportunity = SPTModel.deserialize(data.opportunity)
+    s.opportunity = Assessment.deserialize(data.opportunity)
     s.roadmap = Roadmap.deserialize(data.roadmap)
     return s;
   }

@@ -139,12 +139,14 @@ body {
     vertical-align: middle;
   }
 
+  --paren-color: grey;
+
   .open-bracket,
   .closed-bracket,
   .open-paren,
   .closed-paren {
-    border-top: 2px solid black;
-    border-bottom: 2px solid black;
+    border-top: 2px solid var(--paren-color);
+    border-bottom: 2px solid var(--paren-color);
     height: calc(100% + 20px);
     width: 0.5em;
     position: relative;
@@ -153,13 +155,13 @@ body {
 
   .open-bracket,
   .open-paren {
-    border-left: 2px solid black;
+    border-left: 2px solid var(--paren-color);
     border-radius: 3px 0 0 3px;
   }
 
   .closed-bracket,
   .closed-paren {
-    border-right: 2px solid black;
+    border-right: 2px solid var(--paren-color);
     border-radius: 0 3px 3px 0;
   }
 

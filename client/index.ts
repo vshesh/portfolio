@@ -14,6 +14,5 @@ Actions.load().then(data => {
     '/idea/:id': IdeaView(DB), 
     '/scenario/:id': ScenarioView(DB), 
   })
-
 })
 
