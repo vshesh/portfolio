@@ -94,6 +94,15 @@ export abstract class IndexedSet<Id, T> {
     return this.add(object)
   }
 
+  // only useful if T extends Object 
+  // you can pass in a partial set of properties
+  // for an id, and it will be set.
+  // this is a more flexible version of set for objects. 
+  patch(id: Id, value: Object) {
+    let v = Object.assign({}, this.get(id), value);
+    return this.upsert(v);
+  }
+
   remove(object: T) {
     this.objects.delete(this.id(object))
     R.map(i => i.index.get(i.id(object))?.delete(this.id(object)), this.indexes)
@@ -152,15 +161,15 @@ export abstract class IndexedSet<Id, T> {
     delete this.indexes[name]
   }
 
-  [Symbol.iterator]() {
+  [Symbol.iterator](): IterableIterator<T> {
     return this.objects.values()
   }
 }
 
 // TODO(vishesh): return a object with class-based names instead of an array
-function join<I1, T1, I2, T2>(set1: IndexedSet<I1, T1>, set2: IndexedSet<I2, T2>, where: (a: T1, b: T2) => boolean): IndexedSet<[I1, I2], [T1, T2]>
-function join<I1, T1, I2, T2>(set1: IndexedSet<I1, T1>, set2: IndexedSet<I2, T2>, match: [string, string]): IndexedSet<[I1, I2], [T1, T2]>
-function join<I1, T1, I2, T2>(set1: IndexedSet<I1, T1>, set2: IndexedSet<I2, T2>, match: [string, string] | ((a: T1, b: T2) => boolean)): IndexedSet<[I1, I2], [T1, T2]> {
+export function join<I1, T1, I2, T2>(set1: IndexedSet<I1, T1>, set2: IndexedSet<I2, T2>, where: (a: T1, b: T2) => boolean): IndexedSet<[I1, I2], [T1, T2]>
+export function join<I1, T1, I2, T2>(set1: IndexedSet<I1, T1>, set2: IndexedSet<I2, T2>, match: [string, string]): IndexedSet<[I1, I2], [T1, T2]>
+export function join<I1, T1, I2, T2>(set1: IndexedSet<I1, T1>, set2: IndexedSet<I2, T2>, match: [string, string] | ((a: T1, b: T2) => boolean)): IndexedSet<[I1, I2], [T1, T2]> {
   
   const final = new (class extends IndexedSet<[I1, I2], [T1, T2]> {
     id([t1, t2]: [T1, T2]): [I1, I2] { return [set1.id(t1), set2.id(t2)] }

@@ -146,21 +146,18 @@ export type ProofPoint = ModelInput<number, {criteria: string, comments: string}
 // so that we can refer to them together.
 export type Input = UncertainQuantity | ProofPoint
 
-class QuantityT extends IndexedSet<string, Quantity> {id(q:Quantity) {return q.name}}
-class ProofPointT extends IndexedSet<string, ProofPoint> {id(q:ProofPoint) {return q.name}}
-
 export class SPTModel {
   _model!: Model
-  inputs: QuantityT
+  inputs: {[s: string]: Quantity}
   private _samples!: number[]
 
   constructor(formula: string, inputs?: Iterable<Quantity>) {
-    this.inputs = new QuantityT(inputs ?? []);
+    this.inputs = !!inputs ? R.fromPairs(Array.from(inputs).map(x => [x.name, x])) : {};
     this.model = new Model(formula);
   }
 
-  upsert(value: Quantity) {
-    this.inputs.upsert(value)
+  set(name: string, value: Quantity) {
+    this.inputs[name] = value;
     this.update_samples()
     console.log('new samples', R.mean(this.samples), R.median(this.samples), this.inputs, this.model)
   }
@@ -169,7 +166,7 @@ export class SPTModel {
   public set model(model:Model) {
     console.log('setting model')
     this._model = model;
-    this.inputs.addAll(this.model.inputs.map(
+    this.inputs = Object.assign(this.model.inputs.map(
         (i) => ({
           name: i, 
           description: "", 
@@ -177,7 +174,7 @@ export class SPTModel {
           estimate: { alpha: 0.1, low: 0, med: 5, high: 10, min: undefined, max: undefined }
         })
       )
-    )
+    , this.inputs)
     this.update_samples();
   }
 
@@ -190,7 +187,7 @@ export class SPTModel {
 
   protected has_all_inputs() {
     for (let i of this.model.inputs) {
-      if (!(this.inputs.get(i))) {
+      if (!(this.inputs[i])) {
         console.log(`Warning: Not all inputs are present. Need [${this.model.inputs}], have [${R.keys(this.inputs)}]`)
         return false;
       }
@@ -202,7 +199,7 @@ export class SPTModel {
     if (!this.has_all_inputs()) return []
     return R.range(0, n).map(
       (_) => this.model.compute(
-        R.fromPairs(map(this.inputs, x => [x.name, inv_q(x.estimate)(Math.random())] ))
+        R.map(x => inv_q(x.estimate)(Math.random()), this.inputs)
       ))
   }
 
@@ -232,7 +229,7 @@ export class SPTModel {
       value: R.tap(x => console.log('value', i, x), [0.1, 0.5, 0.9].map(q => 
         this.model.compute( R.fromPairs(this.model.inputs.map(
           x => {
-            const estimate = this.inputs.get(x)?.estimate!;
+            const estimate = this.inputs[x].estimate!;
             const value = inv_q(estimate)(x === i ? q : basepoint(estimate))
             return [x, value]
           }
@@ -243,7 +240,7 @@ export class SPTModel {
 
   serialize() {
     return {
-      inputs: Array.from(this.inputs),
+      inputs: Object.values(this.inputs),
       formula: this.model.formulaString()
     }
   }
@@ -257,19 +254,19 @@ export class SPTModel {
 export class Phase {
   name: string
   description?: string
-  proof_points: IndexedSet<string, ProofPoint>
+  proof_points: {[_:string]: ProofPoint}
   cost: SPTModel
 
   constructor(name: string, description?: string, proof_points?: Iterable<ProofPoint>) {
     this.name = name; 
     this.description = description || "";
-    this.proof_points = new ProofPointT(proof_points);
+    this.proof_points = !!proof_points ? R.fromPairs(Array.from(proof_points).map(x => [x.name, x])) : {};;
     this.cost = new SPTModel('value = devtime * devcost')
   }
 
   public chanceOfSuccess(){
     let p = 1; 
-    for (const pp of this.proof_points) {
+    for (const pp of Object.values(this.proof_points)) {
       p *= pp.estimate;
     }
     return p;
@@ -279,7 +276,7 @@ export class Phase {
     return {
       name: this.name,
       description: this.description,
-      proof_points: Array.from(this.proof_points),
+      proof_points: Object.values(this.proof_points),
       cost: this.cost.serialize()
     }
   }
