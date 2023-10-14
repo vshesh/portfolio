@@ -69,7 +69,6 @@ export class Model {
     this.name = name ?? formula;
     this.formulas = asStatement(parse(formula, {}) as ASTBranch[]);
     this.derived_vars = this.formulas.map(x => x[1]);
-    console.log(this.derived_vars);
     this.inputs = R.uniq(R.chain((f) => Array.from(extract(
       branch,
       (a) => isLeaf(a) && typeof a === 'string' && !R.includes(a, this.derived_vars),
@@ -152,8 +151,8 @@ export class SPTModel {
   inputs: {[s: string]: Quantity}
   private _samples!: number[]
 
-  constructor(formula: string, inputs?: Iterable<Quantity>) {
-    this.inputs = !!inputs ? R.fromPairs(Array.from(inputs).map(x => [x.name, x])) : {};
+  constructor(formula: string, inputs?: {[s:string]: Quantity}) {
+    this.inputs = inputs ?? {}; // R.fromPairs(Array.from(inputs).map(x => [x.name, x])) 
     this.model = new Model(formula);
   }
 
@@ -171,14 +170,14 @@ export class SPTModel {
   public set model(model:Model) {
     console.log('setting model')
     this._model = model;
-    this.inputs = Object.assign(this.model.inputs.map(
-        (i) => ({
+    this.inputs = Object.assign(R.fromPairs(this.model.inputs.map(
+        (i) => [i, {
           name: i, 
           description: "", 
           rationales: {low: '', high: ''}, 
           estimate: { alpha: 0.1, low: 0, med: 5, high: 10, min: undefined, max: undefined }
-        })
-      )
+        }]
+      ))
     , this.inputs)
     this.update_samples();
   }
@@ -231,7 +230,7 @@ export class SPTModel {
     const basepoint = (s: SPTInput | number) => typeof s === 'number' ? 0 : ({ med: 0.5, low: s.alpha, high: 1 - s.alpha })[around]!
     return this.model.inputs.map(i => ({
       variable: i, 
-      value: R.tap(x => console.log('value', i, x), [0.1, 0.5, 0.9].map(q => 
+      value: R.tap(x => x, [0.1, 0.5, 0.9].map(q => 
         this.model.compute( R.fromPairs(this.model.inputs.map(
           x => {
             const estimate = this.inputs[x].estimate!;
@@ -245,12 +244,12 @@ export class SPTModel {
 
   serialize() {
     return {
-      inputs: Object.values(this.inputs),
+      inputs: this.inputs,
       formula: this.model.formulaString()
     }
   }
 
-  static deserialize(data: {formula: string, inputs: Quantity[]}) {
+  static deserialize(data: {formula: string, inputs: {[s:string]: Quantity}}) {
     return new SPTModel(data.formula, data.inputs)
   }
 }
@@ -262,10 +261,10 @@ export class Phase {
   proof_points: {[_:string]: ProofPoint}
   cost: SPTModel
 
-  constructor(name: string, description?: string, proof_points?: Iterable<ProofPoint>) {
+  constructor(name: string, description?: string, proof_points?: {[s:string]: ProofPoint}) {
     this.name = name; 
     this.description = description || "";
-    this.proof_points = !!proof_points ? R.fromPairs(Array.from(proof_points).map(x => [x.name, x])) : {};;
+    this.proof_points = proof_points ?? {}; // !!proof_points ? R.fromPairs(Array.from(proof_points).map(x => [x.name, x])) : {};;
     this.cost = new SPTModel('value = devtime * devcost')
   }
 
@@ -281,7 +280,7 @@ export class Phase {
     return {
       name: this.name,
       description: this.description,
-      proof_points: Object.values(this.proof_points),
+      proof_points: this.proof_points,
       cost: this.cost.serialize()
     }
   }

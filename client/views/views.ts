@@ -29,7 +29,6 @@ export function IdeaView(db: State) {
   return {
     view({attrs: {id}}: {attrs: {id: string}}) {
       const idea = db.ideas.get(id)!;
-      console.log('idea view', idea);
       return m('div.idea-view', m(CE, {selector: 'h1.title', value: idea.name, onchange: (name: string) => db.ideas.upsert(Object.assign(idea, {name: name}))}), m('p.description', idea.description), m('p.proposer', idea.proposer ?? ""), 
         m('div.scenarios', db.scenarios.get({'idea': id}).map(s => m(ScenarioSummary, {scenario: s, update: (s) => db.scenarios.upsert(s)})), 
         m('div.scenario-summary.new', { onclick: () => db.scenarios.add(new Scenario('value = price * reach', 'New Scenario', idea.id)) }, m('span', '+ Add Scenario'))))
@@ -40,7 +39,6 @@ export function IdeaView(db: State) {
 const CE = {
   // @ts-ignore
   view: ({attrs: {selector, onchange, value}}) => {
-    console.log('CE', selector, value);
     // @ts-ignore
     return m(selector, {contentEditable: true, onblur: (e) => onchange(e.target.innerText)}, m.trust(value))
   }
