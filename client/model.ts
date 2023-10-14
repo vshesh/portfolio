@@ -123,6 +123,7 @@ export type UncertainQuantity = ModelInput<SPTInput, {low: string, high: string}
 // represents a known quantity with a fixed value
 export type CertainQuantity = ModelInput<number, {comments: string}>
 export type Quantity = UncertainQuantity | CertainQuantity;
+export function isCertain(q: Quantity): q is CertainQuantity {return typeof q.estimate === 'number'}
 
 // every reasonable complexity program has a half-baked implementation of multiple dispatch
 // this is annoying but necessary.
@@ -160,6 +161,10 @@ export class SPTModel {
     this.inputs[name] = value;
     this.update_samples()
     console.log('new samples', R.mean(this.samples), R.median(this.samples), this.inputs, this.model)
+  }
+
+  patch(name: string, value: Object) {
+    this.set(name, R.mergeDeepRight(this.inputs[name], value))
   }
 
   public get model() {return this._model}

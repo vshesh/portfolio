@@ -2,10 +2,11 @@ import m from 'mithril';
 import * as R from 'ramda';
 import { State, Actions } from '../viewmodel';
 import { SPTInput } from '../metalog';
-import { ASTTree, Idea, isLeaf, Model, Scenario, SPTModel, Roadmap, Quantity } from '../model';
+import { ASTTree, Idea, isLeaf, Model, Scenario, SPTModel, Roadmap, Quantity, isCertain } from '../model';
 import { CDFPlot, TornadoPlot } from './plots';
 import {map} from '../db'
 import { OpenDirOptions } from 'fs';
+import { T } from 'ramda';
 
 export function MainView(db: State) {
   return {
@@ -53,7 +54,7 @@ const LabeledNumber = {
 }
 
 const OpportunitySummary = {
-  view: ({attrs: {opportunity, update}}: {attrs: {opportunity: SPTModel, update: (o: Quantity) => any}}) {
+  view({attrs: {opportunity, update}}: {attrs: {opportunity: SPTModel, update: (o: Quantity) => any}}) {
     return m('div.opportunity', 
       m('div.outputs',
         m('div.stats',
@@ -69,8 +70,8 @@ const OpportunitySummary = {
         m('div.spts',
           opportunity.model.inputs.map(
             x => { 
-              let input = opportunity.inputs.get(x)!;
-              return m(typeof input.estimate === 'number' ? CertainInputView : SPTInputView, {
+              let input = opportunity.inputs[x];
+              return m(isCertain(input) ? FixedInputView : SPTInputView, {
                 name: x,
                 input: input.estimate,
                 update: (values: SPTInput) => {
@@ -90,15 +91,15 @@ const ScenarioSummary = {
       m('div.top-bar',
         m(CE, {selector: 'span.name', onchange: (s: string) => {scenario.name = s; update(scenario)}, value: scenario.name}),
         m('button', m('a', { href: `#!/scenario/${scenario.id}` }, '>'))),
-      
-      )
+      m(OpportunitySummary, {opportunity: scenario.opportunity, update: (q) => {scenario.opportunity.set(q.name, q); update(scenario)}})  
+    )
   }
 }
 
 
 const SPTInputView = {
-  view: ({ attrs: { name, input, update, simple } }: { attrs: { name: string, input: SPTInput, update: (v: SPTInput) => unknown , simple?: boolean} }) =>
-    m('div.spt-input',
+  view({ attrs: { name, input, update, simple } }: { attrs: { name: string, input: SPTInput, update: (v: SPTInput) => unknown , simple?: boolean} }) {
+    return m('div.spt-input',
       m('h4', name),
       m('div.input-stack',
         ((simple ? ['low', 'med', 'high'] : ['min', 'low', 'med', 'high', 'max']) as (keyof SPTInput)[]).map(q =>
@@ -110,6 +111,25 @@ const SPTInputView = {
           })),
       )
     )
+  }
+}
+
+const FixedInputView = {
+  view: ({ attrs: { name, input, update, simple } }: { attrs: { name: string, input: number, update: (v: number) => unknown , simple?: boolean} }) =>
+    m('div.spt-input',
+      m('h4', name),
+      m('div.input-stack',
+          m('input', {
+            type: 'number', value: input,
+            oninput: (e: { target: { value: string } }) => update(e.target.value && /-?\d+(\.\d*)?([eE]\d+)?/.test(e.target.value) ? +e.target.value : input)
+          })
+        ),
+    )
+}
+
+const InputView = {
+  view: ({attrs}: { attrs: { name: string, input: number | SPTInput, update: (v: number) => unknown | ((v:SPTInput) => unknown) , simple?: boolean} }) => 
+    typeof attrs.input === 'number' ? m(FixedInputView, {attrs}) : m(SPTInputView, {attrs})
 }
 
 
@@ -121,21 +141,21 @@ const PersonBubble = {
 
 
 export const OpportunityView = {
-  view({attrs: {opportunity}}: {attrs: {opportunity: SPTModel}}) {
+  view({attrs: {opportunity, update}}: {attrs: {opportunity: SPTModel, update: (o: SPTModel) => any}}) {
       return m('div.opportunity', 
         m(FormulaText, { formula: opportunity.model.formulaString(), update: (s: string) => {opportunity.model = new Model(s)} }),
-        m(FormulaInputView, {  scenario: opportunity }),
+        m(FormulaInputView, {  opportunity }),
         m('div.rationales', 
-          opportunity.model.inputs.map(input => 
-            m('div.input-rationale', 
-              m(FormulaText, {title: 'Rationale for Low Side', formula: opportunity.inputs.get(input)?.rationales.low, update: (s) => {opportunity.inputs.upsert()}}),
+          R.map(input => !isCertain(input) && m('div.input-rationale', 
+              m(FormulaText, {title: 'Rationale for Low Side', formula: input.rationales.low, update: (s) => { opportunity.patch(input.name, {rationales: {low: s}}); update(opportunity) }}),
               m(SPTInputView, {
-                name: input,
-                input: opportunity.inputs[input],
-                update: (values: SPTInput) => {opportunity.set(input, values); db.opportunitys.upsert(opportunity)}
+                name: input.name,
+                input: input.estimate,
+                update: (values: SPTInput) => {opportunity.patch(input.name, {estimate: values}); update(opportunity)}
               }),
-              m(FormulaText, {title: 'Rationale for High Side', formula: opportunity.rationales[input].high, update: (s) => {opportunity.rationales[input].high = s; db.opportunitys.upsert(opportunity)}}),
-            ))))
+              m(FormulaText, {title: 'Rationale for High Side', formula: input.rationales.high, update: (s) => { opportunity.patch(input.name, {rationales: {low: s}}); update(opportunity) }}),
+            ), opportunity.inputs))
+        )
   }
 } 
 
@@ -162,31 +182,31 @@ const FormulaText = {
 
 
 const FormulaInputView = {
-  view({ attrs: { scenario } }: { attrs: {  scenario: SPTModel } }) {
+  view({ attrs: { opportunity } }: { attrs: {  opportunity: SPTModel } }) {
     return m('div.formula-input-view',
-      scenario.model.formulas.map(
-        f => m('div.formula-view', m('span.variable', f[1]), m('span.equals', `=`), this.construct(f[2], scenario))
+      opportunity.model.formulas.map(
+        f => m('div.formula-view', m('span.variable', f[1]), m('span.equals', `=`), this.construct(f[2], opportunity))
       )
     )
   },
 
-  construct(formula: ASTTree, scenario: SPTModel ): m.Vnode<any, any> {
+  construct(formula: ASTTree, opportunity: SPTModel ): m.Vnode<any, any> {
     if (isLeaf(formula)) {
       if (typeof formula === 'number') {
         return m('span.number', `${formula}`)
       } else {
-        if (R.includes(formula, scenario.model.derived_vars)) {
+        if (R.includes(formula, opportunity.model.derived_vars)) {
           return m('span.variable', `${formula}`);
         }
         return m(SPTInputView, {
           name: formula,
           // in this case formula is a variable name
-          input: scenario.inputs.get(formula),
-          update: (v) => {scenario.set(formula, v)}
+          input: opportunity.inputs[formula].estimate,
+          update: (v) => opportunity.patch(formula, {estimate: v})
         })
       }
     };
-    const children = formula.slice(1).map(x => this.construct(x, scenario))
+    const children = formula.slice(1).map(x => this.construct(x, opportunity))
     if (!(/\w+/.test(formula[0]))) {
       // @ts-ignore (R.intersperse is typed wrong!)
       const term = R.intersperse(m('span.operator', { '+': '+', '-': '-', '*': '×', '/': '÷' }[formula[0]]), children)

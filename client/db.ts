@@ -99,7 +99,7 @@ export abstract class IndexedSet<Id, T> {
   // for an id, and it will be set.
   // this is a more flexible version of set for objects. 
   patch(id: Id, value: Object) {
-    let v = Object.assign({}, this.get(id), value);
+    let v: T = R.mergeDeepRight(this.get(id) as Object, value) as T;
     return this.upsert(v);
   }
 
@@ -180,7 +180,7 @@ export function join<I1, T1, I2, T2>(set1: IndexedSet<I1, T1>, set2: IndexedSet<
     // todo(vishesh): make IndexedSet more complicated to allow aliases 
     // at some point it will actually turn into a db... 
     final.addIndex(match[0].toLowerCase() === 'id' ? ([x,y]) => set1.id(x) : ([x, y]) => set1.indexes[match[0]].id(x), `${set1.constructor.name.replace(/T$/, '').toLowerCase()}.${match[0]}`)
-    final.addIndex(match[1].toLowerCase() === 'id' ? ([x,y]) => set2.id(y) :([x,y]) => set2.indexes[match[1]].id(y), `${set2.constructor.name.replace(/T$/, '').toLowerCase()}.${match[1]}`)
+    final.addIndex(match[1].toLowerCase() === 'id' ? ([x,y]) => set2.id(y) : ([x, y]) => set2.indexes[match[1]].id(y), `${set2.constructor.name.replace(/T$/, '').toLowerCase()}.${match[1]}`)
     // fast index match version: 
     // in most instances indexes are 1:1, so this will be fast... 
 
