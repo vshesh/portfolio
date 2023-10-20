@@ -148,7 +148,7 @@ function inv_q(q: Quantity | (Quantity)['estimate']) {
 }
 
 // represents a single proof point in a phase of development
-export type ProofPoint = ModelInput<number, {criteria: string, comments: string}>;
+export type ProofPoint = ModelInput<number, {comments: string}>;
 // so that we can refer to them together.
 export type Input = UncertainQuantity | ProofPoint
 

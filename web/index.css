@@ -51,6 +51,17 @@ body {
   }
 }
 
+.assessment-outputs {
+  .stats {
+    display: flex;
+  
+    * {
+      flex: 1;
+      width: 100%;
+    }
+  }
+}
+
 body {
   font-family: Avenir, sans-serif;
 }
@@ -209,5 +220,25 @@ body {
   }
   .number {
     font-family: monospace;
+  }
+}
+
+.person-bubble {
+  cursor: pointer;
+}
+
+
+.tab-bar {
+  display: flex;
+  margin-bottom: 5px;
+  border-bottom: 1px solid #eee;
+
+  .tab-name {
+    padding: 0.5em 0.25em;
+    background: #333;
+    /*! margin: 1px; */
+    &:not(:first-child) {
+      border-left: 1px solid #888;
+    }
   }
 }

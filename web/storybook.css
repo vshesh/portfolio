@@ -1,9 +1,35 @@
+html, body, #app, .storybook {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+
+
+.storybook {
+  display: grid;
+  grid-template-columns: min-content 1fr;
+  grid-column-gap: 2em;
+}
+
+.fixture {
+  margin-bottom: 4em;
+  .title {
+    font-family: monospace;
+  }
+}
 
 .story {
   background: #181818;
   padding-bottom: 1em;
   border-radius: 5px;
   display: inline-block;
+  margin-right: 1em;
+  margin-bottom: 1em;
+
   .story-name {
     margin: 0;
     font-size: 66%;
@@ -23,3 +49,28 @@
     padding-right: 1em;
   }
 }
+
+.main-panel {
+  grid-column: 2 / span 1;
+  width: 80%;
+  margin: 0 auto;
+}
+
+
+.sidebar {
+  overflow-y: scroll;
+  grid-column: 1 / span 1;
+  background-color: #161616;
+}
+
+.nav-item {
+  font-family: monospace;
+  padding: 0.5em 1em;
+  background: #181818;
+  border: 1px solid #202020;
+  &:hover {
+    background: #202020;
+    cursor: pointer;
+  }
+}
+
