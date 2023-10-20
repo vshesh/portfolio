@@ -13,15 +13,15 @@ export interface Fixture<T extends ViewFunction> {
 export interface Fixtures<T extends ViewFunction> {
   name: string,
   component: T,
-  stories: {name: string, attrs: Attrs<T>}[]
+  stories: {name: string, style?: {[s: string]: string}, attrs: Attrs<T>}[]
 }
 
 export const ShowFixtures = {
   view<T extends ViewFunction>({attrs}: {attrs: Fixtures<T>}) {
-    return m('div.fixtures', 
+    return m('div.fixture', 
       m('h1.title', attrs.name),
       m('div.stories', 
-        attrs.stories.map(story => m('div.story', m('h3.story-name', story.name), m('div.rendering', m(attrs.component, story.attrs)))))
+        attrs.stories.map(story => m('div.story', m('h3.story-name', story.name), m('div.rendering', {style: story.style ?? undefined}, m(attrs.component, story.attrs)))))
     )
   }
 }
