@@ -4196,6 +4196,90 @@ var tap = _curry2(_dispatchable([], _xtap, function tap2(fn, x) {
   return x;
 }));
 var tap_default = tap;
+// client/db.ts
+function map5(iterable, f) {
+  const l = [];
+  for (const item of iterable) {
+    l.push(f(item));
+  }
+  return l;
+}
+class IndexedSet {
+  objects;
+  indexes;
+  constructor(iterable = []) {
+    this.objects = new Map;
+    this.indexes = {};
+    for (const item of iterable) {
+      this.add(item);
+    }
+  }
+  add(object) {
+    if (!!this.objects.get(this.id(object))) {
+      throw new Error(`While trying to add ${object}: Object with id ${this.id(object)} already exists in db: ${this.objects.get(this.id(object))}.`);
+    }
+    this.objects.set(this.id(object), object);
+    map_default((i) => i.index.get(i.id(object)) ? i.index.get(i.id(object))?.add(this.id(object)) : i.index.set(i.id(object), new Set([this.id(object)])), this.indexes);
+    return this;
+  }
+  addAll(objects) {
+    for (const o of objects) {
+      this.add(o);
+    }
+  }
+  upsert(object) {
+    if (!!this.objects.get(this.id(object))) {
+      this.remove(object);
+    }
+    return this.add(object);
+  }
+  patch(id, value) {
+    let v = mergeDeepRight_default(this.get(id), value);
+    return this.upsert(v);
+  }
+  remove(object) {
+    this.objects.delete(this.id(object));
+    map_default((i) => i.index.get(i.id(object))?.delete(this.id(object)), this.indexes);
+    return this;
+  }
+  get(arg) {
+    const test = (x) => typeof x !== "object";
+    if (!test(arg)) {
+      if (Object.keys(arg).length === 1) {
+        const name = Object.keys(arg)[0];
+        if (name.toLowerCase() === "id")
+          return this.get(arg[name]);
+        const id = this.indexes[name].index.get(arg[name]) ?? new Set;
+        return Array.from(id).map((x) => clone_default(this.objects.get(x)));
+      } else {
+        const { name, value } = arg;
+        const id = this.indexes[name].index.get(value) ?? new Set;
+        return Array.from(id).map((x) => clone_default(this.objects.get(x)));
+      }
+    } else {
+      return clone_default(this.objects.get(arg));
+    }
+  }
+  addIndex(id, name) {
+    if (!(name ?? id.name)) {
+      throw Error(`New index being added, but no valid name found. id function has name \`${id.name}\` and name is \`${name}\``);
+    }
+    if ((name ?? id.name).toLowerCase() === "id")
+      throw Error(`Either name \`${name}\` or id function name \`${name}\` is some variant of 'id'. Do not do this.`);
+    let m = new Map;
+    for (let [k, v] of this.objects.entries()) {
+      m.get(id(v)) ? m.get(id(v)).add(k) : m.set(id(v), new Set([k]));
+    }
+    this.indexes[name ?? id.name] = { id, index: m };
+  }
+  removeIndex(name) {
+    delete this.indexes[name];
+  }
+  [Symbol.iterator]() {
+    return this.objects.values();
+  }
+}
+
 // client/model.ts
 var exprparser = __toESM(require_exprparser(), 1);
 
@@ -4448,6 +4532,8 @@ class Phase {
     this.description = description || "";
     this.proof_points = proof_points ?? {};
     this.cost = new Assessment("value = devtime * devcost");
+    this.cost.patch("devtime", { min: 0 });
+    this.cost.patch("devcost", { min: 0 });
   }
   chanceOfSuccess() {
     let p = 1;
@@ -4546,90 +4632,6 @@ class Idea {
     let idea = new Idea(i.name, i.description, i.proposer);
     idea.id = i.id;
     return idea;
-  }
-}
-
-// client/db.ts
-function map5(iterable, f) {
-  const l = [];
-  for (const item of iterable) {
-    l.push(f(item));
-  }
-  return l;
-}
-class IndexedSet {
-  objects;
-  indexes;
-  constructor(iterable = []) {
-    this.objects = new Map;
-    this.indexes = {};
-    for (const item of iterable) {
-      this.add(item);
-    }
-  }
-  add(object) {
-    if (!!this.objects.get(this.id(object))) {
-      throw new Error(`While trying to add ${object}: Object with id ${this.id(object)} already exists in db: ${this.objects.get(this.id(object))}.`);
-    }
-    this.objects.set(this.id(object), object);
-    map_default((i) => i.index.get(i.id(object)) ? i.index.get(i.id(object))?.add(this.id(object)) : i.index.set(i.id(object), new Set([this.id(object)])), this.indexes);
-    return this;
-  }
-  addAll(objects) {
-    for (const o of objects) {
-      this.add(o);
-    }
-  }
-  upsert(object) {
-    if (!!this.objects.get(this.id(object))) {
-      this.remove(object);
-    }
-    return this.add(object);
-  }
-  patch(id, value2) {
-    let v = mergeDeepRight_default(this.get(id), value2);
-    return this.upsert(v);
-  }
-  remove(object) {
-    this.objects.delete(this.id(object));
-    map_default((i) => i.index.get(i.id(object))?.delete(this.id(object)), this.indexes);
-    return this;
-  }
-  get(arg) {
-    const test = (x) => typeof x !== "object";
-    if (!test(arg)) {
-      if (Object.keys(arg).length === 1) {
-        const name = Object.keys(arg)[0];
-        if (name.toLowerCase() === "id")
-          return this.get(arg[name]);
-        const id = this.indexes[name].index.get(arg[name]) ?? new Set;
-        return Array.from(id).map((x) => clone_default(this.objects.get(x)));
-      } else {
-        const { name, value: value2 } = arg;
-        const id = this.indexes[name].index.get(value2) ?? new Set;
-        return Array.from(id).map((x) => clone_default(this.objects.get(x)));
-      }
-    } else {
-      return clone_default(this.objects.get(arg));
-    }
-  }
-  addIndex(id, name) {
-    if (!(name ?? id.name)) {
-      throw Error(`New index being added, but no valid name found. id function has name \`${id.name}\` and name is \`${name}\``);
-    }
-    if ((name ?? id.name).toLowerCase() === "id")
-      throw Error(`Either name \`${name}\` or id function name \`${name}\` is some variant of 'id'. Do not do this.`);
-    let m = new Map;
-    for (let [k, v] of this.objects.entries()) {
-      m.get(id(v)) ? m.get(id(v)).add(k) : m.set(id(v), new Set([k]));
-    }
-    this.indexes[name ?? id.name] = { id, index: m };
-  }
-  removeIndex(name) {
-    delete this.indexes[name];
-  }
-  [Symbol.iterator]() {
-    return this.objects.values();
   }
 }
 
@@ -20242,12 +20244,10 @@ function Tabs() {
   let selected = null;
   return {
     view: ({ attrs }) => {
-      console.log("selected tab is ", selected);
       return import_mithril2.default("div.tabs", import_mithril2.default("div.tab-bar", Object.keys(attrs).map((name) => import_mithril2.default("span.tab-name", {
+        class: name === selected ? "selected" : "",
         onclick: () => {
-          console.log(`selected is, ${selected}`);
           selected = name;
-          console.log(`${name} tab clicked; ${selected} tab selected`);
         }
       }, name))), import_mithril2.default("div.tab-content", attrs[selected ?? Object.keys(attrs)[0]]));
     }
@@ -20309,7 +20309,11 @@ var FormulaInputView = {
 var RoadmapView = {
   view({ attrs: { roadmap, update } }) {
     return import_mithril2.default("div.roadmap", import_mithril2.default("span.success-chance", roadmap.chanceOfSuccess()), roadmap.phases.map((phase, i) => import_mithril2.default(PhaseView, { phase, update: (p) => {
-      roadmap.phases[i] = p;
+      if (p === null || p === undefined) {
+        roadmap.phases.splice(i, 1);
+      } else {
+        roadmap.phases[i] = p;
+      }
       update(roadmap);
     } })), import_mithril2.default("span.add-button", { onclick: () => {
       roadmap.phases.push(new Phase("Untitled Phase"));
@@ -20319,10 +20323,10 @@ var RoadmapView = {
 };
 var PhaseView = {
   view({ attrs: { phase, update } }) {
-    return import_mithril2.default("div.phase", import_mithril2.default("h4.name", phase.name), import_mithril2.default(LabeledNumber, { label: "Chance of Success", number: phase.chanceOfSuccess() }), import_mithril2.default(AssessmentStatsView, { assessment: phase.cost }), import_mithril2.default("textarea", { value: phase.description, onblur: (e3) => {
-      phase.description = e3.target.innerText;
+    return import_mithril2.default("div.phase", import_mithril2.default("h4.name", phase.name), import_mithril2.default("button.remove", { onclick: () => update(null) }, "\xD7"), import_mithril2.default("textarea.description", { value: phase.description, onblur: (e3) => {
+      phase.description = e3.target.value;
       update(phase);
-    } }));
+    } }), import_mithril2.default(LabeledNumber, { label: "Chance of Success", number: phase.chanceOfSuccess() }), import_mithril2.default("div.stats", "Cost profile:", import_mithril2.default(LabeledNumber, { number: phase.cost.quantileF()(0.1), label: "10%" }), import_mithril2.default(LabeledNumber, { number: median_default(phase.cost.samples), label: "50%" }), import_mithril2.default(LabeledNumber, { number: mean_default(phase.cost.samples), label: "Mean" }), import_mithril2.default(LabeledNumber, { number: phase.cost.quantileF()(0.9), label: "90%" })));
   }
 };
 var QuantityView = {
@@ -20332,17 +20336,17 @@ var QuantityView = {
 };
 var UncertainQuantityView = {
   view({ attrs: { quantity, update } }) {
-    return import_mithril2.default(QuantityHeader, { quantity, update }, import_mithril2.default("textarea", { value: quantity.rationales.low, placeholder: "Explain reasons for low estimate here...", onblur: (s2) => update(quantity, "rationales", { low: s2, high: quantity.rationales.high }) }), import_mithril2.default(SPTInputView, { input: quantity.estimate, update: (n) => update(quantity, "estimate", n) }), import_mithril2.default("textarea", { value: quantity.rationales.high, placeholder: "Explain reasons for high estimate here...", onblur: (s2) => update(quantity, "rationales", { low: quantity.rationales.low, high: s2 }) }));
+    return import_mithril2.default(QuantityHeader, { quantity, update }, import_mithril2.default("textarea.rationale.low", { value: quantity.rationales.low, placeholder: "Explain reasons for low estimate here...", onblur: (e3) => update(quantity, "rationales", { low: e3.target.value, high: quantity.rationales.high }) }), import_mithril2.default(SPTInputView, { input: quantity.estimate, update: (n) => update(quantity, "estimate", n) }), import_mithril2.default("textarea.rationale.low", { value: quantity.rationales.high, placeholder: "Explain reasons for high estimate here...", onblur: (e3) => update(quantity, "rationales", { low: quantity.rationales.low, high: e3.target.value }) }));
   }
 };
 var FixedQuantityView = {
   view({ attrs: { quantity, update } }) {
-    return import_mithril2.default(QuantityHeader, { quantity, update }, import_mithril2.default("textarea", { value: quantity.rationales.comments, placeholder: "Add comments here...", onblur: (s2) => update(quantity, "rationales", { comments: s2 }) }), import_mithril2.default(FixedInputView, { input: quantity.estimate, update: (n) => update(quantity, "estimate", n) }));
+    return import_mithril2.default(QuantityHeader, { quantity, update }, import_mithril2.default("textarea.rationale.comments", { value: quantity.rationales.comments, placeholder: "Add comments here...", onblur: (s2) => update(quantity, "rationales", { comments: s2 }) }), import_mithril2.default(FixedInputView, { input: quantity.estimate, update: (n) => update(quantity, "estimate", n) }));
   }
 };
 var QuantityHeader = {
   view({ children: children2, attrs: { quantity, update } }) {
-    return import_mithril2.default("div.quantity", import_mithril2.default(CE, { selector: "span.name", onchange: (s2) => update(quantity, "name", s2), value: quantity.name }), import_mithril2.default("input.description", { type: "text", onblur: (e3) => update(quantity, "description", e3.target.value) }, quantity.description), import_mithril2.default(CE, { selector: "span.units", value: quantity.units, onchange: (s2) => update(quantity, "units", s2) }), children2);
+    return import_mithril2.default("div.quantity", import_mithril2.default("span.name", quantity.name), import_mithril2.default("input.description", { type: "text", onblur: (e3) => update(quantity, "description", e3.target.value) }, quantity.description), import_mithril2.default(CE, { selector: "span.units", value: quantity.units, onchange: (s2) => update(quantity, "units", s2) }), children2);
   }
 };
 var InputsListView = {
@@ -20365,8 +20369,9 @@ var SPTInputView = {
     return import_mithril2.default("div.spt-input", name && import_mithril2.default("h4", name), import_mithril2.default("div.input-stack", (simple ? ["low", "med", "high"] : ["min", "low", "med", "high", "max"]).map((q) => import_mithril2.default("input", {
       type: "number",
       value: input[q],
+      placeholder: q,
       oninput: (e3) => update(Object.assign(input, {
-        [q]: e3.target.value ? /-?\d+(\.\d*)?([eE]\d+)?/.test(e3.target.value) ? +e3.target.value : input[q] : null
+        [q]: e3.target.value && e3.target.value !== "" ? /-?\d+(\.\d*)?([eE]\d+)?/.test(e3.target.value) ? +e3.target.value : input[q] : null
       }))
     }))));
   }
@@ -20421,17 +20426,17 @@ function ScenarioView(db2) {
       } }), import_mithril3.default(CE, { selector: "div.description", value: scenario.description, onchange: (s2) => {
         scenario.description = s2;
         db2.scenarios.upsert(scenario);
-      } }), import_mithril3.default(Tabs(), {
+      } }), import_mithril3.default(Tabs, {
+        Opportunity: import_mithril3.default(OpportunityView, {
+          assessment: scenario.opportunity,
+          update: (o) => {
+            db2.scenarios.upsert(scenario);
+          }
+        }),
         Roadmap: import_mithril3.default(RoadmapView, {
           roadmap: scenario.roadmap,
           update: (r) => {
             scenario.roadmap = r;
-            db2.scenarios.upsert(scenario);
-          }
-        }),
-        Opportunity: import_mithril3.default(OpportunityView, {
-          assessment: scenario.opportunity,
-          update: (o) => {
             db2.scenarios.upsert(scenario);
           }
         })
@@ -20459,8 +20464,10 @@ var OpportunityView = {
   view({ attrs: { assessment, update } }) {
     return import_mithril3.default("div.opportunity", import_mithril3.default(FormulaText, { formula: assessment.model.formulaString(), update: (s2) => {
       assessment.model = new Formula(s2);
+      update(assessment);
     } }), import_mithril3.default(FormulaInputView, { assessment }), import_mithril3.default("div.rationales", map_default((input) => !isCertain(input) && import_mithril3.default("div.input-rationale", import_mithril3.default(QuantityView, { quantity: input, update: (quantity, prop4, value5) => {
       assessment.patch(input.name, { [prop4]: value5 });
+      update(assessment);
     } })), values_default(assessment.inputs))));
   }
 };

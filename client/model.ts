@@ -281,6 +281,8 @@ export class Phase {
     this.description = description || "";
     this.proof_points = proof_points ?? {}; // !!proof_points ? R.fromPairs(Array.from(proof_points).map(x => [x.name, x])) : {};;
     this.cost = new Assessment('value = devtime * devcost')
+    this.cost.patch('devtime', {min: 0})
+    this.cost.patch('devcost', {min: 0})
   }
 
   public chanceOfSuccess(){

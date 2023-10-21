@@ -20012,8 +20012,9 @@ var SPTInputView = {
     return import_mithril2.default("div.spt-input", name && import_mithril2.default("h4", name), import_mithril2.default("div.input-stack", (simple ? ["low", "med", "high"] : ["min", "low", "med", "high", "max"]).map((q) => import_mithril2.default("input", {
       type: "number",
       value: input[q],
+      placeholder: q,
       oninput: (e3) => update(Object.assign(input, {
-        [q]: e3.target.value ? /-?\d+(\.\d*)?([eE]\d+)?/.test(e3.target.value) ? +e3.target.value : input[q] : null
+        [q]: e3.target.value && e3.target.value !== "" ? /-?\d+(\.\d*)?([eE]\d+)?/.test(e3.target.value) ? +e3.target.value : input[q] : null
       }))
     }))));
   }

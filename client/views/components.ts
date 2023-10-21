@@ -116,7 +116,14 @@ export const RoadmapView = {
   view({ attrs: { roadmap, update } }: { attrs: { roadmap: Roadmap, update: (r: Roadmap) => any } }) {
     return m('div.roadmap',
       m('span.success-chance', roadmap.chanceOfSuccess()),
-      roadmap.phases.map((phase, i) => m(PhaseView, { phase, update: (p: Phase) => { roadmap.phases[i] = p; update(roadmap) } })),
+      roadmap.phases.map((phase, i) => m(PhaseView, { phase, update: (p) => { 
+        if (p === null || p === undefined) {
+          roadmap.phases.splice(i, 1)
+        } else {
+          roadmap.phases[i] = p; 
+        }
+        update(roadmap) 
+      } })),
       m('span.add-button', {onclick: () => {roadmap.phases.push(new Phase('Untitled Phase')); update(roadmap)}}, 'Add Phase')
     )
   }
@@ -125,12 +132,21 @@ export const RoadmapView = {
 // Phase views
 
 export const PhaseView = {
-  view({ attrs: { phase, update } }: { attrs: { phase: Phase, update: (p: Phase) => any } }) {
+  view({ attrs: { phase, update } }: { attrs: { phase: Phase, update: (p: Phase | null) => any } }) {
     return m('div.phase',
       m('h4.name', phase.name),
+      m('button.remove', {onclick: () => update(null)}, '×'),
+      m('textarea.description', { value: phase.description, onblur: (e: {target: {value: string}}) => {phase.description = e.target.value; update(phase)} }),
       m(LabeledNumber, { label: "Chance of Success", number: phase.chanceOfSuccess() }),
-      m(AssessmentStatsView, { assessment: phase.cost }),
-      m('textarea', { value: phase.description, onblur: (e) => {phase.description = e.target.innerText; update(phase)} }),
+      m('div.stats',
+        "Cost profile:",
+        // todo replace with SPTInput view for this phase, which will automatically have the appropriate values. 
+        // can show simple version since we know that there will be no negative costs. 
+        m(LabeledNumber, { number: phase.cost.quantileF()(0.1), label: "10%" }),
+        m(LabeledNumber, { number: R.median(phase.cost.samples), label: '50%' }),
+        m(LabeledNumber, { number: R.mean(phase.cost.samples), label: "Mean" }),
+        m(LabeledNumber, { number: phase.cost.quantileF()(0.9), label: "90%" }),
+      ),
     )
   }
 }
@@ -158,9 +174,9 @@ export const UncertainQuantityView = {
   view({ attrs: { quantity, update } }: { attrs: { quantity: UncertainQuantity, update: <P extends keyof UncertainQuantity>(q: UncertainQuantity, prop: P, value: UncertainQuantity[P]) => any } }) {
     return m(QuantityHeader, { quantity, update },
       // show rationales and estimates
-      m('textarea', { value: quantity.rationales.low, placeholder: "Explain reasons for low estimate here...", onblur: (s: string) => update(quantity, 'rationales', { low: s, high: quantity.rationales.high }) }),
+      m('textarea.rationale.low', { value: quantity.rationales.low, placeholder: "Explain reasons for low estimate here...", onblur: (e: {target: {value: string}}) => update(quantity, 'rationales', { low: e.target.value, high: quantity.rationales.high }) }),
       m(SPTInputView, { input: quantity.estimate, update: (n) => update(quantity, 'estimate', n) }),
-      m('textarea', { value: quantity.rationales.high, placeholder: "Explain reasons for high estimate here...", onblur: (s: string) => update(quantity, 'rationales', { low: quantity.rationales.low, high: s }) }),
+      m('textarea.rationale.low', { value: quantity.rationales.high, placeholder: "Explain reasons for high estimate here...", onblur: (e: {target: {value: string}}) => update(quantity, 'rationales', { low: quantity.rationales.low, high: e.target.value }) }),
     )
   }
 }
@@ -169,7 +185,7 @@ export const FixedQuantityView = {
   view({ attrs: { quantity, update } }: { attrs: { quantity: CertainQuantity, update: <P extends keyof CertainQuantity>(q: CertainQuantity, prop: P, value: CertainQuantity[P]) => any } }) {
     return m(QuantityHeader, { quantity, update },
       // show rationales and estimates
-      m('textarea', { value: quantity.rationales.comments, placeholder: "Add comments here...", onblur: (s: string) => update(quantity, 'rationales', { comments: s }) }),
+      m('textarea.rationale.comments', { value: quantity.rationales.comments, placeholder: "Add comments here...", onblur: (s: string) => update(quantity, 'rationales', { comments: s }) }),
       m(FixedInputView, { input: quantity.estimate, update: (n) => update(quantity, 'estimate', n) }))
   }
 }
@@ -184,7 +200,10 @@ export const QuantityHeader = {
 
     // TODO, will use this on the main ScenarioView page to show inputs & rationales and to allow editing.
     return m('div.quantity',
-      m(CE, { selector: 'span.name', onchange: (s: string) => update(quantity, 'name', s), value: quantity.name }),
+      // change the formula to change the name
+      // TODO in the future can support name changes in place 
+      // but that requires triggering an event on the scenario directly, so it's for later. 
+      m('span.name', quantity.name),
       m('input.description', { type: "text", onblur: (e: { target: { value: string } }) => update(quantity, 'description', e.target.value) }, quantity.description),
       m(CE, { selector: 'span.units', value: quantity.units, onchange: (s: string) => update(quantity, 'units', s) }),
       // let parent decide on how to show the rationales and numeric inputs
@@ -224,15 +243,16 @@ export const SPTInputView = {
       name && m('h4', name),
       m('div.input-stack',
         ((simple ? ['low', 'med', 'high'] : ['min', 'low', 'med', 'high', 'max']) as (keyof SPTInput)[]).map(q => m('input', {
-          type: 'number', value: input[q],
+          type: 'number', value: input[q], placeholder: q,
           oninput: (e: { target: { value: string; }; }) => update(Object.assign(input, {
-            [q]: e.target.value ? /-?\d+(\.\d*)?([eE]\d+)?/.test(e.target.value) ? +e.target.value : input[q] : null
+            [q]: e.target.value && e.target.value !== "" ? /-?\d+(\.\d*)?([eE]\d+)?/.test(e.target.value) ? +e.target.value : input[q] : null
           }))
         }))
       )
     );
   }
 };
+
 export const FixedInputView = {
   view: ({ attrs: { name, input, update, simple } }: { attrs: { name?: string; input: number; update: (v: number) => any; simple?: boolean; }; }) => m('div.spt-input',
     name && m('h4', name),
@@ -278,17 +298,18 @@ export const LabeledNumber = {
 };
 
 
+
+
 export function Tabs() {
   let selected: string | null = null;
+
   return {
     view: <V extends m.VnodeDOM<any, any>>({ attrs }: { attrs: { [s: string]: V } }) => {
-      console.log('selected tab is ', selected)
       return m('div.tabs',
         m('div.tab-bar', Object.keys(attrs).map(name => m('span.tab-name', {
+          class: name === selected ? 'selected' : '',
           onclick: () => {
-            console.log(`selected is, ${selected}`)
             selected = name;
-            console.log(`${name} tab clicked; ${selected} tab selected`);
           }
         }, name))),
         m('div.tab-content', attrs[selected ?? Object.keys(attrs)[0]])

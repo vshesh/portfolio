@@ -159,48 +159,7 @@
         "formula": "reach = endusers * (1 - cann)\ndevtime = 0.25 + log(endusers) * ntools * tptool / log(120)\nvalue = nmakers * (ntools * reach * (lift * wtp - cost) - (devtime * devcost + devlic))"
       },
       "roadmap": {
-        "phases": [
-          {
-            "name": "Untitled Phase",
-            "description": {
-              "isTrusted": true
-            },
-            "proof_points": {},
-            "cost": {
-              "inputs": {
-                "devtime": {
-                  "name": "devtime",
-                  "description": "",
-                  "rationales": {
-                    "low": "",
-                    "high": ""
-                  },
-                  "estimate": {
-                    "alpha": 0.1,
-                    "low": 0,
-                    "med": 5,
-                    "high": 10
-                  }
-                },
-                "devcost": {
-                  "name": "devcost",
-                  "description": "",
-                  "rationales": {
-                    "low": "",
-                    "high": ""
-                  },
-                  "estimate": {
-                    "alpha": 0.1,
-                    "low": 0,
-                    "med": 5,
-                    "high": 10
-                  }
-                }
-              },
-              "formula": "value = devtime * devcost"
-            }
-          }
-        ]
+        "phases": []
       }
     }
   ]

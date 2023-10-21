@@ -1,9 +1,9 @@
 import m from 'mithril';
 import * as R from 'ramda';
+import { map } from '../db';
+import { Assessment, Formula, Idea, isCertain, Quantity, Scenario } from '../model';
 import { State } from '../viewmodel';
-import { Idea, Formula, Scenario, Assessment, Roadmap, Quantity, isCertain } from '../model';
-import { map } from '../db'
-import { CE, FormulaText, InputView, FormulaInputView, AssessmentOutputsView, AssessmentInputsView, QuantityHeader, QuantityView, Tabs, RoadmapView } from './components';
+import { AssessmentInputsView, AssessmentOutputsView, CE, FormulaInputView, FormulaText, QuantityView, RoadmapView, Tabs } from './components';
 
 
 
@@ -60,15 +60,16 @@ const ScenarioSummary = {
 export const OpportunityView = {
   view({ attrs: { assessment, update } }: { attrs: { assessment: Assessment, update: (o: Assessment) => any } }) {
     return m('div.opportunity',
-      m(FormulaText, { formula: assessment.model.formulaString(), update: (s: string) => { assessment.model = new Formula(s) } }),
+      m(FormulaText, { formula: assessment.model.formulaString(), update: (s: string) => { assessment.model = new Formula(s); update(assessment) } }),
       m(FormulaInputView, { assessment }),
       m('div.rationales',
         R.map(input => !isCertain(input) && m('div.input-rationale',
-          m(QuantityView, { quantity: input, update: (quantity, prop, value) => { assessment.patch(input.name, { [prop]: value }) } }),
+          m(QuantityView, { quantity: input, update: (quantity, prop, value) => { assessment.patch(input.name, { [prop]: value }); update(assessment) } }),
         ), R.values(assessment.inputs)))
     )
   }
 }
+
 
 export function ScenarioView(db: State) {
   return {
@@ -77,16 +78,17 @@ export function ScenarioView(db: State) {
       return m("div.scenario",
         m(CE, { selector: 'h1.name', value: scenario.name, onchange: (s: string) => { scenario.name = s; db.scenarios.upsert(scenario) } }),
         m(CE, { selector: 'div.description', value: scenario.description, onchange: (s: string) => { scenario.description = s; db.scenarios.upsert(scenario) } }),
-        m(Tabs(), {
-          'Roadmap': m(RoadmapView, {
-            roadmap: scenario.roadmap, 
-            update: (r) => {scenario.roadmap = r; db.scenarios.upsert(scenario)}
-          }),
+        // @ts-ignore
+        m(Tabs, {
           'Opportunity': m(OpportunityView, {
             assessment: scenario.opportunity, update: (o) => {
               /* opportunity is modified in place, no need for `scenario.opportunity = o` here.*/
               db.scenarios.upsert(scenario)
             }
+          }),
+          'Roadmap': m(RoadmapView, {
+            roadmap: scenario.roadmap, 
+            update: (r) => {scenario.roadmap = r; db.scenarios.upsert(scenario)}
           }),
         })
       )
