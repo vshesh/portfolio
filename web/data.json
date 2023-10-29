@@ -4,6 +4,16 @@
       "name": "New Idea",
       "description": "Fill in a description",
       "id": "New-Idea--4a0mzx7"
+    },
+    {
+      "name": "New Idea",
+      "description": "Fill in a description",
+      "id": "New-Idea--d93v0ms"
+    },
+    {
+      "name": "New Idea",
+      "description": "Fill in a description",
+      "id": "New-Idea--liht5at"
     }
   ],
   "scenarios": [
@@ -157,6 +167,148 @@
           }
         },
         "formula": "reach = endusers * (1 - cann)\ndevtime = 0.25 + log(endusers) * ntools * tptool / log(120)\nvalue = nmakers * (ntools * reach * (lift * wtp - cost) - (devtime * devcost + devlic))"
+      },
+      "roadmap": {
+        "phases": [
+          {
+            "name": "Untitled Phase",
+            "description": "",
+            "proof_points": {
+              "untitled--dhlxz96": {
+                "name": "Technology",
+                "description": "",
+                "estimate": 0.6,
+                "rationales": {
+                  "comments": ""
+                }
+              },
+              "untitled--nu6ro44": {
+                "name": "Market",
+                "description": "",
+                "estimate": 0.9,
+                "rationales": {
+                  "comments": ""
+                }
+              }
+            },
+            "cost": {
+              "inputs": {
+                "devtime": {
+                  "name": "devtime",
+                  "description": "",
+                  "rationales": {
+                    "low": "",
+                    "high": ""
+                  },
+                  "estimate": {
+                    "alpha": 0.1,
+                    "low": 0,
+                    "med": 5,
+                    "high": 10
+                  },
+                  "min": 0
+                },
+                "devcost": {
+                  "name": "devcost",
+                  "description": "",
+                  "rationales": {
+                    "low": "",
+                    "high": ""
+                  },
+                  "estimate": {
+                    "alpha": 0.1,
+                    "low": 0,
+                    "med": 5,
+                    "high": 10
+                  },
+                  "min": 0
+                }
+              },
+              "formula": "value = devtime * devcost"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "New Scenario",
+      "id": "New-Scenario--f6djzvh",
+      "description": "",
+      "idea": "New-Idea--d93v0ms",
+      "opportunity": {
+        "inputs": {
+          "price": {
+            "name": "price",
+            "description": "",
+            "rationales": {
+              "low": "",
+              "high": ""
+            },
+            "estimate": {
+              "alpha": 0.1,
+              "low": 0,
+              "med": 5,
+              "high": 10
+            }
+          },
+          "reach": {
+            "name": "reach",
+            "description": "",
+            "rationales": {
+              "low": "",
+              "high": ""
+            },
+            "estimate": {
+              "alpha": 0.1,
+              "low": 0,
+              "med": 5,
+              "high": 10
+            }
+          }
+        },
+        "formula": "value = price * reach"
+      },
+      "roadmap": {
+        "phases": []
+      }
+    },
+    {
+      "name": "New Scenario",
+      "id": "New-Scenario--jeswcnh",
+      "description": "",
+      "idea": "New-Idea--liht5at",
+      "opportunity": {
+        "inputs": {
+          "price": {
+            "name": "price",
+            "description": "",
+            "rationales": {
+              "low": "",
+              "high": ""
+            },
+            "estimate": {
+              "alpha": 0.1,
+              "low": 0,
+              "med": 90,
+              "high": 270
+            }
+          },
+          "reach": {
+            "name": "reach",
+            "description": "",
+            "rationales": {
+              "low": "",
+              "high": ""
+            },
+            "estimate": {
+              "alpha": 0.1,
+              "low": 0,
+              "med": 90,
+              "high": 300
+            }
+          }
+        },
+        "formula": "value = price * reach"
       },
       "roadmap": {
         "phases": []

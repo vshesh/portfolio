@@ -4,20 +4,29 @@ import { map } from '../db';
 import { Assessment, Formula, Idea, isCertain, Quantity, Scenario } from '../model';
 import { State } from '../viewmodel';
 import { AssessmentInputsView, AssessmentOutputsView, CE, FormulaInputView, FormulaText, QuantityView, RoadmapView, Tabs } from './components';
-
+import { InnovationChart } from './plots';
 
 
 export function MainView(db: State) {
-  return {
-    view: ({ attrs: { } }) =>
-      m('div.main-view',
-        m('h1.title', 'DA Product Valuations'),
-        map(db.ideas, idea =>
-          m('div.idea-summary', { onclick: () => { console.log('clicked'); m.route.set(`/idea/:id`, { id: idea.id }) } },
-            m('h3.name', idea.name),
-            m('p.description', idea.description),
-            m('p.proposer', idea.proposer ?? ""))),
-        m('button', { onclick: () => { db.ideas.add(new Idea('New Idea', 'Fill in a description')) } }, '+ Add Idea'))
+  return function () {
+    let chartstyle = 'glyph';
+    return {
+      view: ({ attrs: { } }) => {
+        console.log('chartstyle', chartstyle)
+        return m('div.main-view',
+          m('h1.title', 'DA Product Valuations'),
+          m("select", { onchange: (e: {target: {value: string}}) => { chartstyle = e.target.value; } },
+            ['glyph', 'full', 'simple'].map(x => m('option', { value: x }, x))),
+            // @ts-ignore
+          m(InnovationChart(map(db.ideas, (x: Idea) => R.head(db.scenarios.get({ idea: x.id }))!), chartstyle)),
+          map(db.ideas, idea =>
+            m('div.idea-summary', { onclick: () => { console.log('clicked', idea.id); m.route.set(`/idea/:id`, { id: idea.id }) } },
+              m('h3.name', idea.name),
+              m('p.description', idea.description),
+              m('p.proposer', idea.proposer ?? ""))),
+          m('button', { onclick: () => { db.ideas.add(new Idea('New Idea', 'Fill in a description')) } }, '+ Add Idea'))
+      }
+    }
   }
 }
 
@@ -87,8 +96,8 @@ export function ScenarioView(db: State) {
             }
           }),
           'Roadmap': m(RoadmapView, {
-            roadmap: scenario.roadmap, 
-            update: (r) => {scenario.roadmap = r; db.scenarios.upsert(scenario)}
+            roadmap: scenario.roadmap,
+            update: (r) => { scenario.roadmap = r; db.scenarios.upsert(scenario) }
           }),
         })
       )

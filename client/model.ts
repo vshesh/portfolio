@@ -279,10 +279,26 @@ export class Phase {
   constructor(name: string, description?: string, proof_points?: {[s:string]: ProofPoint}) {
     this.name = name; 
     this.description = description || "";
-    this.proof_points = proof_points ?? {}; // !!proof_points ? R.fromPairs(Array.from(proof_points).map(x => [x.name, x])) : {};;
+    this.proof_points = proof_points ?? {}; 
     this.cost = new Assessment('value = devtime * devcost')
     this.cost.patch('devtime', {min: 0})
     this.cost.patch('devcost', {min: 0})
+  }
+
+  public upsert(p: ProofPoint) {
+    this.proof_points[p.name] = p;
+    return this;
+  }
+
+  public create() {
+    const id = makeId('untitled');
+    this.proof_points[id] = {
+      name: id,
+      description: '',
+      estimate: 1,
+      rationales: {comments: ''},
+    }
+    return this;
   }
 
   public chanceOfSuccess(){
@@ -351,7 +367,7 @@ export class Scenario {
   description: string = "";
 
   idea?: Idea['id'] // parent idea this scenario is estimating. 
-  assessor?: Person['id'] // person who did the estimates for this idea. 
+  assessor?: Person // person who did the estimates for this idea. 
 
   opportunity: Assessment;
   roadmap: Roadmap;
@@ -422,6 +438,6 @@ export interface Person {
   color: string;
 }
 
-function makeId(name: string) {
+export function makeId(name: string) {
   return name.replace(/\s/, '-') + '--' + (Math.random() + 1).toString(36).slice(-7)
 }

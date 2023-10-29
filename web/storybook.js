@@ -20413,7 +20413,44 @@ class NoBiasArbitrary extends Arbitrary {
   }
 }
 
+// node_modules/fast-check/lib/esm/utils/apply.js
+var safeExtractApply = function(f) {
+  try {
+    return f.apply;
+  } catch (err) {
+    return;
+  }
+};
+var safeApplyHacky = function(f, instance, args) {
+  const ff = f;
+  ff[ApplySymbol] = untouchedApply;
+  const out = ff[ApplySymbol](instance, args);
+  delete ff[ApplySymbol];
+  return out;
+};
+function safeApply(f, instance, args) {
+  if (safeExtractApply(f) === untouchedApply) {
+    return f.apply(instance, args);
+  }
+  return safeApplyHacky(f, instance, args);
+}
+var untouchedApply = Function.prototype.apply;
+var ApplySymbol = Symbol("apply");
+
 // node_modules/fast-check/lib/esm/utils/globals.js
+var extractMap = function(instance) {
+  try {
+    return instance.map;
+  } catch (err) {
+    return;
+  }
+};
+function safeMap(instance, fn) {
+  if (extractMap(instance) === untouchedMap) {
+    return instance.map(fn);
+  }
+  return safeApply(untouchedMap, instance, [fn]);
+}
 var SError = typeof Error !== "undefined" ? Error : undefined;
 var SString = typeof String !== "undefined" ? String : undefined;
 var untouchedForEach = Array.prototype.forEach;
@@ -21370,18 +21407,33 @@ function* toss(generator, seed, random, examples) {
     yield tossNext(generator, rng, idx);
   }
 }
+var lazyGenerate = function(generator, rng, idx) {
+  return () => generator.generate(new Random(rng), idx);
+};
+function* lazyToss(generator, seed, random, examples) {
+  yield* safeMap(examples, (e3) => () => new Value(e3, undefined));
+  let idx = 0;
+  let rng = random(seed);
+  for (;; ) {
+    rng = rng.jump ? rng.jump() : skipN(rng, 42);
+    yield lazyGenerate(generator, rng, idx++);
+  }
+}
 
 // node_modules/fast-check/lib/esm/check/runner/utils/PathWalker.js
-function pathWalk(path3, initialValues, shrink) {
-  let values4 = initialValues;
+var produce = function(producer) {
+  return producer();
+};
+function pathWalk(path3, initialProducers, shrink) {
+  const producers = initialProducers;
   const segments = path3.split(":").map((text7) => +text7);
   if (segments.length === 0) {
-    return values4;
+    return producers.map(produce);
   }
   if (!segments.every((v) => !Number.isNaN(v))) {
     throw new Error(`Unable to replay, got invalid path=${path3}`);
   }
-  values4 = values4.drop(segments[0]);
+  let values4 = producers.drop(segments[0]).map(produce);
   for (const s2 of segments.slice(1)) {
     const valueToShrink = values4.getNthOrLast(0);
     if (valueToShrink == null) {
@@ -21402,11 +21454,8 @@ var streamSample = function(generator, params) {
   const qParams = QualifiedParameters.read(extendedParams);
   const nextProperty = toProperty(generator, qParams);
   const shrink = nextProperty.shrink.bind(nextProperty);
-  const tossedValues = stream3(toss(nextProperty, qParams.seed, qParams.randomType, qParams.examples));
-  if (qParams.path.length === 0) {
-    return tossedValues.take(qParams.numRuns).map((s2) => s2.value_);
-  }
-  return pathWalk(qParams.path, tossedValues, shrink).take(qParams.numRuns).map((s2) => s2.value_);
+  const tossedValues = qParams.path.length === 0 ? stream3(toss(nextProperty, qParams.seed, qParams.randomType, qParams.examples)) : pathWalk(qParams.path, stream3(lazyToss(nextProperty, qParams.seed, qParams.randomType, qParams.examples)), shrink);
+  return tossedValues.take(qParams.numRuns).map((s2) => s2.value_);
 };
 var sample = function(generator, params) {
   return [...streamSample(generator, params)];

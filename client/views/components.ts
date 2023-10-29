@@ -1,7 +1,7 @@
 import m from 'mithril';
 import * as R from 'ramda';
 import { SPTInput } from '../metalog';
-import { ASTTree, isLeaf, Assessment, Formula, Quantity, ModelInput, CertainQuantity, UncertainQuantity, isCertain, Phase, ProofPoint, Roadmap } from '../model';
+import { ASTTree, isLeaf, Assessment, Formula, Quantity, ModelInput, CertainQuantity, UncertainQuantity, isCertain, Phase, ProofPoint, Roadmap, makeId } from '../model';
 import { CDFPlot, TornadoPlot } from './plots';
 
 
@@ -116,15 +116,17 @@ export const RoadmapView = {
   view({ attrs: { roadmap, update } }: { attrs: { roadmap: Roadmap, update: (r: Roadmap) => any } }) {
     return m('div.roadmap',
       m('span.success-chance', roadmap.chanceOfSuccess()),
-      roadmap.phases.map((phase, i) => m(PhaseView, { phase, update: (p) => { 
-        if (p === null || p === undefined) {
-          roadmap.phases.splice(i, 1)
-        } else {
-          roadmap.phases[i] = p; 
+      roadmap.phases.map((phase, i) => m(PhaseView, {
+        phase, update: (p) => {
+          if (p === null || p === undefined) {
+            roadmap.phases.splice(i, 1)
+          } else {
+            roadmap.phases[i] = p;
+          }
+          update(roadmap)
         }
-        update(roadmap) 
-      } })),
-      m('span.add-button', {onclick: () => {roadmap.phases.push(new Phase('Untitled Phase')); update(roadmap)}}, 'Add Phase')
+      })),
+      m('span.add-button', { onclick: () => { roadmap.phases.push(new Phase('Untitled Phase')); update(roadmap) } }, 'Add Phase')
     )
   }
 }
@@ -134,18 +136,25 @@ export const RoadmapView = {
 export const PhaseView = {
   view({ attrs: { phase, update } }: { attrs: { phase: Phase, update: (p: Phase | null) => any } }) {
     return m('div.phase',
-      m('h4.name', phase.name),
-      m('button.remove', {onclick: () => update(null)}, '×'),
-      m('textarea.description', { value: phase.description, onblur: (e: {target: {value: string}}) => {phase.description = e.target.value; update(phase)} }),
-      m(LabeledNumber, { label: "Chance of Success", number: phase.chanceOfSuccess() }),
-      m('div.stats',
-        "Cost profile:",
-        // todo replace with SPTInput view for this phase, which will automatically have the appropriate values. 
-        // can show simple version since we know that there will be no negative costs. 
-        m(LabeledNumber, { number: phase.cost.quantileF()(0.1), label: "10%" }),
-        m(LabeledNumber, { number: R.median(phase.cost.samples), label: '50%' }),
-        m(LabeledNumber, { number: R.mean(phase.cost.samples), label: "Mean" }),
-        m(LabeledNumber, { number: phase.cost.quantileF()(0.9), label: "90%" }),
+      m(CE, {selector: 'h4.name', onchange: (s: string) => {phase.name = s; update(phase)}, value: phase.name}),
+      m('button.remove', { onclick: () => update(null) }, '×'),
+      m('textarea.textarea.description', { value: phase.description, onblur: (e: { target: { value: string } }) => { phase.description = e.target.value; update(phase) } }),
+      m('div.cost-profile',
+        m('span.label', "Cost profile:"),
+        m('div.stats',
+          // todo replace with SPTInput view for this phase, which will automatically have the appropriate values. 
+          // can show simple version since we know that there will be no negative costs. 
+          m(LabeledNumber, { number: phase.cost.quantileF()(0.1), label: "10%" }),
+          m(LabeledNumber, { number: R.median(phase.cost.samples), label: '50%' }),
+          m(LabeledNumber, { number: R.mean(phase.cost.samples), label: "Mean" }),
+          m(LabeledNumber, { number: phase.cost.quantileF()(0.9), label: "90%" }),
+        ),
+        m(InputsListView, { assessment: phase.cost, update: (q) => { phase.cost.set(q.name, q); update(phase) } })),
+      m('div.proof-points',
+        m('span.label', 'Proof Points'),
+        m(LabeledNumber, { label: "Chance of Success", precision: 2, number: phase.chanceOfSuccess() }),
+        R.keys(phase.proof_points).map(pp => m(ProofPointView, { proof_point: phase.proof_points[pp], update: (p) => { phase.proof_points[pp] = p; update(phase) } })),
+        m('span.add-button', { onclick: () => { phase.create(); update(phase) } }, 'Add Proof Point')
       ),
     )
   }
@@ -154,8 +163,10 @@ export const PhaseView = {
 export const ProofPointView = {
   view({ attrs: { proof_point, update } }: { attrs: { proof_point: ProofPoint, update: (pp: ProofPoint) => any } }) {
     return m('div.proof-point',
-      m('div.bar', m('span.name', proof_point.name), m('span.chance', proof_point.estimate)),
-      m('textarea.criteria', proof_point.description), m('textarea.comments', proof_point.rationales.comments),
+      m(CE, {selector: 'span.name', onchange: (s: string) => {proof_point.name = s; update(proof_point)}, value: proof_point.name}),
+      m('span.chance', m('span.label', 'Assessment: '), m('input', { type: 'number', step: '0.1', value: proof_point.estimate, oninput: (e: { target: { value: string } }) => { proof_point.estimate = +e.target.value; update(proof_point) } })),
+      m('textarea.textarea.criteria', { placeholder: "Enter criteria ..." }, proof_point.description),
+      m('textarea.textarea.comments', { placeholder: "Enter comments ..." }, proof_point.rationales.comments),
     )
   }
 }
@@ -174,9 +185,9 @@ export const UncertainQuantityView = {
   view({ attrs: { quantity, update } }: { attrs: { quantity: UncertainQuantity, update: <P extends keyof UncertainQuantity>(q: UncertainQuantity, prop: P, value: UncertainQuantity[P]) => any } }) {
     return m(QuantityHeader, { quantity, update },
       // show rationales and estimates
-      m('textarea.rationale.low', { value: quantity.rationales.low, placeholder: "Explain reasons for low estimate here...", onblur: (e: {target: {value: string}}) => update(quantity, 'rationales', { low: e.target.value, high: quantity.rationales.high }) }),
+      m('textarea.rationale.low', { value: quantity.rationales.low, placeholder: "Explain reasons for low estimate here...", onblur: (e: { target: { value: string } }) => update(quantity, 'rationales', { low: e.target.value, high: quantity.rationales.high }) }),
       m(SPTInputView, { input: quantity.estimate, update: (n) => update(quantity, 'estimate', n) }),
-      m('textarea.rationale.low', { value: quantity.rationales.high, placeholder: "Explain reasons for high estimate here...", onblur: (e: {target: {value: string}}) => update(quantity, 'rationales', { low: quantity.rationales.low, high: e.target.value }) }),
+      m('textarea.rationale.low', { value: quantity.rationales.high, placeholder: "Explain reasons for high estimate here...", onblur: (e: { target: { value: string } }) => update(quantity, 'rationales', { low: quantity.rationales.low, high: e.target.value }) }),
     )
   }
 }
