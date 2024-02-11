@@ -3371,6 +3371,30 @@ function _map(fn, functor) {
   return result;
 }
 
+// node_modules/ramda/es/internal/_quote.js
+function _quote(s) {
+  var escaped = s.replace(/\\/g, "\\\\").replace(/[\b]/g, "\\b").replace(/\f/g, "\\f").replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\t/g, "\\t").replace(/\v/g, "\\v").replace(/\0/g, "\\0");
+  return '"' + escaped.replace(/"/g, '\\"') + '"';
+}
+
+// node_modules/ramda/es/internal/_toISOString.js
+var pad = function pad2(n) {
+  return (n < 10 ? "0" : "") + n;
+};
+var _toISOString = typeof Date.prototype.toISOString === "function" ? function _toISOString2(d) {
+  return d.toISOString();
+} : function _toISOString3(d) {
+  return d.getUTCFullYear() + "-" + pad(d.getUTCMonth() + 1) + "-" + pad(d.getUTCDate()) + "T" + pad(d.getUTCHours()) + ":" + pad(d.getUTCMinutes()) + ":" + pad(d.getUTCSeconds()) + "." + (d.getUTCMilliseconds() / 1000).toFixed(3).slice(2, 5) + "Z";
+};
+var _toISOString_default = _toISOString;
+
+// node_modules/ramda/es/internal/_complement.js
+function _complement(f) {
+  return function() {
+    return !f.apply(this, arguments);
+  };
+}
+
 // node_modules/ramda/es/internal/_arrayReduce.js
 function _arrayReduce(reducer, acc, list) {
   var index = 0;
@@ -3430,6 +3454,91 @@ var filter = _curry2(_dispatchable(["fantasy-land/filter", "filter"], _xfilter, 
   }, {}, keys_default(filterable)) : _filter(pred, filterable);
 }));
 var filter_default = filter;
+
+// node_modules/ramda/es/reject.js
+var reject = _curry2(function reject2(pred, filterable) {
+  return filter_default(_complement(pred), filterable);
+});
+var reject_default = reject;
+
+// node_modules/ramda/es/internal/_toString.js
+function _toString(x, seen) {
+  var recur = function recur(y) {
+    var xs = seen.concat([x]);
+    return _includes(y, xs) ? "<Circular>" : _toString(y, xs);
+  };
+  var mapPairs = function(obj, keys7) {
+    return _map(function(k) {
+      return _quote(k) + ": " + recur(obj[k]);
+    }, keys7.slice().sort());
+  };
+  switch (Object.prototype.toString.call(x)) {
+    case "[object Arguments]":
+      return "(function() { return arguments; }(" + _map(recur, x).join(", ") + "))";
+    case "[object Array]":
+      return "[" + _map(recur, x).concat(mapPairs(x, reject_default(function(k) {
+        return /^\d+$/.test(k);
+      }, keys_default(x)))).join(", ") + "]";
+    case "[object Boolean]":
+      return typeof x === "object" ? "new Boolean(" + recur(x.valueOf()) + ")" : x.toString();
+    case "[object Date]":
+      return "new Date(" + (isNaN(x.valueOf()) ? recur(NaN) : _quote(_toISOString_default(x))) + ")";
+    case "[object Map]":
+      return "new Map(" + recur(Array.from(x)) + ")";
+    case "[object Null]":
+      return "null";
+    case "[object Number]":
+      return typeof x === "object" ? "new Number(" + recur(x.valueOf()) + ")" : 1 / x === (-Infinity) ? "-0" : x.toString(10);
+    case "[object Set]":
+      return "new Set(" + recur(Array.from(x).sort()) + ")";
+    case "[object String]":
+      return typeof x === "object" ? "new String(" + recur(x.valueOf()) + ")" : _quote(x);
+    case "[object Undefined]":
+      return "undefined";
+    default:
+      if (typeof x.toString === "function") {
+        var repr = x.toString();
+        if (repr !== "[object Object]") {
+          return repr;
+        }
+      }
+      return "{" + mapPairs(x, keys_default(x)).join(", ") + "}";
+  }
+}
+
+// node_modules/ramda/es/toString.js
+var toString2 = _curry1(function toString3(val) {
+  return _toString(val, []);
+});
+var toString_default = toString2;
+
+// node_modules/ramda/es/max.js
+var max = _curry2(function max2(a, b) {
+  if (a === b) {
+    return b;
+  }
+  function safeMax(x, y) {
+    if (x > y !== y > x) {
+      return y > x ? y : x;
+    }
+    return;
+  }
+  var maxByValue = safeMax(a, b);
+  if (maxByValue !== undefined) {
+    return maxByValue;
+  }
+  var maxByType = safeMax(typeof a, typeof b);
+  if (maxByType !== undefined) {
+    return maxByType === typeof a ? a : b;
+  }
+  var stringA = toString_default(a);
+  var maxByStringValue = safeMax(stringA, toString_default(b));
+  if (maxByStringValue !== undefined) {
+    return maxByStringValue === stringA ? a : b;
+  }
+  return b;
+});
+var max_default = max;
 
 // node_modules/ramda/es/internal/_xmap.js
 var XMap = function() {
@@ -4146,30 +4255,30 @@ var spt_coeffs = function({
   med,
   high,
   min,
-  max
+  max: max3
 }) {
-  if (e(max) && !e(min))
+  if (e(max3) && !e(min))
     throw Error("spt_coeffs: if you define max, need to also define min.");
-  if (!e(min) && !e(max)) {
+  if (!e(min) && !e(max3)) {
     return [
       med,
       (high - low) / 2 / log(1 / alpha - 1),
       (high + low - 2 * med) / (1 - 2 * alpha) / log(1 / alpha - 1)
     ];
-  } else if (!e(max) && e(min)) {
+  } else if (!e(max3) && e(min)) {
     return [
       log(med - min),
       0.5 * log((high - min) / (low - min)) / log(1 / alpha - 1),
       log((high - min) * (low - min) / (med - min) ^ 2) / ((1 - 2 * alpha) * log(1 / alpha - 1))
     ];
-  } else if (e(max) && e(min)) {
-    const t = (x) => (x - min) / (max - x);
+  } else if (e(max3) && e(min)) {
+    const t = (x) => (x - min) / (max3 - x);
     let a1 = log(t(med));
     let a2 = 0.5 * log(t(high) / t(low)) / log(1 / alpha - 1);
     let a3 = log(t(high) * t(low) / t(med) ^ 2) / (1 - 2 * alpha) / log(1 / alpha - 1);
     return [a1, a2, a3];
   }
-  throw Error(`Must pass a valid SPT configuration. ${{ alpha, low, med, high, min, max }} doesn't qualify`);
+  throw Error(`Must pass a valid SPT configuration. ${{ alpha, low, med, high, min, max: max3 }} doesn't qualify`);
 };
 function sptq({
   alpha,
@@ -4177,16 +4286,16 @@ function sptq({
   med,
   high,
   min,
-  max
+  max: max3
 }) {
-  if (!e(min) && !e(max)) {
+  if (!e(min) && !e(max3)) {
     return mq(...spt_coeffs({ low, med, high, alpha }));
-  } else if (!e(max) && e(min)) {
+  } else if (!e(max3) && e(min)) {
     let [a1, a2, a3] = spt_coeffs({ alpha, low, med, high, min });
     return (y) => y === 0 ? min : min + exp(mq(a1, a2, a3)(y));
-  } else if (e(max) && e(min)) {
-    let [a1, a2, a3] = spt_coeffs({ alpha, low, med, high, min, max });
-    return (y) => y === 0 ? min : y === 1 ? max : (min + max * exp(mq(a1, a2, a3)(y))) / (1 + exp(mq(a1, a2, a3)(y)));
+  } else if (e(max3) && e(min)) {
+    let [a1, a2, a3] = spt_coeffs({ alpha, low, med, high, min, max: max3 });
+    return (y) => y === 0 ? min : y === 1 ? max3 : (min + max3 * exp(mq(a1, a2, a3)(y))) / (1 + exp(mq(a1, a2, a3)(y)));
   } else {
     throw Error("sptq: if you define max, need to also define min.");
   }
@@ -4548,18 +4657,18 @@ function deviation(values3, valueof) {
 // node_modules/d3-array/src/extent.js
 function extent(values3, valueof) {
   let min;
-  let max;
+  let max3;
   if (valueof === undefined) {
     for (const value2 of values3) {
       if (value2 != null) {
         if (min === undefined) {
           if (value2 >= value2)
-            min = max = value2;
+            min = max3 = value2;
         } else {
           if (min > value2)
             min = value2;
-          if (max < value2)
-            max = value2;
+          if (max3 < value2)
+            max3 = value2;
         }
       }
     }
@@ -4569,17 +4678,17 @@ function extent(values3, valueof) {
       if ((value2 = valueof(value2, ++index, values3)) != null) {
         if (min === undefined) {
           if (value2 >= value2)
-            min = max = value2;
+            min = max3 = value2;
         } else {
           if (min > value2)
             min = value2;
-          if (max < value2)
-            max = value2;
+          if (max3 < value2)
+            max3 = value2;
         }
       }
     }
   }
-  return [min, max];
+  return [min, max3];
 }
 // node_modules/d3-array/src/fsum.js
 class Adder {
@@ -4694,18 +4803,18 @@ function identity3(x) {
 }
 
 // node_modules/d3-array/src/group.js
-function rollup(values3, reduce3, ...keys8) {
-  return nest(values3, identity3, reduce3, keys8);
+function rollup(values3, reduce3, ...keys9) {
+  return nest(values3, identity3, reduce3, keys9);
 }
-function rollups(values3, reduce3, ...keys8) {
-  return nest(values3, Array.from, reduce3, keys8);
+function rollups(values3, reduce3, ...keys9) {
+  return nest(values3, Array.from, reduce3, keys9);
 }
-var nest = function(values3, map5, reduce3, keys8) {
+var nest = function(values3, map5, reduce3, keys9) {
   return function regroup(values4, i) {
-    if (i >= keys8.length)
+    if (i >= keys9.length)
       return reduce3(values4);
     const groups = new InternMap;
-    const keyof2 = keys8[i++];
+    const keyof2 = keys9[i++];
     let index = -1;
     for (const value2 of values4) {
       const key = keyof2(value2, ++index, values4);
@@ -4721,12 +4830,12 @@ var nest = function(values3, map5, reduce3, keys8) {
     return map5(groups);
   }(values3, 0);
 };
-function group(values3, ...keys8) {
-  return nest(values3, identity3, identity3, keys8);
+function group(values3, ...keys9) {
+  return nest(values3, identity3, identity3, keys9);
 }
 // node_modules/d3-array/src/permute.js
-function permute(source, keys8) {
-  return Array.from(keys8, (key) => source[key]);
+function permute(source, keys9) {
+  return Array.from(keys9, (key) => source[key]);
 }
 
 // node_modules/d3-array/src/sort.js
@@ -4846,41 +4955,41 @@ function thresholdSturges(values3) {
 }
 
 // node_modules/d3-array/src/max.js
-function max(values3, valueof) {
-  let max2;
+function max3(values3, valueof) {
+  let max4;
   if (valueof === undefined) {
     for (const value2 of values3) {
-      if (value2 != null && (max2 < value2 || max2 === undefined && value2 >= value2)) {
-        max2 = value2;
+      if (value2 != null && (max4 < value2 || max4 === undefined && value2 >= value2)) {
+        max4 = value2;
       }
     }
   } else {
     let index = -1;
     for (let value2 of values3) {
-      if ((value2 = valueof(value2, ++index, values3)) != null && (max2 < value2 || max2 === undefined && value2 >= value2)) {
-        max2 = value2;
+      if ((value2 = valueof(value2, ++index, values3)) != null && (max4 < value2 || max4 === undefined && value2 >= value2)) {
+        max4 = value2;
       }
     }
   }
-  return max2;
+  return max4;
 }
 
 // node_modules/d3-array/src/maxIndex.js
 function maxIndex(values3, valueof) {
-  let max2;
+  let max4;
   let maxIndex2 = -1;
   let index = -1;
   if (valueof === undefined) {
     for (const value2 of values3) {
       ++index;
-      if (value2 != null && (max2 < value2 || max2 === undefined && value2 >= value2)) {
-        max2 = value2, maxIndex2 = index;
+      if (value2 != null && (max4 < value2 || max4 === undefined && value2 >= value2)) {
+        max4 = value2, maxIndex2 = index;
       }
     }
   } else {
     for (let value2 of values3) {
-      if ((value2 = valueof(value2, ++index, values3)) != null && (max2 < value2 || max2 === undefined && value2 >= value2)) {
-        max2 = value2, maxIndex2 = index;
+      if ((value2 = valueof(value2, ++index, values3)) != null && (max4 < value2 || max4 === undefined && value2 >= value2)) {
+        max4 = value2, maxIndex2 = index;
       }
     }
   }
@@ -4980,27 +5089,27 @@ function quickselect(array, k, left = 0, right = Infinity, compare) {
 
 // node_modules/d3-array/src/greatest.js
 function greatest(values3, compare = ascending) {
-  let max2;
+  let max4;
   let defined = false;
   if (compare.length === 1) {
     let maxValue;
     for (const element of values3) {
       const value2 = compare(element);
       if (defined ? ascending(value2, maxValue) > 0 : ascending(value2, value2) === 0) {
-        max2 = element;
+        max4 = element;
         maxValue = value2;
         defined = true;
       }
     }
   } else {
     for (const value2 of values3) {
-      if (defined ? compare(value2, max2) > 0 : compare(value2, value2) === 0) {
-        max2 = value2;
+      if (defined ? compare(value2, max4) > 0 : compare(value2, value2) === 0) {
+        max4 = value2;
         defined = true;
       }
     }
   }
-  return max2;
+  return max4;
 }
 
 // node_modules/d3-array/src/quantile.js
@@ -5021,20 +5130,20 @@ function quantile(values3, p, valueof) {
   if (p <= 0 || n < 2)
     return min(values3);
   if (p >= 1)
-    return max(values3);
-  var n, i = (n - 1) * p, i0 = Math.floor(i), value0 = max(quickselect(values3, i0).subarray(0, i0 + 1)), value1 = min(values3.subarray(i0 + 1));
+    return max3(values3);
+  var n, i = (n - 1) * p, i0 = Math.floor(i), value0 = max3(quickselect(values3, i0).subarray(0, i0 + 1)), value1 = min(values3.subarray(i0 + 1));
   return value0 + (value1 - value0) * (i - i0);
 }
 
 // node_modules/d3-array/src/threshold/freedmanDiaconis.js
-function thresholdFreedmanDiaconis(values3, min3, max3) {
+function thresholdFreedmanDiaconis(values3, min3, max5) {
   const c = count(values3), d = quantile(values3, 0.75) - quantile(values3, 0.25);
-  return c && d ? Math.ceil((max3 - min3) / (2 * d * Math.pow(c, -1 / 3))) : 1;
+  return c && d ? Math.ceil((max5 - min3) / (2 * d * Math.pow(c, -1 / 3))) : 1;
 }
 // node_modules/d3-array/src/threshold/scott.js
-function thresholdScott(values3, min3, max3) {
+function thresholdScott(values3, min3, max5) {
   const c = count(values3), d = deviation(values3);
-  return c && d ? Math.ceil((max3 - min3) * Math.cbrt(c) / (3.49 * d)) : 1;
+  return c && d ? Math.ceil((max5 - min3) * Math.cbrt(c) / (3.49 * d)) : 1;
 }
 // node_modules/d3-array/src/mean.js
 function mean4(values3, valueof) {
@@ -5459,10 +5568,10 @@ var children = function() {
 };
 var childrenFilter = function(match) {
   return function() {
-    return filter2.call(this.children, match);
+    return filter3.call(this.children, match);
   };
 };
-var filter2 = Array.prototype.filter;
+var filter3 = Array.prototype.filter;
 function selectChildren_default(match) {
   return this.selectAll(match == null ? children : childrenFilter(typeof match === "function" ? match : childMatcher(match)));
 }
@@ -6282,15 +6391,15 @@ function hslConvert(o) {
   if (o instanceof Hsl)
     return o;
   o = o.rgb();
-  var r = o.r / 255, g = o.g / 255, b = o.b / 255, min3 = Math.min(r, g, b), max3 = Math.max(r, g, b), h = NaN, s = max3 - min3, l = (max3 + min3) / 2;
+  var r = o.r / 255, g = o.g / 255, b = o.b / 255, min3 = Math.min(r, g, b), max5 = Math.max(r, g, b), h = NaN, s = max5 - min3, l = (max5 + min3) / 2;
   if (s) {
-    if (r === max3)
+    if (r === max5)
       h = (g - b) / s + (g < b) * 6;
-    else if (g === max3)
+    else if (g === max5)
       h = (b - r) / s + 2;
     else
       h = (r - g) / s + 4;
-    s /= l < 0.5 ? max3 + min3 : 2 - max3 - min3;
+    s /= l < 0.5 ? max5 + min3 : 2 - max5 - min3;
     h *= 60;
   } else {
     s = l > 0 && l < 1 ? 0 : h;
@@ -7833,8 +7942,8 @@ function transition_default() {
 // node_modules/d3-transition/src/transition/end.js
 function end_default() {
   var on0, on1, that = this, id = that._id, size2 = that.size();
-  return new Promise(function(resolve, reject) {
-    var cancel = { value: reject }, end = { value: function() {
+  return new Promise(function(resolve, reject4) {
+    var cancel = { value: reject4 }, end = { value: function() {
       if (--size2 === 0)
         resolve();
     } };
@@ -8335,9 +8444,9 @@ function precisionPrefix_default(step, value5) {
   return Math.max(0, Math.max(-8, Math.min(8, Math.floor(exponent_default(value5) / 3))) * 3 - exponent_default(Math.abs(step)));
 }
 // node_modules/d3-format/src/precisionRound.js
-function precisionRound_default(step, max3) {
-  step = Math.abs(step), max3 = Math.abs(max3) - step;
-  return Math.max(0, exponent_default(max3) - exponent_default(step)) + 1;
+function precisionRound_default(step, max5) {
+  step = Math.abs(step), max5 = Math.abs(max5) - step;
+  return Math.max(0, exponent_default(max5) - exponent_default(step)) + 1;
 }
 // node_modules/d3-geo/src/math.js
 function acos(x) {
@@ -11165,7 +11274,7 @@ var utcDate = function(d) {
 var newDate = function(y, m, d) {
   return { y, m, d, H: 0, M: 0, S: 0, L: 0 };
 };
-var pad = function(value5, fill, width) {
+var pad3 = function(value5, fill, width) {
   var sign2 = value5 < 0 ? "-" : "", string3 = (sign2 ? -value5 : value5) + "", length2 = string3.length;
   return sign2 + (length2 < width ? new Array(width - length2 + 1).join(fill) + string3 : string3);
 };
@@ -11259,38 +11368,38 @@ var parseUnixTimestampSeconds = function(d, string3, i) {
   return n ? (d.s = +n[0], i + n[0].length) : -1;
 };
 var formatDayOfMonth = function(d, p) {
-  return pad(d.getDate(), p, 2);
+  return pad3(d.getDate(), p, 2);
 };
 var formatHour24 = function(d, p) {
-  return pad(d.getHours(), p, 2);
+  return pad3(d.getHours(), p, 2);
 };
 var formatHour12 = function(d, p) {
-  return pad(d.getHours() % 12 || 12, p, 2);
+  return pad3(d.getHours() % 12 || 12, p, 2);
 };
 var formatDayOfYear = function(d, p) {
-  return pad(1 + timeDay.count(timeYear(d), d), p, 3);
+  return pad3(1 + timeDay.count(timeYear(d), d), p, 3);
 };
 var formatMilliseconds = function(d, p) {
-  return pad(d.getMilliseconds(), p, 3);
+  return pad3(d.getMilliseconds(), p, 3);
 };
 var formatMicroseconds = function(d, p) {
   return formatMilliseconds(d, p) + "000";
 };
 var formatMonthNumber = function(d, p) {
-  return pad(d.getMonth() + 1, p, 2);
+  return pad3(d.getMonth() + 1, p, 2);
 };
 var formatMinutes = function(d, p) {
-  return pad(d.getMinutes(), p, 2);
+  return pad3(d.getMinutes(), p, 2);
 };
 var formatSeconds = function(d, p) {
-  return pad(d.getSeconds(), p, 2);
+  return pad3(d.getSeconds(), p, 2);
 };
 var formatWeekdayNumberMonday = function(d) {
   var day2 = d.getDay();
   return day2 === 0 ? 7 : day2;
 };
 var formatWeekNumberSunday = function(d, p) {
-  return pad(timeSunday.count(timeYear(d) - 1, d), p, 2);
+  return pad3(timeSunday.count(timeYear(d) - 1, d), p, 2);
 };
 var dISO = function(d) {
   var day2 = d.getDay();
@@ -11298,66 +11407,66 @@ var dISO = function(d) {
 };
 var formatWeekNumberISO = function(d, p) {
   d = dISO(d);
-  return pad(timeThursday.count(timeYear(d), d) + (timeYear(d).getDay() === 4), p, 2);
+  return pad3(timeThursday.count(timeYear(d), d) + (timeYear(d).getDay() === 4), p, 2);
 };
 var formatWeekdayNumberSunday = function(d) {
   return d.getDay();
 };
 var formatWeekNumberMonday = function(d, p) {
-  return pad(timeMonday.count(timeYear(d) - 1, d), p, 2);
+  return pad3(timeMonday.count(timeYear(d) - 1, d), p, 2);
 };
 var formatYear = function(d, p) {
-  return pad(d.getFullYear() % 100, p, 2);
+  return pad3(d.getFullYear() % 100, p, 2);
 };
 var formatYearISO = function(d, p) {
   d = dISO(d);
-  return pad(d.getFullYear() % 100, p, 2);
+  return pad3(d.getFullYear() % 100, p, 2);
 };
 var formatFullYear = function(d, p) {
-  return pad(d.getFullYear() % 1e4, p, 4);
+  return pad3(d.getFullYear() % 1e4, p, 4);
 };
 var formatFullYearISO = function(d, p) {
   var day2 = d.getDay();
   d = day2 >= 4 || day2 === 0 ? timeThursday(d) : timeThursday.ceil(d);
-  return pad(d.getFullYear() % 1e4, p, 4);
+  return pad3(d.getFullYear() % 1e4, p, 4);
 };
 var formatZone = function(d) {
   var z = d.getTimezoneOffset();
-  return (z > 0 ? "-" : (z *= -1, "+")) + pad(z / 60 | 0, "0", 2) + pad(z % 60, "0", 2);
+  return (z > 0 ? "-" : (z *= -1, "+")) + pad3(z / 60 | 0, "0", 2) + pad3(z % 60, "0", 2);
 };
 var formatUTCDayOfMonth = function(d, p) {
-  return pad(d.getUTCDate(), p, 2);
+  return pad3(d.getUTCDate(), p, 2);
 };
 var formatUTCHour24 = function(d, p) {
-  return pad(d.getUTCHours(), p, 2);
+  return pad3(d.getUTCHours(), p, 2);
 };
 var formatUTCHour12 = function(d, p) {
-  return pad(d.getUTCHours() % 12 || 12, p, 2);
+  return pad3(d.getUTCHours() % 12 || 12, p, 2);
 };
 var formatUTCDayOfYear = function(d, p) {
-  return pad(1 + utcDay.count(utcYear(d), d), p, 3);
+  return pad3(1 + utcDay.count(utcYear(d), d), p, 3);
 };
 var formatUTCMilliseconds = function(d, p) {
-  return pad(d.getUTCMilliseconds(), p, 3);
+  return pad3(d.getUTCMilliseconds(), p, 3);
 };
 var formatUTCMicroseconds = function(d, p) {
   return formatUTCMilliseconds(d, p) + "000";
 };
 var formatUTCMonthNumber = function(d, p) {
-  return pad(d.getUTCMonth() + 1, p, 2);
+  return pad3(d.getUTCMonth() + 1, p, 2);
 };
 var formatUTCMinutes = function(d, p) {
-  return pad(d.getUTCMinutes(), p, 2);
+  return pad3(d.getUTCMinutes(), p, 2);
 };
 var formatUTCSeconds = function(d, p) {
-  return pad(d.getUTCSeconds(), p, 2);
+  return pad3(d.getUTCSeconds(), p, 2);
 };
 var formatUTCWeekdayNumberMonday = function(d) {
   var dow = d.getUTCDay();
   return dow === 0 ? 7 : dow;
 };
 var formatUTCWeekNumberSunday = function(d, p) {
-  return pad(utcSunday.count(utcYear(d) - 1, d), p, 2);
+  return pad3(utcSunday.count(utcYear(d) - 1, d), p, 2);
 };
 var UTCdISO = function(d) {
   var day2 = d.getUTCDay();
@@ -11365,28 +11474,28 @@ var UTCdISO = function(d) {
 };
 var formatUTCWeekNumberISO = function(d, p) {
   d = UTCdISO(d);
-  return pad(utcThursday.count(utcYear(d), d) + (utcYear(d).getUTCDay() === 4), p, 2);
+  return pad3(utcThursday.count(utcYear(d), d) + (utcYear(d).getUTCDay() === 4), p, 2);
 };
 var formatUTCWeekdayNumberSunday = function(d) {
   return d.getUTCDay();
 };
 var formatUTCWeekNumberMonday = function(d, p) {
-  return pad(utcMonday.count(utcYear(d) - 1, d), p, 2);
+  return pad3(utcMonday.count(utcYear(d) - 1, d), p, 2);
 };
 var formatUTCYear = function(d, p) {
-  return pad(d.getUTCFullYear() % 100, p, 2);
+  return pad3(d.getUTCFullYear() % 100, p, 2);
 };
 var formatUTCYearISO = function(d, p) {
   d = UTCdISO(d);
-  return pad(d.getUTCFullYear() % 100, p, 2);
+  return pad3(d.getUTCFullYear() % 100, p, 2);
 };
 var formatUTCFullYear = function(d, p) {
-  return pad(d.getUTCFullYear() % 1e4, p, 4);
+  return pad3(d.getUTCFullYear() % 1e4, p, 4);
 };
 var formatUTCFullYearISO = function(d, p) {
   var day2 = d.getUTCDay();
   d = day2 >= 4 || day2 === 0 ? utcThursday(d) : utcThursday.ceil(d);
-  return pad(d.getUTCFullYear() % 1e4, p, 4);
+  return pad3(d.getUTCFullYear() % 1e4, p, 4);
 };
 var formatUTCZone = function() {
   return "+0000";
@@ -11513,18 +11622,18 @@ function formatLocale(locale3) {
   utcFormats.c = newFormat(locale_dateTime, utcFormats);
   function newFormat(specifier, formats2) {
     return function(date2) {
-      var string3 = [], i = -1, j = 0, n = specifier.length, c, pad2, format2;
+      var string3 = [], i = -1, j = 0, n = specifier.length, c, pad4, format2;
       if (!(date2 instanceof Date))
         date2 = new Date(+date2);
       while (++i < n) {
         if (specifier.charCodeAt(i) === 37) {
           string3.push(specifier.slice(j, i));
-          if ((pad2 = pads[c = specifier.charAt(++i)]) != null)
+          if ((pad4 = pads[c = specifier.charAt(++i)]) != null)
             c = specifier.charAt(++i);
           else
-            pad2 = c === "e" ? " " : "0";
+            pad4 = c === "e" ? " " : "0";
           if (format2 = formats2[c])
-            c = format2(date2, pad2);
+            c = format2(date2, pad4);
           string3.push(c);
           j = i + 1;
         }
@@ -13280,9 +13389,9 @@ function negative(x2) {
 
 // node_modules/isoformat/src/format.js
 var formatYear2 = function(year2) {
-  return year2 < 0 ? `-${pad2(-year2, 6)}` : year2 > 9999 ? `+${pad2(year2, 6)}` : pad2(year2, 4);
+  return year2 < 0 ? `-${pad4(-year2, 6)}` : year2 > 9999 ? `+${pad4(year2, 6)}` : pad4(year2, 4);
 };
-var pad2 = function(value5, width) {
+var pad4 = function(value5, width) {
   return `${value5}`.padStart(width, "0");
 };
 function format2(date3, fallback) {
@@ -13294,7 +13403,7 @@ function format2(date3, fallback) {
   const minutes = date3.getUTCMinutes();
   const seconds2 = date3.getUTCSeconds();
   const milliseconds2 = date3.getUTCMilliseconds();
-  return `${formatYear2(date3.getUTCFullYear(), 4)}-${pad2(date3.getUTCMonth() + 1, 2)}-${pad2(date3.getUTCDate(), 2)}${hours || minutes || seconds2 || milliseconds2 ? `T${pad2(hours, 2)}:${pad2(minutes, 2)}${seconds2 || milliseconds2 ? `:${pad2(seconds2, 2)}${milliseconds2 ? `.${pad2(milliseconds2, 3)}` : ``}` : ``}Z` : ``}`;
+  return `${formatYear2(date3.getUTCFullYear(), 4)}-${pad4(date3.getUTCMonth() + 1, 2)}-${pad4(date3.getUTCDate(), 2)}${hours || minutes || seconds2 || milliseconds2 ? `T${pad4(hours, 2)}:${pad4(minutes, 2)}${seconds2 || milliseconds2 ? `:${pad4(seconds2, 2)}${milliseconds2 ? `.${pad4(milliseconds2, 3)}` : ``}` : ``}Z` : ``}`;
 }
 // node_modules/isoformat/src/parse.js
 var re2 = /^(?:[-+]\d{2})?\d{4}(?:-\d{2}(?:-\d{2})?)?(?:T\d{2}:\d{2}(?::\d{2}(?:\.\d{3})?)?(?:Z|[-+]\d{2}:?\d{2})?)?$/;
@@ -14096,7 +14205,7 @@ function maybeReduce(reduce3, value5, fallback = invalidReduce) {
     case "min-index":
       return reduceAccessor(minIndex);
     case "max":
-      return reduceAccessor(max);
+      return reduceAccessor(max3);
     case "max-index":
       return reduceAccessor(maxIndex);
     case "mean":
@@ -14205,7 +14314,7 @@ var reduceDistinct = {
 var reduceSum = reduceAccessor(sum3);
 
 // node_modules/@observablehq/plot/src/channel.js
-function createChannel(data2, { scale, type: type5, value: value5, filter: filter5, hint }, name) {
+function createChannel(data2, { scale, type: type5, value: value5, filter: filter6, hint }, name) {
   if (hint === undefined && typeof value5?.transform === "function")
     hint = value5.hint;
   return inferChannelScale(name, {
@@ -14213,7 +14322,7 @@ function createChannel(data2, { scale, type: type5, value: value5, filter: filte
     type: type5,
     value: valueof(data2, value5),
     label: labelof(value5),
-    filter: filter5,
+    filter: filter6,
     hint
   });
 }
@@ -14365,10 +14474,10 @@ function getSource(channels, key) {
 // node_modules/@observablehq/plot/src/memoize.js
 function memoize1(compute2) {
   let cacheValue, cacheKeys;
-  return (...keys8) => {
-    if (cacheKeys?.length !== keys8.length || cacheKeys.some((k2, i) => k2 !== keys8[i])) {
-      cacheKeys = keys8;
-      cacheValue = compute2(...keys8);
+  return (...keys9) => {
+    if (cacheKeys?.length !== keys9.length || cacheKeys.some((k2, i) => k2 !== keys9[i])) {
+      cacheKeys = keys9;
+      cacheValue = compute2(...keys9);
     }
     return cacheValue;
   };
@@ -15245,8 +15354,8 @@ function createScaleQ(key, scale, channels, {
     scale.interpolate(interpolate3);
   }
   if (zero3) {
-    const [min4, max3] = extent(domain);
-    if (min4 > 0 || max3 < 0) {
+    const [min4, max5] = extent(domain);
+    if (min4 > 0 || max5 < 0) {
       domain = slice2(domain);
       if (orderof(domain) !== Math.sign(min4))
         domain[domain.length - 1] = 0;
@@ -15310,18 +15419,18 @@ function createScaleQuantize(key, channels, {
   interpolate: interpolate3,
   reverse: reverse2
 }) {
-  const [min4, max3] = extent(domain);
+  const [min4, max5] = extent(domain);
   let thresholds;
   if (range5 === undefined) {
-    thresholds = ticks(min4, max3, n);
+    thresholds = ticks(min4, max5, n);
     if (thresholds[0] <= min4)
       thresholds.splice(0, 1);
-    if (thresholds[thresholds.length - 1] >= max3)
+    if (thresholds[thresholds.length - 1] >= max5)
       thresholds.pop();
     n = thresholds.length + 1;
     range5 = interpolate3 !== undefined ? quantize_default(interpolate3, n) : registry.get(key) === color9 ? ordinalRange(scheme28, n) : undefined;
   } else {
-    thresholds = quantize_default(number_default(min4, max3), n + 1).slice(1, -1);
+    thresholds = quantize_default(number_default(min4, max5), n + 1).slice(1, -1);
     if (min4 instanceof Date)
       thresholds = thresholds.map((x2) => new Date(x2));
   }
@@ -15364,7 +15473,7 @@ function createScaleIdentity() {
 function inferDomain(channels, f = finite) {
   return channels.length ? [
     min(channels, ({ value: value5 }) => value5 === undefined ? value5 : min(value5, f)),
-    max(channels, ({ value: value5 }) => value5 === undefined ? value5 : max(value5, f))
+    max3(channels, ({ value: value5 }) => value5 === undefined ? value5 : max3(value5, f))
   ] : [0, 1];
 }
 var inferAutoDomain = function(key, channels) {
@@ -15372,7 +15481,7 @@ var inferAutoDomain = function(key, channels) {
   return (type5 === radius || type5 === opacity || type5 === length2 ? inferZeroDomain : inferDomain)(channels);
 };
 var inferZeroDomain = function(channels) {
-  return [0, channels.length ? max(channels, ({ value: value5 }) => value5 === undefined ? value5 : max(value5, finite)) : 1];
+  return [0, channels.length ? max3(channels, ({ value: value5 }) => value5 === undefined ? value5 : max3(value5, finite)) : 1];
 };
 var inferRadialRange = function(channels, domain) {
   const hint = channels.find(({ radius: radius2 }) => radius2 !== undefined);
@@ -15380,13 +15489,13 @@ var inferRadialRange = function(channels, domain) {
     return [0, hint.radius];
   const h25 = quantile(channels, 0.5, ({ value: value5 }) => value5 === undefined ? NaN : quantile(value5, 0.25, positive));
   const range5 = domain.map((d) => 3 * Math.sqrt(d / h25));
-  const k2 = 30 / max(range5);
+  const k2 = 30 / max3(range5);
   return k2 < 1 ? range5.map((r) => r * k2) : range5;
 };
 var inferLengthRange = function(channels, domain) {
   const h50 = median3(channels, ({ value: value5 }) => value5 === undefined ? NaN : median3(value5, Math.abs));
   const range5 = domain.map((d) => 12 * d / h50);
-  const k2 = 60 / max(range5);
+  const k2 = 60 / max3(range5);
   return k2 < 1 ? range5.map((r) => r * k2) : range5;
 };
 var inferLogDomain = function(channels) {
@@ -15441,13 +15550,13 @@ var createScaleD = function(key, scale, transform5, channels, {
 }) {
   pivot = +pivot;
   domain = arrayify2(domain);
-  let [min4, max3] = domain;
+  let [min4, max5] = domain;
   if (domain.length > 2)
     warn(`Warning: the diverging ${key} scale domain contains extra elements.`);
-  if (descending(min4, max3) < 0)
-    [min4, max3] = [max3, min4], reverse2 = !reverse2;
+  if (descending(min4, max5) < 0)
+    [min4, max5] = [max5, min4], reverse2 = !reverse2;
   min4 = Math.min(min4, pivot);
-  max3 = Math.max(max3, pivot);
+  max5 = Math.max(max5, pivot);
   if (typeof interpolate3 !== "function") {
     interpolate3 = maybeInterpolator(interpolate3);
   }
@@ -15459,18 +15568,18 @@ var createScaleD = function(key, scale, transform5, channels, {
   if (symmetric) {
     const mid2 = transform5.apply(pivot);
     const mindelta = mid2 - transform5.apply(min4);
-    const maxdelta = transform5.apply(max3) - mid2;
+    const maxdelta = transform5.apply(max5) - mid2;
     if (mindelta < maxdelta)
       min4 = transform5.invert(mid2 - maxdelta);
     else if (mindelta > maxdelta)
-      max3 = transform5.invert(mid2 + mindelta);
+      max5 = transform5.invert(mid2 + mindelta);
   }
-  scale.domain([min4, pivot, max3]).unknown(unknown).interpolator(interpolate3);
+  scale.domain([min4, pivot, max5]).unknown(unknown).interpolator(interpolate3);
   if (clamp)
     scale.clamp(clamp);
   if (nice4)
     scale.nice(nice4);
-  return { type: type5, domain: [min4, max3], pivot, interpolate: interpolate3, scale };
+  return { type: type5, domain: [min4, max5], pivot, interpolate: interpolate3, scale };
 };
 function createScaleDiverging(key, channels, options11) {
   return createScaleD(key, diverging(), transformIdentity, channels, options11);
@@ -15626,8 +15735,8 @@ var inferDomain2 = function(channels, interval10, key) {
       values4.add(v);
   }
   if (interval10 !== undefined) {
-    const [min4, max3] = extent(values4).map(interval10.floor, interval10);
-    return interval10.range(min4, interval10.offset(max3));
+    const [min4, max5] = extent(values4).map(interval10.floor, interval10);
+    return interval10.range(min4, interval10.offset(max5));
   }
   if (values4.size > 1e4 && registry.get(key) === position) {
     throw new Error(`implicit ordinal domain of ${key} scale has more than 10,000 values`);
@@ -16181,8 +16290,8 @@ var aspectRatioLength = function(k2, scale) {
     default:
       throw new Error(`unsupported ${k2} scale for aspectRatio: ${type5}`);
   }
-  const [min4, max3] = extent(domain);
-  return Math.abs(transform5(max3) - transform5(min4));
+  const [min4, max5] = extent(domain);
+  return Math.abs(transform5(max5) - transform5(min4));
 };
 
 // node_modules/@observablehq/plot/src/facet.js
@@ -16449,10 +16558,10 @@ class Mark {
   }
   filter(index2, channels, values4) {
     for (const name in channels) {
-      const { filter: filter5 = defined } = channels[name];
-      if (filter5 !== null) {
+      const { filter: filter6 = defined } = channels[name];
+      if (filter6 !== null) {
         const value5 = values4[name];
-        index2 = index2.filter((i) => filter5(value5[i]));
+        index2 = index2.filter((i) => filter6(value5[i]));
       }
     }
     return index2;
@@ -17883,11 +17992,11 @@ var axisMark = function(mark6, k2, ariaLabel, data2, options24, initialize) {
         } else {
           interval12 = maybeRangeInterval(interval12 === undefined ? scale.interval : interval12, scale.type);
           if (interval12 !== undefined) {
-            const [min4, max3] = extent(scale.domain());
-            data3 = interval12.range(min4, interval12.offset(interval12.floor(max3)));
+            const [min4, max5] = extent(scale.domain());
+            data3 = interval12.range(min4, interval12.offset(interval12.floor(max5)));
           } else {
-            const [min4, max3] = extent(scale.range());
-            ticks2 = (max3 - min4) / (tickSpacing === undefined ? k2 === "x" ? 80 : 35 : tickSpacing);
+            const [min4, max5] = extent(scale.range());
+            ticks2 = (max5 - min4) / (tickSpacing === undefined ? k2 === "x" ? 80 : 35 : tickSpacing);
             data3 = scale.ticks(ticks2);
           }
         }
@@ -18736,12 +18845,12 @@ var inferChannelScales = function(channels) {
     inferChannelScale(name, channels[name]);
   }
 };
-var addScaleChannels = function(channelsByScale, stateByMark, options31, filter5 = yes) {
+var addScaleChannels = function(channelsByScale, stateByMark, options31, filter6 = yes) {
   for (const { channels } of stateByMark.values()) {
     for (const name in channels) {
       const channel4 = channels[name];
       const { scale } = channel4;
-      if (scale != null && filter5(scale)) {
+      if (scale != null && filter6(scale)) {
         if (scale === "projection") {
           if (!hasProjection(options31)) {
             const gx = options31.x?.domain === undefined;
@@ -19090,7 +19199,7 @@ function maybeDenseIntervalX(options32 = {}) {
 }
 var binn = function(bx, by, gx, gy, {
   data: reduceData = reduceIdentity,
-  filter: filter5 = reduceCount,
+  filter: filter6 = reduceCount,
   sort: sort5,
   reverse: reverse2,
   ...outputs
@@ -19100,7 +19209,7 @@ var binn = function(bx, by, gx, gy, {
   outputs = maybeBinOutputs(outputs, inputs);
   reduceData = maybeBinReduce(reduceData, identity13);
   sort5 = sort5 == null ? undefined : maybeBinOutput("sort", sort5, inputs);
-  filter5 = filter5 == null ? undefined : maybeBinEvaluator("filter", filter5, inputs);
+  filter6 = filter6 == null ? undefined : maybeBinEvaluator("filter", filter6, inputs);
   if (gx != null && hasOutput(outputs, "x", "x1", "x2"))
     gx = null;
   if (gy != null && hasOutput(outputs, "y", "y1", "y2"))
@@ -19158,20 +19267,20 @@ var binn = function(bx, by, gx, gy, {
         o.initialize(data2);
       if (sort5)
         sort5.initialize(data2);
-      if (filter5)
-        filter5.initialize(data2);
+      if (filter6)
+        filter6.initialize(data2);
       for (const facet3 of facets) {
         const groupFacet = [];
         for (const o of outputs)
           o.scope("facet", facet3);
         if (sort5)
           sort5.scope("facet", facet3);
-        if (filter5)
-          filter5.scope("facet", facet3);
+        if (filter6)
+          filter6.scope("facet", facet3);
         for (const [f, I] of maybeGroup(facet3, G)) {
           for (const [k3, g] of maybeGroup(I, K2)) {
             for (const [b, extent2] of bin(g)) {
-              if (filter5 && !filter5.reduce(b, extent2))
+              if (filter6 && !filter6.reduce(b, extent2))
                 continue;
               groupFacet.push(i++);
               groupData.push(reduceData.reduceIndex(b, data2, extent2));
@@ -19232,32 +19341,32 @@ var maybeBin = function(options32) {
     let T;
     if (isTemporal(V) || isTimeThresholds(thresholds)) {
       V = map6(V, coerceDate, Float64Array);
-      let [min4, max3] = typeof domain === "function" ? domain(V) : domain;
-      let t = typeof thresholds === "function" && !isInterval(thresholds) ? thresholds(V, min4, max3) : thresholds;
+      let [min4, max5] = typeof domain === "function" ? domain(V) : domain;
+      let t = typeof thresholds === "function" && !isInterval(thresholds) ? thresholds(V, min4, max5) : thresholds;
       if (typeof t === "number")
-        t = utcTickInterval(min4, max3, t);
+        t = utcTickInterval(min4, max5, t);
       if (isInterval(t)) {
         if (domain === extent) {
           min4 = t.floor(min4);
-          max3 = t.offset(t.floor(max3));
+          max5 = t.offset(t.floor(max5));
         }
-        t = t.range(min4, t.offset(max3));
+        t = t.range(min4, t.offset(max5));
       }
       T = t;
     } else {
       V = coerceNumbers(V);
-      let [min4, max3] = typeof domain === "function" ? domain(V) : domain;
-      let t = typeof thresholds === "function" && !isInterval(thresholds) ? thresholds(V, min4, max3) : thresholds;
+      let [min4, max5] = typeof domain === "function" ? domain(V) : domain;
+      let t = typeof thresholds === "function" && !isInterval(thresholds) ? thresholds(V, min4, max5) : thresholds;
       if (typeof t === "number") {
         if (domain === extent) {
-          let step = tickIncrement(min4, max3, t);
+          let step = tickIncrement(min4, max5, t);
           if (isFinite(step)) {
             if (step > 0) {
               let r0 = Math.round(min4 / step);
-              let r1 = Math.round(max3 / step);
+              let r1 = Math.round(max5 / step);
               if (!(r0 * step <= min4))
                 --r0;
-              if (!(r1 * step > max3))
+              if (!(r1 * step > max5))
                 ++r1;
               let n = r1 - r0 + 1;
               t = new Float64Array(n);
@@ -19266,10 +19375,10 @@ var maybeBin = function(options32) {
             } else if (step < 0) {
               step = -step;
               let r0 = Math.round(min4 * step);
-              let r1 = Math.round(max3 * step);
+              let r1 = Math.round(max5 * step);
               if (!(r0 / step <= min4))
                 --r0;
-              if (!(r1 / step > max3))
+              if (!(r1 / step > max5))
                 ++r1;
               let n = r1 - r0 + 1;
               t = new Float64Array(n);
@@ -19282,14 +19391,14 @@ var maybeBin = function(options32) {
             t = [min4];
           }
         } else {
-          t = ticks(min4, max3, t);
+          t = ticks(min4, max5, t);
         }
       } else if (isInterval(t)) {
         if (domain === extent) {
           min4 = t.floor(min4);
-          max3 = t.offset(t.floor(max3));
+          max5 = t.offset(t.floor(max5));
         }
-        t = t.range(min4, t.offset(max3));
+        t = t.range(min4, t.offset(max5));
       }
       T = t;
     }
@@ -19353,8 +19462,8 @@ var maybeBinReduceFallback = function(reduce3) {
   }
   throw new Error(`invalid bin reduce: ${reduce3}`);
 };
-var thresholdAuto = function(values4, min4, max3) {
-  return Math.min(200, thresholdScott(values4, min4, max3));
+var thresholdAuto = function(values4, min4, max5) {
+  return Math.min(200, thresholdScott(values4, min4, max5));
 };
 var isTimeThresholds = function(t) {
   return isTimeInterval(t) || isIterable(t) && isTemporal(t);
@@ -19549,15 +19658,15 @@ var maybeOffset = function(offset2) {
   throw new Error(`unknown offset: ${offset2}`);
 };
 var extent2 = function(stack2, Y22) {
-  let min4 = 0, max3 = 0;
+  let min4 = 0, max5 = 0;
   for (const i of stack2) {
     const y2 = Y22[i];
     if (y2 < min4)
       min4 = y2;
-    if (y2 > max3)
-      max3 = y2;
+    if (y2 > max5)
+      max5 = y2;
   }
-  return [min4, max3];
+  return [min4, max5];
 };
 var offsetExpand = function(facetstacks, Y12, Y22) {
   for (const stacks of facetstacks) {
@@ -19626,7 +19735,7 @@ var offsetCenterFacets = function(facetstacks, Y12, Y22) {
   if (n === 1)
     return;
   const facets = facetstacks.map((stacks) => stacks.flat());
-  const m = facets.map((I) => (min(I, (i) => Y12[i]) + max(I, (i) => Y22[i])) / 2);
+  const m = facets.map((I) => (min(I, (i) => Y12[i]) + max3(I, (i) => Y22[i])) / 2);
   const m0 = min(m);
   for (let j = 0;j < n; j++) {
     const p = m0 - m[j];
@@ -19948,6 +20057,11 @@ var tornadoplot = function(data2) {
     marks: [
       barX(data2, {
         y: "variable",
+        sort: { y: {
+          value: "data",
+          reverse: true,
+          reduce: (d) => reduce_default(max_default, (-Infinity), map_default((x2) => Math.abs(x2.value[2] - x2.value[0]), d))
+        } },
         fillOpacity: 0.8,
         fill: (d) => Math.abs(d.value[2] - d.value[0]),
         x1: (d) => Math.min(...d.value),
@@ -21374,14 +21488,14 @@ class Random {
   nextBoolean() {
     return unsafeUniformIntDistribution(0, 1, this.internalRng) == 1;
   }
-  nextInt(min4, max3) {
-    return unsafeUniformIntDistribution(min4 == null ? Random.MIN_INT : min4, max3 == null ? Random.MAX_INT : max3, this.internalRng);
+  nextInt(min4, max5) {
+    return unsafeUniformIntDistribution(min4 == null ? Random.MIN_INT : min4, max5 == null ? Random.MAX_INT : max5, this.internalRng);
   }
-  nextBigInt(min4, max3) {
-    return unsafeUniformBigIntDistribution(min4, max3, this.internalRng);
+  nextBigInt(min4, max5) {
+    return unsafeUniformBigIntDistribution(min4, max5, this.internalRng);
   }
-  nextArrayInt(min4, max3) {
-    return unsafeUniformArrayIntDistribution(min4, max3, this.internalRng);
+  nextArrayInt(min4, max5) {
+    return unsafeUniformArrayIntDistribution(min4, max5, this.internalRng);
   }
   nextDouble() {
     const a2 = this.next(26);
@@ -21465,22 +21579,22 @@ var sample = function(generator, params) {
 function integerLogLike(v) {
   return safeMathFloor(safeMathLog2(v) / safeMathLog2(2));
 }
-var biasNumericRange = function(min4, max3, logLike) {
-  if (min4 === max3) {
-    return [{ min: min4, max: max3 }];
+var biasNumericRange = function(min4, max5, logLike) {
+  if (min4 === max5) {
+    return [{ min: min4, max: max5 }];
   }
-  if (min4 < 0 && max3 > 0) {
+  if (min4 < 0 && max5 > 0) {
     const logMin = logLike(-min4);
-    const logMax = logLike(max3);
+    const logMax = logLike(max5);
     return [
       { min: -logMin, max: logMax },
-      { min: max3 - logMax, max: max3 },
+      { min: max5 - logMax, max: max5 },
       { min: min4, max: min4 + logMin }
     ];
   }
-  const logGap = logLike(max3 - min4);
+  const logGap = logLike(max5 - min4);
   const arbCloseToMin = { min: min4, max: min4 + logGap };
-  const arbCloseToMax = { min: max3 - logGap, max: max3 };
+  const arbCloseToMax = { min: max5 - logGap, max: max5 };
   return min4 < 0 ? [arbCloseToMax, arbCloseToMin] : [arbCloseToMin, arbCloseToMax];
 };
 var safeMathFloor = Math.floor;
@@ -21524,10 +21638,10 @@ var safeNumberIsInteger = Number.isInteger;
 var safeObjectIs = Object.is;
 
 class IntegerArbitrary extends Arbitrary {
-  constructor(min4, max3) {
+  constructor(min4, max5) {
     super();
     this.min = min4;
-    this.max = max3;
+    this.max = max5;
   }
   generate(mrng, biasFactor) {
     const range5 = this.computeGenerateRange(mrng, biasFactor);
@@ -21587,8 +21701,8 @@ class IntegerArbitrary extends Arbitrary {
 // node_modules/fast-check/lib/esm/arbitrary/integer.js
 var buildCompleteIntegerConstraints = function(constraints) {
   const min4 = constraints.min !== undefined ? constraints.min : -2147483648;
-  const max3 = constraints.max !== undefined ? constraints.max : 2147483647;
-  return { min: min4, max: max3 };
+  const max5 = constraints.max !== undefined ? constraints.max : 2147483647;
+  return { min: min4, max: max5 };
 };
 function integer(constraints = {}) {
   const fullConstraints = buildCompleteIntegerConstraints(constraints);
@@ -21683,10 +21797,10 @@ var unmapperFloatToIndex = function(value5) {
   return floatToIndex(value5);
 };
 function float(constraints = {}) {
-  const { noDefaultInfinity = false, noNaN = false, minExcluded = false, maxExcluded = false, min: min4 = noDefaultInfinity ? -MAX_VALUE_32 : safeNegativeInfinity2, max: max3 = noDefaultInfinity ? MAX_VALUE_32 : safePositiveInfinity2 } = constraints;
+  const { noDefaultInfinity = false, noNaN = false, minExcluded = false, maxExcluded = false, min: min4 = noDefaultInfinity ? -MAX_VALUE_32 : safeNegativeInfinity2, max: max5 = noDefaultInfinity ? MAX_VALUE_32 : safePositiveInfinity2 } = constraints;
   const minIndexRaw = safeFloatToIndex(min4, "min");
   const minIndex2 = minExcluded ? minIndexRaw + 1 : minIndexRaw;
-  const maxIndexRaw = safeFloatToIndex(max3, "max");
+  const maxIndexRaw = safeFloatToIndex(max5, "max");
   const maxIndex2 = maxExcluded ? maxIndexRaw - 1 : maxIndexRaw;
   if (minIndex2 > maxIndex2) {
     throw new Error("fc.float constraints.min must be smaller or equal to constraints.max");

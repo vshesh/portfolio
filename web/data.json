@@ -18,6 +18,140 @@
   ],
   "scenarios": [
     {
+      "name": "New Scenario",
+      "id": "New-Scenario--jeswcnh",
+      "description": "",
+      "idea": "New-Idea--liht5at",
+      "opportunity": {
+        "inputs": {
+          "price": {
+            "name": "price",
+            "description": "",
+            "rationales": {
+              "low": "",
+              "high": ""
+            },
+            "estimate": {
+              "alpha": 0.1,
+              "low": 0,
+              "med": 90,
+              "high": 270
+            }
+          },
+          "reach": {
+            "name": "reach",
+            "description": "",
+            "rationales": {
+              "low": "",
+              "high": ""
+            },
+            "estimate": {
+              "alpha": 0.1,
+              "low": 0,
+              "med": 90,
+              "high": 300
+            }
+          }
+        },
+        "formula": "value = price * reach"
+      },
+      "roadmap": {
+        "phases": []
+      }
+    },
+    {
+      "name": "New Scenario",
+      "id": "New-Scenario--f6djzvh",
+      "description": "",
+      "idea": "New-Idea--d93v0ms",
+      "opportunity": {
+        "inputs": {
+          "price": {
+            "name": "price",
+            "description": "",
+            "rationales": {
+              "low": "",
+              "high": ""
+            },
+            "estimate": {
+              "alpha": 0.1,
+              "low": 0,
+              "med": 5,
+              "high": 10
+            }
+          },
+          "reach": {
+            "name": "reach",
+            "description": "",
+            "rationales": {
+              "low": "",
+              "high": ""
+            },
+            "estimate": {
+              "alpha": 0.1,
+              "low": 0,
+              "med": 5,
+              "high": 10
+            }
+          }
+        },
+        "formula": "value = price * reach"
+      },
+      "roadmap": {
+        "phases": [
+          {
+            "name": "Untitled Phase",
+            "description": "",
+            "proof_points": {
+              "untitled--yxffvwf": {
+                "name": "untitled--yxffvwf",
+                "description": "",
+                "estimate": 0.8,
+                "rationales": {
+                  "comments": ""
+                }
+              }
+            },
+            "cost": {
+              "inputs": {
+                "devtime": {
+                  "name": "devtime",
+                  "description": "",
+                  "rationales": {
+                    "low": "",
+                    "high": ""
+                  },
+                  "estimate": {
+                    "alpha": 0.1,
+                    "low": 0,
+                    "med": 5,
+                    "high": 10
+                  },
+                  "min": 0
+                },
+                "devcost": {
+                  "name": "devcost",
+                  "description": "",
+                  "rationales": {
+                    "low": "",
+                    "high": ""
+                  },
+                  "estimate": {
+                    "alpha": 0.1,
+                    "low": 0,
+                    "med": 5,
+                    "high": 10
+                  },
+                  "min": 0
+                }
+              },
+              "formula": "value = devtime * devcost"
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "Tool Value Estimate",
       "id": "New-Scenario--61zbhf1",
       "description": "",
@@ -36,7 +170,8 @@
               "low": 2.5,
               "med": 5,
               "high": 10,
-              "min": 1
+              "min": 1,
+              "max": null
             }
           },
           "cann": {
@@ -48,9 +183,11 @@
             },
             "estimate": {
               "alpha": 0.1,
-              "low": 0,
-              "med": 5,
-              "high": 10
+              "low": 0.1,
+              "med": 0.3,
+              "high": 0.5,
+              "max": 1,
+              "min": 0
             }
           },
           "ntools": {
@@ -62,9 +199,11 @@
             },
             "estimate": {
               "alpha": 0.1,
-              "low": 0,
-              "med": 5,
-              "high": 10
+              "low": 1,
+              "med": 3,
+              "high": 10,
+              "min": 0,
+              "max": 20
             }
           },
           "tptool": {
@@ -76,9 +215,11 @@
             },
             "estimate": {
               "alpha": 0.1,
-              "low": 0,
+              "low": 3,
               "med": 5,
-              "high": 10
+              "high": 7,
+              "max": 10,
+              "min": 0
             }
           },
           "nmakers": {
@@ -118,9 +259,11 @@
             },
             "estimate": {
               "alpha": 0.1,
-              "low": 0,
-              "med": 5,
-              "high": 10
+              "low": 50,
+              "med": 100,
+              "high": 150,
+              "min": 0,
+              "max": 200
             }
           },
           "cost": {
@@ -133,8 +276,8 @@
             "estimate": {
               "alpha": 0.1,
               "low": 0,
-              "med": 5,
-              "high": 10
+              "med": 1,
+              "high": 2
             }
           },
           "devcost": {
@@ -228,90 +371,6 @@
             }
           }
         ]
-      }
-    },
-    {
-      "name": "New Scenario",
-      "id": "New-Scenario--f6djzvh",
-      "description": "",
-      "idea": "New-Idea--d93v0ms",
-      "opportunity": {
-        "inputs": {
-          "price": {
-            "name": "price",
-            "description": "",
-            "rationales": {
-              "low": "",
-              "high": ""
-            },
-            "estimate": {
-              "alpha": 0.1,
-              "low": 0,
-              "med": 5,
-              "high": 10
-            }
-          },
-          "reach": {
-            "name": "reach",
-            "description": "",
-            "rationales": {
-              "low": "",
-              "high": ""
-            },
-            "estimate": {
-              "alpha": 0.1,
-              "low": 0,
-              "med": 5,
-              "high": 10
-            }
-          }
-        },
-        "formula": "value = price * reach"
-      },
-      "roadmap": {
-        "phases": []
-      }
-    },
-    {
-      "name": "New Scenario",
-      "id": "New-Scenario--jeswcnh",
-      "description": "",
-      "idea": "New-Idea--liht5at",
-      "opportunity": {
-        "inputs": {
-          "price": {
-            "name": "price",
-            "description": "",
-            "rationales": {
-              "low": "",
-              "high": ""
-            },
-            "estimate": {
-              "alpha": 0.1,
-              "low": 0,
-              "med": 90,
-              "high": 270
-            }
-          },
-          "reach": {
-            "name": "reach",
-            "description": "",
-            "rationales": {
-              "low": "",
-              "high": ""
-            },
-            "estimate": {
-              "alpha": 0.1,
-              "low": 0,
-              "med": 90,
-              "high": 300
-            }
-          }
-        },
-        "formula": "value = price * reach"
-      },
-      "roadmap": {
-        "phases": []
       }
     }
   ]

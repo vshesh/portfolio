@@ -20492,6 +20492,11 @@ var tornadoplot = function(data2) {
     marks: [
       barX(data2, {
         y: "variable",
+        sort: { y: {
+          value: "data",
+          reverse: true,
+          reduce: (d) => reduce_default(max_default, (-Infinity), map_default((x2) => Math.abs(x2.value[2] - x2.value[0]), d))
+        } },
         fillOpacity: 0.8,
         fill: (d) => Math.abs(d.value[2] - d.value[0]),
         x1: (d) => Math.min(...d.value),
@@ -20512,99 +20517,54 @@ function TornadoPlot(data2) {
     }
   };
 }
-var innovationchart = function(data2, markStyle = "glyph") {
+var innovationchart = function(data2, markStyle = "glyph", position2 = "median") {
   let marks2 = [];
+  const x2 = (d) => position2 === "median" ? d.opportunity.quantileF()(0.5) : position2 === "mean" ? mean_default(d.opportunity.samples) : NaN;
   switch (markStyle) {
     case "simple":
       marks2 = [
         dot(data2, {
-          x: (d) => d.opportunity.quantileF()(0.5),
+          x: (d) => x2(d),
           y: (d) => d.roadmap.chanceOfSuccess() * 100,
           fill: (d) => d.assessor?.color || "grey",
           symbol: "circle-filled",
           r: 10
         }),
         text3(data2, {
-          text: (d) => d.assessor?.name.split(" ").slice(0, 2).map((x2) => x2[0]) || "",
-          x: (d) => d.opportunity.quantileF()(0.5),
-          y: (d) => d.roadmap.chanceOfSuccess() * 100
-        })
-      ];
-      break;
-    case "full":
-      const iqr_range = [0.25, 0.75];
-      marks2 = [
-        ruleY(data2, {
-          x1: (d) => d.opportunity.quantileF()(0.1),
-          x2: (d) => d.opportunity.quantileF()(0.9),
+          text: (d) => d.assessor?.name.split(" ").slice(0, 2).map((x3) => x3[0]) || "",
+          x: (d) => x2(d),
           y: (d) => d.roadmap.chanceOfSuccess() * 100,
-          stroke: (d) => d.id
-        }),
-        rect(data2, {
-          x1: (d) => d.opportunity.quantileF()(0.25),
-          x2: (d) => d.opportunity.quantileF()(0.75),
-          y1: (d) => d.roadmap.chanceOfSuccess() * 100 - 1.5,
-          y2: (d) => d.roadmap.chanceOfSuccess() * 100 + 1.5,
-          fill: (d) => d.id,
-          title: (d) => d.name
-        }),
-        dot(data2, {
-          x: (d) => d.opportunity.quantileF()(0.5),
-          y: (d) => d.roadmap.chanceOfSuccess() * 100,
-          stroke: (d) => "#111"
-        }),
-        dot(data2.filter((d) => {
-          const meanq = d.opportunity.quantile(mean_default(d.opportunity.samples));
-          return 0.25 > meanq || 0.75 < meanq;
-        }), {
-          x: (d) => mean_default(d.opportunity.samples),
-          y: (d) => d.roadmap.chanceOfSuccess() * 100,
-          symbol: "circle-filled",
-          r: 3,
-          fill: (d) => {
-            const meanq = d.opportunity.quantile(mean_default(d.opportunity.samples));
-            return d.id;
-          }
-        }),
-        dot(data2.filter((d) => {
-          const meanq = d.opportunity.quantile(mean_default(d.opportunity.samples));
-          return 0.25 < meanq && meanq < 0.75;
-        }), {
-          x: (d) => mean_default(d.opportunity.samples),
-          y: (d) => d.roadmap.chanceOfSuccess() * 100,
-          symbol: "circle-filled",
-          r: 3,
           fill: "#111"
         })
       ];
       break;
     case "glyph":
-      const max5 = reduce_default(max_default, 0, data2.map((x2) => Math.abs(x2.opportunity.quantileF()(0.5))));
+      const max5 = reduce_default(max_default, 0, data2.map((x3) => Math.abs(x3.opportunity.quantileF()(0.5))));
       const size2 = 0.04 * max5;
-      const separation = (d) => d.opportunity.quantileF()(0.5) - size2 + 2 * size2 * (filter_default((x2) => x2 < 0, d.opportunity.samples).length / d.opportunity.samples.length);
+      const separation = (d) => -size2 + 2 * size2 * (filter_default((x3) => x3 < 0, d.opportunity.samples).length / d.opportunity.samples.length);
       const offset2 = (d) => (d.opportunity.quantile(mean_default(d.opportunity.samples)) - 0.5) * 2 * size2;
       marks2 = [
         rect(data2, {
-          x1: (d) => offset2(d) + d.opportunity.quantileF()(0.5) - size2,
-          x2: (d) => offset2(d) + separation(d),
+          x1: (d) => offset2(d) + x2(d) - size2,
+          x2: (d) => offset2(d) + x2(d) + separation(d),
           y1: (d) => d.roadmap.chanceOfSuccess() * 100 - 1,
           y2: (d) => d.roadmap.chanceOfSuccess() * 100 + 1,
-          fill: "#800"
+          fill: "#a00"
         }),
         rect(data2, {
-          x1: (d) => offset2(d) + separation(d),
-          x2: (d) => offset2(d) + d.opportunity.quantileF()(0.5) + size2,
+          x1: (d) => offset2(d) + x2(d) + separation(d),
+          x2: (d) => offset2(d) + x2(d) + size2,
           y1: (d) => d.roadmap.chanceOfSuccess() * 100 - 1,
           y2: (d) => d.roadmap.chanceOfSuccess() * 100 + 1,
-          fill: "#06a"
+          fill: "#48a"
         }),
         ruleX(data2, {
-          x: (d) => d.opportunity.quantileF()(0.5),
+          x: (d) => x2(d),
           y1: (d) => d.roadmap.chanceOfSuccess() * 100 - 1.5,
           y2: (d) => d.roadmap.chanceOfSuccess() * 100 + 1.5
         }),
         dot(data2, {
-          x: (d) => d.opportunity.quantileF()(0.5) + offset2(d),
+          x: (d) => x2(d) + offset2(d),
           y: (d) => d.roadmap.chanceOfSuccess() * 100,
           fill: "black",
           r: 2
@@ -20620,7 +20580,14 @@ var innovationchart = function(data2, markStyle = "glyph") {
     y: {
       domain: [0, 100]
     },
-    marks: marks2
+    marks: [
+      ruleX([0], {
+        strokeWidth: 4,
+        stroke: "grey",
+        opacity: 0.5
+      }),
+      ...marks2
+    ]
   });
 };
 function InnovationChart(data2, markStyle = "glyph") {
@@ -20825,7 +20792,7 @@ function MainView(db2) {
         console.log("chartstyle", chartstyle);
         return import_mithril3.default("div.main-view", import_mithril3.default("h1.title", "DA Product Valuations"), import_mithril3.default("select", { onchange: (e3) => {
           chartstyle = e3.target.value;
-        } }, ["glyph", "full", "simple"].map((x2) => import_mithril3.default("option", { value: x2 }, x2))), import_mithril3.default(InnovationChart(map5(db2.ideas, (x2) => head_default(db2.scenarios.get({ idea: x2.id }))), chartstyle)), map5(db2.ideas, (idea) => import_mithril3.default("div.idea-summary", { onclick: () => {
+        } }, ["glyph", "simple"].map((x2) => import_mithril3.default("option", { value: x2 }, x2))), import_mithril3.default(InnovationChart(map5(db2.ideas, (x2) => head_default(db2.scenarios.get({ idea: x2.id }))), chartstyle)), map5(db2.ideas, (idea) => import_mithril3.default("div.idea-summary", { onclick: () => {
           console.log("clicked", idea.id);
           import_mithril3.default.route.set(`/idea/:id`, { id: idea.id });
         } }, import_mithril3.default("h3.name", idea.name), import_mithril3.default("p.description", idea.description), import_mithril3.default("p.proposer", idea.proposer ?? ""))), import_mithril3.default("button", { onclick: () => {

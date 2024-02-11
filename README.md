@@ -20,7 +20,7 @@ Todo
   - this is a hard feature - what does it mean for two people to disagree? it is about relative position on the innovation chart, but there are 2 dimensions. Which pairs of ideas are 
   - can also compute some statistical metric for "how much do various people agree on ideas?" 
 - [ ] Choose a scenario within an idea as the representation of that idea in the innovation chart
-- [ ] See an "Innovation Chart" and "CFO Chart" on the front page of the portfolio
+- [x] See an "Innovation Chart" and "CFO Chart" on the front page of the portfolio
   - [ ] Show uncertainty in a half-violin plot (with dividers/marks for the important quantiles)
     - can ignore values below 10% and above 90%. Those long tails just add noise to the plot. 
     - shouldn't need to plot individual points, can just sample the quantile function at 20-50 points for the overall shape.
