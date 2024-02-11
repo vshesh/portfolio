@@ -16,7 +16,7 @@ export function MainView(db: State) {
         return m('div.main-view',
           m('h1.title', 'DA Product Valuations'),
           m("select", { onchange: (e: {target: {value: string}}) => { chartstyle = e.target.value; } },
-            ['glyph', 'full', 'simple'].map(x => m('option', { value: x }, x))),
+            ['glyph', 'simple'].map(x => m('option', { value: x }, x))),
             // @ts-ignore
           m(InnovationChart(map(db.ideas, (x: Idea) => R.head(db.scenarios.get({ idea: x.id }))!), chartstyle)),
           map(db.ideas, idea =>
