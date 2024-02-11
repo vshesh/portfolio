@@ -2,7 +2,7 @@ import m from 'mithril';
 import * as R from 'ramda';
 import { map } from '../db';
 import { Assessment, Formula, Idea, isCertain, Quantity, Scenario } from '../model';
-import { IdeaT, ScenarioT, State } from '../viewmodel';
+import { State } from '../viewmodel';
 import { AssessmentInputsView, AssessmentOutputsView, CE, FormulaInputView, FormulaText, QuantityView, RoadmapView, Tabs } from './components';
 import { InnovationChart } from './plots';
 

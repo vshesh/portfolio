@@ -9,7 +9,7 @@ export class IdeaT extends IndexedSet<string, Idea> {
 
 export class ScenarioT extends IndexedSet<string, Scenario> {
   id(s: Scenario) {return s.id; }
-  public constructor(iterable: Iterable<Scenario>) {
+  public constructor(iterable?: Iterable<Scenario>) {
     super(iterable) 
     this.addIndex(s => s.idea, 'idea')
   }

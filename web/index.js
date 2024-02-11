@@ -20956,10 +20956,24 @@ var StartPage = {
         e3.target.files[0].text().then((data2) => {
           DB = Actions.upload(data2);
           console.log("Initial DB", DB);
-          import_mithril5.default.redraw();
+          import_mithril5.default.route(document.getElementById("app"), "/", {
+            "/": Frame2(MainView(DB)),
+            "/idea/:id": Frame2(IdeaView(DB)),
+            "/scenario/:id": Frame2(ScenarioView(DB))
+          });
         });
       }
-    }));
+    }), import_mithril5.default("button", { onclick: (e3) => {
+      DB = {
+        ideas: new IdeaT,
+        scenarios: new ScenarioT
+      };
+      import_mithril5.default.route(document.getElementById("app"), "/", {
+        "/": Frame2(MainView(DB)),
+        "/idea/:id": Frame2(IdeaView(DB)),
+        "/scenario/:id": Frame2(ScenarioView(DB))
+      });
+    } }, "Start New"));
   }
 };
 var Frame2 = (...views2) => ({
@@ -20967,8 +20981,4 @@ var Frame2 = (...views2) => ({
     return import_mithril5.default("div.app", import_mithril5.default("div.nav-bar", import_mithril5.default("button.save", { onclick: () => Actions.download("db.json", DB) }, "Save")), ...views2.map((x2) => import_mithril5.default(x2, attrs)));
   }
 });
-import_mithril5.default.route(document.getElementById("app"), "/", {
-  "/": { view: () => DB.ideas && DB.scenarios ? import_mithril5.default(Frame2(MainView(DB))) : import_mithril5.default(StartPage) },
-  "/idea/:id": Frame2(IdeaView(DB)),
-  "/scenario/:id": Frame2(ScenarioView(DB))
-});
+import_mithril5.default.mount(document.getElementById("app"), StartPage);
