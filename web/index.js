@@ -4204,6 +4204,11 @@ var intersperse = _curry2(_checkForMethod("intersperse", function intersperse2(s
   return out;
 }));
 var intersperse_default = intersperse;
+// node_modules/ramda/es/is.js
+var is = _curry2(function is2(Ctor, val) {
+  return val instanceof Ctor || val != null && (val.constructor === Ctor || Ctor.name === "Object" && typeof val === "object");
+});
+var is_default = is;
 // node_modules/ramda/es/internal/_isNumber.js
 function _isNumber(x) {
   return Object.prototype.toString.call(x) === "[object Number]";
@@ -14104,12 +14109,12 @@ function isNumeric(values3) {
     return typeof value5 === "number";
   }
 }
-function isEvery(values3, is) {
+function isEvery(values3, is3) {
   let every;
   for (const value5 of values3) {
     if (value5 == null)
       continue;
-    if (!is(value5))
+    if (!is3(value5))
       return false;
     every = true;
   }
@@ -20868,6 +20873,9 @@ var OpportunityView = {
 
 // client/viewmodel.ts
 var import_mithril4 = __toESM(require_mithril(), 1);
+function isState(s2) {
+  return is_default(Object, s2) && is_default(Object, s2.ideas) && is_default(Object, s2.scenarios);
+}
 function serialize(db3) {
   return {
     ideas: map5(db3.ideas, (idea) => idea.serialize()),
@@ -20917,19 +20925,50 @@ class Actions {
       return result;
     });
   }
+  static download(filename, contents) {
+    var D2 = document;
+    var element = D2.createElement("a");
+    element.setAttribute("href", "data:text/plain;charset=utf-8," + encodeURIComponent(isState(contents) ? JSON.stringify(serialize(contents), null, 2) : contents));
+    element.setAttribute("download", filename);
+    element.style.display = "none";
+    D2.body.appendChild(element);
+    element.click();
+    D2.body.removeChild(element);
+  }
+  static upload(contents) {
+    const data2 = JSON.parse(contents);
+    return {
+      ideas: new IdeaT(data2.ideas.map(Idea.deserialize)),
+      scenarios: new ScenarioT(data2.scenarios.map(Scenario.deserialize))
+    };
+  }
 }
 
 // client/index.ts
-var DB;
+var DB = {
+  ideas: null,
+  scenarios: null
+};
+var StartPage = {
+  view: () => {
+    return import_mithril5.default("div.start-view", import_mithril5.default("input[type=file]", {
+      onchange: (e3) => {
+        e3.target.files[0].text().then((data2) => {
+          DB = Actions.upload(data2);
+          console.log("Initial DB", DB);
+          import_mithril5.default.redraw();
+        });
+      }
+    }));
+  }
+};
 var Frame2 = (...views2) => ({
-  view: ({ attrs }) => import_mithril5.default("div.app", import_mithril5.default("div.nav-bar", import_mithril5.default("button.save", { onclick: () => Actions.save(DB) }, "Save")), ...views2.map((x2) => import_mithril5.default(x2, attrs)))
+  view: ({ attrs }) => {
+    return import_mithril5.default("div.app", import_mithril5.default("div.nav-bar", import_mithril5.default("button.save", { onclick: () => Actions.download("db.json", DB) }, "Save")), ...views2.map((x2) => import_mithril5.default(x2, attrs)));
+  }
 });
-Actions.load().then((data2) => {
-  DB = data2;
-  console.log("[INFO] Initial DB is: ", DB);
-  import_mithril5.default.route(document.getElementById("app"), "/", {
-    "/": Frame2(MainView(DB)),
-    "/idea/:id": Frame2(IdeaView(DB)),
-    "/scenario/:id": Frame2(ScenarioView(DB))
-  });
+import_mithril5.default.route(document.getElementById("app"), "/", {
+  "/": { view: () => DB.ideas && DB.scenarios ? import_mithril5.default(Frame2(MainView(DB))) : import_mithril5.default(StartPage) },
+  "/idea/:id": Frame2(IdeaView(DB)),
+  "/scenario/:id": Frame2(ScenarioView(DB))
 });
