@@ -16,10 +16,13 @@ export function MainView(db: State) {
         console.log('chartstyle', chartstyle)
         return m('div.main-view',
           m('h1.title', 'DA Product Valuations'),
-          m("select", { onchange: (e: {target: {value: string}}) => { chartstyle = e.target.value; } },
+          
+          // TODO(vishesh): the charts and analysis should be moved to a separate tab from the idea list, probably. 
+          db.ideas && db.ideas.size() > 0 && db.scenarios.size() > 0 && m("select", { onchange: (e: {target: {value: string}}) => { chartstyle = e.target.value; } },
             ['glyph', 'simple'].map(x => m('option', { value: x }, x))),
             // @ts-ignore
-          m(InnovationChart(map(db.ideas, (x: Idea) => R.head(db.scenarios.get({ idea: x.id }))!), chartstyle)),
+          db.ideas && db.ideas.size() > 0 && db.scenarios.size() > 0 && m(InnovationChart(map(db.ideas, (x: Idea) => R.head(db.scenarios.get({ idea: x.id }))!), chartstyle)),
+          
           map(db.ideas, idea =>
             m('div.idea-summary', { onclick: () => { console.log('clicked', idea.id); m.route.set(`/idea/:id`, { id: idea.id }) } },
               m('h3.name', idea.name),

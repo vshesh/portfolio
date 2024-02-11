@@ -4396,6 +4396,9 @@ class IndexedSet {
   [Symbol.iterator]() {
     return this.objects.values();
   }
+  size() {
+    return this.objects.size;
+  }
 }
 
 // client/model.ts
@@ -20795,9 +20798,9 @@ function MainView(db2) {
     return {
       view: ({ attrs: {} }) => {
         console.log("chartstyle", chartstyle);
-        return import_mithril3.default("div.main-view", import_mithril3.default("h1.title", "DA Product Valuations"), import_mithril3.default("select", { onchange: (e3) => {
+        return import_mithril3.default("div.main-view", import_mithril3.default("h1.title", "DA Product Valuations"), db2.ideas && db2.ideas.size() > 0 && db2.scenarios.size() > 0 && import_mithril3.default("select", { onchange: (e3) => {
           chartstyle = e3.target.value;
-        } }, ["glyph", "simple"].map((x2) => import_mithril3.default("option", { value: x2 }, x2))), import_mithril3.default(InnovationChart(map5(db2.ideas, (x2) => head_default(db2.scenarios.get({ idea: x2.id }))), chartstyle)), map5(db2.ideas, (idea) => import_mithril3.default("div.idea-summary", { onclick: () => {
+        } }, ["glyph", "simple"].map((x2) => import_mithril3.default("option", { value: x2 }, x2))), db2.ideas && db2.ideas.size() > 0 && db2.scenarios.size() > 0 && import_mithril3.default(InnovationChart(map5(db2.ideas, (x2) => head_default(db2.scenarios.get({ idea: x2.id }))), chartstyle)), map5(db2.ideas, (idea) => import_mithril3.default("div.idea-summary", { onclick: () => {
           console.log("clicked", idea.id);
           import_mithril3.default.route.set(`/idea/:id`, { id: idea.id });
         } }, import_mithril3.default("h3.name", idea.name), import_mithril3.default("p.description", idea.description), import_mithril3.default("p.proposer", idea.proposer ?? ""))), import_mithril3.default("button", { onclick: () => {

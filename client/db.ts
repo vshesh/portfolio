@@ -164,6 +164,10 @@ export abstract class IndexedSet<Id, T> {
   [Symbol.iterator](): IterableIterator<T> {
     return this.objects.values()
   }
+
+  size() {
+    return this.objects.size;
+  }
 }
 
 // TODO(vishesh): return a object with class-based names instead of an array
